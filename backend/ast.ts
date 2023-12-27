@@ -1,4 +1,4 @@
-import { UnaryOpType } from "./UnaryOp"
+import { PreUnaryOpType } from "./UnaryOp"
 import { BinaryOpType } from "./binaryOp"
 import Enviroment from "./enviroment"
 
@@ -48,9 +48,9 @@ export class BinaryExpr implements Expr {
 export class UnaryExpr implements Expr {
     type = NodeType.UnaryExpr
     expr: Expr
-    operator: UnaryOpType
+    operator: PreUnaryOpType
 
-    constructor(expr: Expr, op: UnaryOpType) {
+    constructor(expr: Expr, op: PreUnaryOpType) {
         this.expr = expr
         this.operator = op
     }
@@ -157,9 +157,7 @@ export class FunctionLiteral implements Expr {
 export class Block implements Expr {
     type = NodeType.BlockLiteral
     value: Expr[]
-    enviroment: Enviroment // block env child of upper env
-    constructor(body: Expr[], env: Enviroment) {
+    constructor(body: Expr[]) {
         this.value = body
-        this.enviroment = env
     }
 }

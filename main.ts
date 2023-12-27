@@ -1,10 +1,9 @@
 import { tokenize } from "./backend/lexer"
 import Parser from "./backend/parser"
-import { evalBlock, evaluate } from "./backend/interpreter"
+import { evalBlock } from "./backend/interpreter"
 import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
-import { env } from "process"
 
 function repl(debug: boolean) {
     const parser = new Parser()
@@ -19,11 +18,11 @@ function repl(debug: boolean) {
         }
 
         const program = parser.produceAST(input, globalEnv)
-        const result = evalBlock(program, globalEnv)
+        const result = evalBlock(program, globalEnv, true)
         if (debug) {
-            // console.log("Tokens:", tokenize(input))
-            // console.log("AST:", program)
-            console.log("Eval Stack:", program.enviroment.evalStack)
+            console.log("Tokens:", tokenize(input))
+            console.log("AST:", program)
+            console.log("Eval Stack:", globalEnv.evalStack)
             console.log("-".repeat(50))
         }
         console.log("Output:")
@@ -48,4 +47,4 @@ function run(debug: boolean) {
     console.log(result)
     console.log("=".repeat(50))
 }
-run(false)
+repl(true)

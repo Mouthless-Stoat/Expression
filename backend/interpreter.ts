@@ -28,7 +28,7 @@ import {
 import Enviroment from "./enviroment"
 import { error } from "./utils"
 import { BinaryOp } from "./binaryOp"
-import { UnaryOp } from "./UnaryOp"
+import { PreUnaryOp } from "./UnaryOp"
 
 //main eval function
 
@@ -63,10 +63,11 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     }
 }
 
-export function evalBlock(block: Block, env: Enviroment): RuntimeVal {
+export function evalBlock(block: Block, env: Enviroment, isGlobal = false): RuntimeVal {
     let out: RuntimeVal = NULLVAL
+    const blockEnv = isGlobal ? env : new Enviroment(env)
     for (const expr of block.value) {
-        out = block.enviroment.pushStack(evaluate(expr, block.enviroment))
+        out = blockEnv.pushStack(evaluate(expr, blockEnv))
     }
     return out
 }
@@ -79,7 +80,7 @@ function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
 }
 
 function evalUnaryExpr(expr: UnaryExpr, env: Enviroment): RuntimeVal {
-    return UnaryOp[expr.operator](evaluate(expr.expr, env), env)
+    return PreUnaryOp[expr.operator](evaluate(expr.expr, env), env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
@@ -107,7 +108,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
     if (isValueType(func, ValueType.Function)) {
         const fn = func as FunctionVal
-        const scope = fn.value.enviroment
+        const scope = new Enviroment(env)
 
         if (args.length != fn.parameter.length) {
             return error("Expected", fn.parameter.length, "argument but given", args.length)

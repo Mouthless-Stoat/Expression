@@ -1,9 +1,9 @@
-import { RuntimeVal, FunctionVal, NativeFunctionVal } from "./value"
+import { RuntimeVal, NativeFunctionVal } from "./value"
 import { error } from "./utils"
 import { NATIVEFUNC } from "./nativeFunc"
 
 export default class Enviroment {
-    private parent?: Enviroment
+    parent?: Enviroment
     private variables: Map<string, RuntimeVal> = new Map()
     private constances: Set<string> = new Set()
     evalStack: RuntimeVal[] = []
@@ -18,6 +18,7 @@ export default class Enviroment {
     }
 
     // assign a var, change variable value is it doesn;t exit make it
+    // lower scope should not breed out
     public assingVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
         if (this.constances.has(name)) return error(`Cannot assign value to constant`)
         if (isConst) this.constances.add(name)

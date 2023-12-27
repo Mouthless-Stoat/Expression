@@ -1,4 +1,4 @@
-import { UnaryOpTokens, UnaryOpType } from "./UnaryOp"
+import { PreUnaryOpTokens, PreUnaryOpType } from "./UnaryOp"
 import {
     Expr,
     Identifier,
@@ -25,7 +25,6 @@ import { error } from "./utils"
 // class to parse and store stuff
 export default class Parser {
     token: Token[] = []
-    globalEnv: Enviroment = new Enviroment()
 
     // the current token
     private current(): Token {
@@ -83,26 +82,25 @@ export default class Parser {
     // produce the ast for the interpreter
     public produceAST(source: string, env: Enviroment): Block {
         this.token = tokenize(source)
-        this.globalEnv = env
         const program: Expr[] = []
 
         // while not the end of the file keep parsing
         while (this.notEOF()) {
             program.push(this.parseExpr())
         }
-        return new Block(program, this.globalEnv)
+        return new Block(program)
     }
 
     // expression order
     // 1. Primary (Literal)
-    // 2. Member access
-    // 3. Call
-    // 4. Unary Operator
-    // 4. Binary Operator (Multi then Add)
-    // 5. Object construction
-    // 6. Function Construction
-    // 7. Block
-    // 8. Assignment
+    // 2. Block
+    // 3. Member access
+    // 4. Call
+    // 5. Unary Operator
+    // 6. Binary Operator (Multi then Add) NOTE flow from add to mul
+    // 7. Object construction
+    // 8. Function Construction
+    // 9. Assignment
     //
     // Highest will be parse the deepest
     // lower will be parse first and place here
@@ -111,26 +109,13 @@ export default class Parser {
     }
 
     private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseBlockExpr()
+        const leftHand = this.parseFuncExpr()
         if (this.isTypes(TokenType.Equal, TokenType.Colon)) {
             const isConst = this.next().isType(TokenType.Colon)
             const rightHand = this.parseAssignmentExpr()
             return new AssignmentExpr(leftHand, rightHand, isConst)
         }
         return leftHand
-    }
-
-    private parseBlockExpr(): Expr {
-        if (!this.current().isType(TokenType.OpenBrace)) {
-            return this.parseFuncExpr()
-        }
-        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
-        const body: Expr[] = []
-        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
-            body.push(this.parseExpr())
-        }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
-        return new Block(body, new Enviroment(this.globalEnv))
     }
 
     private parseFuncExpr(): Expr {
@@ -147,7 +132,7 @@ export default class Parser {
 
     private parseObjExpr(): Expr {
         if (!this.isType(TokenType.OpenDoubleAngle)) {
-            return this.parseUnaryExpr() //if not open brace parse normal
+            return this.parseAdditiveExpr() //if not open brace parse normal
         }
         this.next()
         const properties: Property[] = []
@@ -174,12 +159,12 @@ export default class Parser {
     }
 
     private parseUnaryExpr(): Expr {
-        if (!this.isTypes(...UnaryOpTokens)) {
-            return this.parseAdditiveExpr()
+        if (!this.isTypes(...PreUnaryOpTokens)) {
+            return this.parseMemberCallExpr()
         }
         const op = this.next().value
-        const expr = this.parseExpr()
-        return new UnaryExpr(expr, op as UnaryOpType)
+        const expr = this.parseMemberCallExpr()
+        return new UnaryExpr(expr, op as PreUnaryOpType)
     }
 
     private parseAdditiveExpr(): Expr {
@@ -195,11 +180,11 @@ export default class Parser {
     }
 
     private parseMultiplicativeExpr(): Expr {
-        let leftHand = this.parseMemberCallExpr()
+        let leftHand = this.parseUnaryExpr()
 
         while (this.isTypes(...MultiplicativeToken)) {
             const operator = this.next().value
-            const rightHand = this.parseMemberCallExpr()
+            const rightHand = this.parseUnaryExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
         }
 
@@ -209,13 +194,13 @@ export default class Parser {
     private parseMemberCallExpr(): Expr {
         const member = this.parseMemberExpr()
         if (this.isType(TokenType.OpenParen)) {
-            return this.parseCallExpr(member)
+            return this.parseCallExpr(member) // chaning call
         }
         return member
     }
 
     private parseMemberExpr(): Expr {
-        let object = this.parsePrimaryExpr()
+        let object = this.parseBlockExpr()
         while (this.isTypes(TokenType.Dot, TokenType.OpenBracket)) {
             let comp = !this.next().isType(TokenType.Dot)
             let member = comp
@@ -225,7 +210,7 @@ export default class Parser {
                       return temp
                   })()
                 : (() => {
-                      let temp = this.parsePrimaryExpr()
+                      let temp = this.parseBlockExpr()
                       if (temp.type != NodeType.Identifier) {
                           return error("SyntaxError: Expected Indentifier")
                       }
@@ -235,6 +220,19 @@ export default class Parser {
             object = new MemberExpr(object, member, comp)
         }
         return object
+    }
+
+    private parseBlockExpr(): Expr {
+        if (!this.current().isType(TokenType.OpenBrace)) {
+            return this.parsePrimaryExpr()
+        }
+        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
+        const body: Expr[] = []
+        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
+            body.push(this.parseExpr())
+        }
+        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
+        return new Block(body)
     }
 
     private parsePrimaryExpr(): Expr {
