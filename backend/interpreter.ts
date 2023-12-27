@@ -12,6 +12,7 @@ import {
     FunctionLiteral,
     UnaryExpr,
     Block,
+    MemberExpr,
 } from "./ast"
 import {
     NULLVAL,
@@ -56,6 +57,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalUnaryExpr(astNode as UnaryExpr, env)
         case NodeType.BlockLiteral:
             return evalBlock(astNode as Block, env)
+        case NodeType.MemberExpr:
+            return evalMemberExpr(astNode as MemberExpr, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -131,4 +134,13 @@ function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
 function evalFuncExpr(func: FunctionLiteral, env: Enviroment): RuntimeVal {
     return new FunctionVal(func.parameter, func.body, env)
+}
+
+function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
+    const left = evaluate(expr.object, env)
+    if (!isValueType(left, ValueType.Object)) {
+        return error("Cannot access non object")
+    }
+    const prop = (expr.member as Identifier).symbol
+    return (left as ObjectVal).value.get(prop) ?? error(`Propeties ${prop} does not exit on ${left.value}`)
 }
