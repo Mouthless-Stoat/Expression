@@ -2,7 +2,6 @@ import {
     BinaryExpr,
     NodeType,
     NumberLiteral,
-    Program,
     Expr,
     Identifier,
     BooleanLiteral,
@@ -64,18 +63,10 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     }
 }
 
-export function evalProgram(program: Program, env: Enviroment): RuntimeVal[] {
-    let out: RuntimeVal[] = []
-    for (const stmt of program.body) {
-        out.push(evaluate(stmt, env))
-    }
-    return out
-}
-
-function evalBlock(block: Block, env: Enviroment): RuntimeVal {
+export function evalBlock(block: Block, env: Enviroment): RuntimeVal {
     let out: RuntimeVal = NULLVAL
     for (const expr of block.value) {
-        out = evaluate(expr, env)
+        out = env.pushStack(evaluate(expr, env))
     }
     return out
 }

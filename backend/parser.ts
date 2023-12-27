@@ -1,7 +1,6 @@
 import { UnaryOpTokens, UnaryOpType } from "./UnaryOp"
 import {
     Expr,
-    Program,
     Identifier,
     NumberLiteral,
     NULLLITERAL,
@@ -80,15 +79,15 @@ export default class Parser {
     }
 
     // produce the ast for the interpreter
-    public produceAST(source: string): Program {
+    public produceAST(source: string): Block {
         this.token = tokenize(source)
-        const program = new Program()
+        const program: Expr[] = []
 
         // while not the end of the file keep parsing
         while (this.notEOF()) {
-            program.body.push(this.parseExpr())
+            program.push(this.parseExpr())
         }
-        return program
+        return new Block(program)
     }
 
     // expression order

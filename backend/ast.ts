@@ -30,12 +30,6 @@ export interface Expr {
     type: NodeType
 }
 
-// program node, top most level of any ast
-export class Program implements Expr {
-    type = NodeType.Program
-    body: Expr[] = []
-}
-
 // binary expression node, have 2 side and a operator
 export class BinaryExpr implements Expr {
     type = NodeType.BinaryExpr

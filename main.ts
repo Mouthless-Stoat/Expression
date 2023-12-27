@@ -1,6 +1,6 @@
 import { tokenize } from "./backend/lexer"
 import Parser from "./backend/parser"
-import { evalProgram, evaluate } from "./backend/interpreter"
+import { evalBlock, evaluate } from "./backend/interpreter"
 import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
@@ -18,10 +18,11 @@ function repl(debug: boolean) {
         }
 
         const program = parser.produceAST(input)
-        const result = evalProgram(program, env)
+        const result = evalBlock(program, env)
         if (debug) {
             console.log("Tokens:", tokenize(input))
             console.log("AST:", JSON.stringify(program, null, 2))
+            console.log("Eval Stack:", env.evalStack)
             console.log("-".repeat(50))
         }
         console.log("Output:")
@@ -36,7 +37,7 @@ function run(debug: boolean) {
     let input = fs.readFileSync("./test.txt", "utf8")
     console.log(input)
     const program = parser.produceAST(input)
-    const result = evalProgram(program, env)
+    const result = evalBlock(program, env)
     if (debug) {
         console.log("Tokens:", tokenize(input))
         console.log("AST:", JSON.stringify(program, null, 2))

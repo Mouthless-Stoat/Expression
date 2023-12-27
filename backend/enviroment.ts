@@ -6,6 +6,7 @@ export default class Enviroment {
     private parent?: Enviroment
     private variables: Map<string, RuntimeVal> = new Map()
     private constances: Set<string> = new Set()
+    evalStack: RuntimeVal[] = []
 
     constructor(parentEnv?: Enviroment) {
         this.parent = parentEnv
@@ -38,5 +39,10 @@ export default class Enviroment {
         if (this.variables.has(name)) return this
         if (!this.parent) return undefined
         return this.parent.resolve(name)
+    }
+
+    public pushStack(value: RuntimeVal): RuntimeVal {
+        this.evalStack.unshift(value)
+        return value
     }
 }
