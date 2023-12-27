@@ -11,6 +11,7 @@ import {
     CallExpr,
     FunctionLiteral,
     UnaryExpr,
+    Block,
 } from "./ast"
 import {
     NULLVAL,
@@ -53,6 +54,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalFuncExpr(astNode as FunctionLiteral, env)
         case NodeType.UnaryExpr:
             return evalUnaryExpr(astNode as UnaryExpr, env)
+        case NodeType.BlockLiteral:
+            return evalBlock(astNode as Block, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -62,6 +65,14 @@ export function evalProgram(program: Program, env: Enviroment): RuntimeVal[] {
     let out: RuntimeVal[] = []
     for (const stmt of program.body) {
         out.push(evaluate(stmt, env))
+    }
+    return out
+}
+
+function evalBlock(block: Block, env: Enviroment): RuntimeVal {
+    let out: RuntimeVal = NULLVAL
+    for (const expr of block.value) {
+        out = evaluate(expr, env)
     }
     return out
 }
@@ -113,7 +124,7 @@ function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
             scope.assingVar(fn.parameter[i], args[i], false)
         }
 
-        return evalProgram({ type: NodeType.Program, body: fn.value } as Program, scope).at(-1) ?? NULLVAL
+        return evalBlock(fn.value, scope)
     } else if (isValueType(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
     else return error("Cannot call on non-function")
 }

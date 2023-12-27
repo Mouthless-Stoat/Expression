@@ -1,6 +1,6 @@
 // this file contain all value to be store at runtime definition
 
-import { Expr } from "./ast"
+import { Block, Expr } from "./ast"
 import Enviroment from "./enviroment"
 import { NATIVEFUNC } from "./nativeFunc"
 
@@ -70,10 +70,10 @@ export class NativeFunctionVal implements RuntimeVal {
 
 export class FunctionVal implements RuntimeVal {
     type = ValueType.Function
-    value: Expr[]
+    value: Block
     parameter: string[]
     enviroment: Enviroment
-    constructor(param: string[], body: Expr[], env: Enviroment) {
+    constructor(param: string[], body: Block, env: Enviroment) {
         this.parameter = param
         this.value = body
         this.enviroment = env

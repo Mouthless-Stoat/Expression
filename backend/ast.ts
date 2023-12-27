@@ -22,6 +22,7 @@ export enum NodeType {
     ObjectLiteral,
     NullLiteral,
     FunctionLiteral,
+    BlockLiteral,
 }
 
 // a stament node, stament does not return anything
@@ -151,9 +152,17 @@ export class ObjectLiteral implements Expr {
 export class FunctionLiteral implements Expr {
     type = NodeType.FunctionLiteral
     parameter: string[]
-    body: Expr[]
-    constructor(param: string[], body: Expr[]) {
+    body: Block
+    constructor(param: string[], body: Block) {
         this.parameter = param
         this.body = body
+    }
+}
+
+export class Block implements Expr {
+    type = NodeType.BlockLiteral
+    value: Expr[]
+    constructor(body: Expr[]) {
+        this.value = body
     }
 }

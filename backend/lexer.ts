@@ -98,14 +98,19 @@ const charToken: Record<string, TokenType> = {
 }
 
 // multichar token
-const keywordToken: Map<string, TokenType> = (() => {
-    const keyword = {
-        null: TokenType.Null,
-        true: TokenType.Boolean,
-        false: TokenType.Boolean,
-        fn: TokenType.Function,
-    }
-    return new Map<string, TokenType>([...Object.entries(keyword)].sort(([a, _], [b, __]) => a.length - b.length))
+const multiToken: Map<string, TokenType> = (() => {
+    return new Map<string, TokenType>(
+        [
+            ...Object.entries({
+                null: TokenType.Null,
+                true: TokenType.Boolean,
+                false: TokenType.Boolean,
+                fn: TokenType.Function,
+                "<<": TokenType.OpenDoubleAngle,
+                ">>": TokenType.CloseDoubleAngle,
+            }),
+        ].sort(([a, _], [b, __]) => a.length - b.length)
+    )
 })()
 
 // parse input into a list of token that can be use to generate an ast later
@@ -117,7 +122,7 @@ export function tokenize(source: string): Token[] {
     while (src.length > 0) {
         const char = src[0]
         const keyword = (() => {
-            for (const [keyword, _] of keywordToken) {
+            for (const [keyword, _] of multiToken) {
                 if (src.slice(0, keyword.length).join("") === keyword) {
                     return keyword
                 }
@@ -129,7 +134,7 @@ export function tokenize(source: string): Token[] {
         } else if (charToken[char]) {
             push(charToken[char], src.shift())
         } else if (keyword) {
-            push(keywordToken.get(keyword) ?? 0, src.splice(0, keyword.length).join(""))
+            push(multiToken.get(keyword) ?? 0, src.splice(0, keyword.length).join(""))
         } else {
             const isNumber = isNumeric(char)
             if (!isNumber && !isNamic(char)) {

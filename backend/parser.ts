@@ -16,6 +16,7 @@ import {
     MemberExpr,
     FunctionLiteral,
     UnaryExpr,
+    Block,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "./binaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
@@ -98,7 +99,8 @@ export default class Parser {
     // 4. Binary Operator (Multi then Add)
     // 5. Object construction
     // 6. Function Construction
-    // 7. Assignment
+    // 7. Block
+    // 8. Assignment
     //
     // Highest will be parse the deepest
     // lower will be parse first and place here
@@ -107,13 +109,26 @@ export default class Parser {
     }
 
     private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseFuncExpr()
+        const leftHand = this.parseBlockExpr()
         if (this.isTypes(TokenType.Equal, TokenType.Colon)) {
             const isConst = this.next().isType(TokenType.Colon)
             const rightHand = this.parseAssignmentExpr()
             return new AssignmentExpr(leftHand, rightHand, isConst)
         }
         return leftHand
+    }
+
+    private parseBlockExpr(): Expr {
+        if (!this.current().isType(TokenType.OpenBrace)) {
+            return this.parseFuncExpr()
+        }
+        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
+        const body: Expr[] = []
+        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
+            body.push(this.parseExpr())
+        }
+        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
+        return new Block(body)
     }
 
     private parseFuncExpr(): Expr {
@@ -124,27 +139,22 @@ export default class Parser {
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
         )
-        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
-        const body: Expr[] = []
-        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
-            body.push(this.parseExpr())
-        }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
+        const body = this.parseBlockExpr() as Block
         return new FunctionLiteral(args, body)
     }
 
     private parseObjExpr(): Expr {
-        if (!this.isType(TokenType.OpenBrace)) {
+        if (!this.isType(TokenType.OpenDoubleAngle)) {
             return this.parseUnaryExpr() //if not open brace parse normal
         }
         this.next()
         const properties: Property[] = []
 
-        while (this.notEOF() && !this.isType(TokenType.CloseBrace)) {
+        while (this.notEOF() && !this.isType(TokenType.CloseDoubleAngle)) {
             const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
 
             // assign shorthand
-            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseBrace)) {
+            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
                 if (this.isType(TokenType.Comma)) this.next() // discard ,
                 properties.push(new Property(key))
                 continue
@@ -153,11 +163,11 @@ export default class Parser {
             this.expect(TokenType.Colon, "Missing Colon")
             const value = this.parseExpr()
             properties.push(new Property(key, value))
-            if (!this.isType(TokenType.CloseBrace)) {
+            if (!this.isType(TokenType.CloseDoubleAngle)) {
                 this.expect(TokenType.Comma, "SyntaxError: Expected comma")
             }
         }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expect "}"')
+        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
         return new ObjectLiteral(properties)
     }
 
