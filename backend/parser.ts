@@ -1,3 +1,4 @@
+import { resolveTxt } from "dns"
 import { PreUnaryOpTokens, PreUnaryOpType } from "./UnaryOp"
 import {
     Expr,
@@ -80,7 +81,7 @@ export default class Parser {
     }
 
     // produce the ast for the interpreter
-    public produceAST(source: string, env: Enviroment): Block {
+    public produceAST(source: string): Block {
         this.token = tokenize(source)
         const program: Expr[] = []
 
@@ -93,12 +94,10 @@ export default class Parser {
 
     // expression order
     // 1. Primary (Literal)
-    // 2. Block
     // 3. Member access
     // 4. Call
     // 5. Unary Operator
     // 6. Binary Operator (Multi then Add) NOTE flow from add to mul
-    // 7. Object construction
     // 8. Function Construction
     // 9. Assignment
     //
@@ -120,7 +119,7 @@ export default class Parser {
 
     private parseFuncExpr(): Expr {
         if (!this.isType(TokenType.Function)) {
-            return this.parseObjExpr()
+            return this.parseAdditiveExpr()
         }
         this.next()
         const args = this.parseArgs().map((a) =>
@@ -128,34 +127,6 @@ export default class Parser {
         )
         const body = this.parseBlockExpr() as Block
         return new FunctionLiteral(args, body)
-    }
-
-    private parseObjExpr(): Expr {
-        if (!this.isType(TokenType.OpenDoubleAngle)) {
-            return this.parseAdditiveExpr() //if not open brace parse normal
-        }
-        this.next()
-        const properties: Property[] = []
-
-        while (this.notEOF() && !this.isType(TokenType.CloseDoubleAngle)) {
-            const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
-
-            // assign shorthand
-            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
-                if (this.isType(TokenType.Comma)) this.next() // discard ,
-                properties.push(new Property(key))
-                continue
-            }
-
-            this.expect(TokenType.Colon, "Missing Colon")
-            const value = this.parseExpr()
-            properties.push(new Property(key, value))
-            if (!this.isType(TokenType.CloseDoubleAngle)) {
-                this.expect(TokenType.Comma, "SyntaxError: Expected comma")
-            }
-        }
-        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
-        return new ObjectLiteral(properties)
     }
 
     private parseAdditiveExpr(): Expr {
@@ -200,7 +171,7 @@ export default class Parser {
     }
 
     private parseMemberExpr(): Expr {
-        let object = this.parseBlockExpr()
+        let object = this.parsePrimaryExpr()
         while (this.isTypes(TokenType.Dot, TokenType.OpenBracket)) {
             let comp = !this.next().isType(TokenType.Dot)
             let member = comp
@@ -222,19 +193,6 @@ export default class Parser {
         return object
     }
 
-    private parseBlockExpr(): Expr {
-        if (!this.current().isType(TokenType.OpenBrace)) {
-            return this.parsePrimaryExpr()
-        }
-        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
-        const body: Expr[] = []
-        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
-            body.push(this.parseExpr())
-        }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
-        return new Block(body)
-    }
-
     private parsePrimaryExpr(): Expr {
         switch (this.current().type) {
             case TokenType.Identifier:
@@ -251,8 +209,46 @@ export default class Parser {
                 return NULLLITERAL
             case TokenType.Boolean:
                 return this.next().value == "true" ? TRUELITERAL : FALSELITERAL
+            case TokenType.OpenDoubleAngle:
+                return this.parseObjExpr()
+            case TokenType.OpenBrace:
+                return this.parseBlockExpr()
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }
+    }
+    private parseObjExpr(): Expr {
+        this.next()
+        const properties: Property[] = []
+
+        while (this.notEOF() && !this.isType(TokenType.CloseDoubleAngle)) {
+            const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
+
+            // assign shorthand
+            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
+                if (this.isType(TokenType.Comma)) this.next() // discard ,
+                properties.push(new Property(key))
+                continue
+            }
+
+            this.expect(TokenType.Colon, "Missing Colon")
+            const value = this.parseExpr()
+            properties.push(new Property(key, value))
+            if (!this.isType(TokenType.CloseDoubleAngle)) {
+                this.expect(TokenType.Comma, "SyntaxError: Expected comma")
+            }
+        }
+        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
+        return new ObjectLiteral(properties)
+    }
+
+    private parseBlockExpr(): Expr {
+        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
+        const body: Expr[] = []
+        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
+            body.push(this.parseExpr())
+        }
+        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
+        return new Block(body)
     }
 }

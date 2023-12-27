@@ -17,16 +17,16 @@ function repl(debug: boolean) {
             throw new Error("Exit")
         }
 
-        const program = parser.produceAST(input, globalEnv)
-        const result = evalBlock(program, globalEnv, true)
+        const program = parser.produceAST(input)
         if (debug) {
             console.log("Tokens:", tokenize(input))
             console.log("AST:", program)
-            console.log("Eval Stack:", globalEnv.evalStack)
             console.log("-".repeat(50))
         }
         console.log("Output:")
-        console.log(result)
+        const result = evalBlock(program, globalEnv, true)
+        console.log("Program Return:", result)
+        console.log("Eval Stack:", globalEnv.evalStack)
         console.log("=".repeat(50))
     }
 }
@@ -36,7 +36,7 @@ function run(debug: boolean) {
     const env = new Enviroment()
     let input = fs.readFileSync("./test.txt", "utf8")
     console.log(input)
-    const program = parser.produceAST(input, env)
+    const program = parser.produceAST(input)
     const result = evalBlock(program, env)
     if (debug) {
         console.log("Tokens:", tokenize(input))
