@@ -158,15 +158,6 @@ export default class Parser {
         return new ObjectLiteral(properties)
     }
 
-    private parseUnaryExpr(): Expr {
-        if (!this.isTypes(...PreUnaryOpTokens)) {
-            return this.parseMemberCallExpr()
-        }
-        const op = this.next().value
-        const expr = this.parseMemberCallExpr()
-        return new UnaryExpr(expr, op as PreUnaryOpType)
-    }
-
     private parseAdditiveExpr(): Expr {
         let leftHand = this.parseMultiplicativeExpr()
 
@@ -189,6 +180,15 @@ export default class Parser {
         }
 
         return leftHand
+    }
+
+    private parseUnaryExpr(): Expr {
+        if (!this.isTypes(...PreUnaryOpTokens)) {
+            return this.parseMemberCallExpr()
+        }
+        const op = this.next().value
+        const expr = this.parseMemberCallExpr()
+        return new UnaryExpr(expr, op as PreUnaryOpType)
     }
 
     private parseMemberCallExpr(): Expr {
