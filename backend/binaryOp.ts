@@ -1,4 +1,5 @@
 // all binary op definition for ease of use
+import Enviroment from "./enviroment"
 import { TokenType } from "./lexer"
 import { NULLVAL, NumberVal, RuntimeVal, ValueType, isValueType } from "./value"
 
@@ -13,7 +14,7 @@ export const MultiplicativeToken = [TokenType.Star, TokenType.Slash, TokenType.P
 export type BinaryOpType = "+" | "-" | "*" | "/" | "%"
 
 // implementation for all binary operator between every run time value
-export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal) => RuntimeVal> = {
+export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal, env: Enviroment) => RuntimeVal> = {
     "+": (lhs, rhs) => {
         if (isValueType(rhs, ValueType.Number) && isValueType(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value + rhs.value)

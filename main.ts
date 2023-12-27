@@ -4,10 +4,11 @@ import { evalBlock, evaluate } from "./backend/interpreter"
 import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
+import { env } from "process"
 
 function repl(debug: boolean) {
     const parser = new Parser()
-    const env = new Enviroment()
+    const globalEnv = new Enviroment()
     console.log("v0.0.1")
 
     while (true) {
@@ -17,12 +18,12 @@ function repl(debug: boolean) {
             throw new Error("Exit")
         }
 
-        const program = parser.produceAST(input)
-        const result = evalBlock(program, env)
+        const program = parser.produceAST(input, globalEnv)
+        const result = evalBlock(program, globalEnv)
         if (debug) {
-            console.log("Tokens:", tokenize(input))
-            console.log("AST:", JSON.stringify(program, null, 2))
-            console.log("Eval Stack:", env.evalStack)
+            // console.log("Tokens:", tokenize(input))
+            // console.log("AST:", program)
+            console.log("Eval Stack:", program.enviroment.evalStack)
             console.log("-".repeat(50))
         }
         console.log("Output:")
@@ -36,7 +37,7 @@ function run(debug: boolean) {
     const env = new Enviroment()
     let input = fs.readFileSync("./test.txt", "utf8")
     console.log(input)
-    const program = parser.produceAST(input)
+    const program = parser.produceAST(input, env)
     const result = evalBlock(program, env)
     if (debug) {
         console.log("Tokens:", tokenize(input))
@@ -47,4 +48,4 @@ function run(debug: boolean) {
     console.log(result)
     console.log("=".repeat(50))
 }
-repl(true)
+run(false)

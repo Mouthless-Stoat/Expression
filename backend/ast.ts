@@ -1,5 +1,6 @@
 import { UnaryOpType } from "./UnaryOp"
 import { BinaryOpType } from "./binaryOp"
+import Enviroment from "./enviroment"
 
 // this file contant definition for the ast
 
@@ -156,7 +157,9 @@ export class FunctionLiteral implements Expr {
 export class Block implements Expr {
     type = NodeType.BlockLiteral
     value: Expr[]
-    constructor(body: Expr[]) {
+    enviroment: Enviroment // block env child of upper env
+    constructor(body: Expr[], env: Enviroment) {
         this.value = body
+        this.enviroment = env
     }
 }

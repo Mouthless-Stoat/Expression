@@ -66,7 +66,7 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
 export function evalBlock(block: Block, env: Enviroment): RuntimeVal {
     let out: RuntimeVal = NULLVAL
     for (const expr of block.value) {
-        out = env.pushStack(evaluate(expr, env))
+        out = block.enviroment.pushStack(evaluate(expr, block.enviroment))
     }
     return out
 }
@@ -75,11 +75,11 @@ export function evalBlock(block: Block, env: Enviroment): RuntimeVal {
 function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
     const left = evaluate(expr.leftHand, env)
     const right = evaluate(expr.rightHand, env)
-    return BinaryOp[expr.operator](left as RuntimeVal, right as RuntimeVal)
+    return BinaryOp[expr.operator](left as RuntimeVal, right as RuntimeVal, env)
 }
 
 function evalUnaryExpr(expr: UnaryExpr, env: Enviroment): RuntimeVal {
-    return UnaryOp[expr.operator](evaluate(expr.expr, env))
+    return UnaryOp[expr.operator](evaluate(expr.expr, env), env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
@@ -101,13 +101,13 @@ function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
     return new ObjectVal(prop)
 }
 
-function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
+export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
     const args = caller.args.map((arg) => evaluate(arg, env))
     const func = evaluate(caller.caller, env)
 
     if (isValueType(func, ValueType.Function)) {
         const fn = func as FunctionVal
-        const scope = new Enviroment(fn.enviroment)
+        const scope = fn.value.enviroment
 
         if (args.length != fn.parameter.length) {
             return error("Expected", fn.parameter.length, "argument but given", args.length)

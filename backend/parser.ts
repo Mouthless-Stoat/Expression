@@ -18,12 +18,14 @@ import {
     Block,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "./binaryOp"
+import Enviroment from "./enviroment"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "./utils"
 
 // class to parse and store stuff
 export default class Parser {
     token: Token[] = []
+    globalEnv: Enviroment = new Enviroment()
 
     // the current token
     private current(): Token {
@@ -79,15 +81,16 @@ export default class Parser {
     }
 
     // produce the ast for the interpreter
-    public produceAST(source: string): Block {
+    public produceAST(source: string, env: Enviroment): Block {
         this.token = tokenize(source)
+        this.globalEnv = env
         const program: Expr[] = []
 
         // while not the end of the file keep parsing
         while (this.notEOF()) {
             program.push(this.parseExpr())
         }
-        return new Block(program)
+        return new Block(program, this.globalEnv)
     }
 
     // expression order
@@ -127,7 +130,7 @@ export default class Parser {
             body.push(this.parseExpr())
         }
         this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
-        return new Block(body)
+        return new Block(body, new Enviroment(this.globalEnv))
     }
 
     private parseFuncExpr(): Expr {

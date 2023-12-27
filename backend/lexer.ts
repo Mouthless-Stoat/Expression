@@ -155,5 +155,3 @@ export function tokenize(source: string): Token[] {
     push(TokenType.EOF, "EOF")
     return tokens
 }
-
-// console.log(tokenize("1"))

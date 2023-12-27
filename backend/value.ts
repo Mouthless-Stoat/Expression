@@ -71,7 +71,7 @@ export class NativeFunctionVal implements RuntimeVal {
 export class FunctionVal implements RuntimeVal {
     type = ValueType.Function
     value: Block
-    parameter: string[]
+    parameter: string[] // where the function was declare in
     enviroment: Enviroment
     constructor(param: string[], body: Block, env: Enviroment) {
         this.parameter = param

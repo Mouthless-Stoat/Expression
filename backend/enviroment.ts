@@ -19,10 +19,9 @@ export default class Enviroment {
 
     // assign a var, change variable value is it doesn;t exit make it
     public assingVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
-        const env = this.resolve(name) ?? this
-        if (env.constances.has(name)) return error(`Cannot assign value to constant`)
+        if (this.constances.has(name)) return error(`Cannot assign value to constant`)
         if (isConst) this.constances.add(name)
-        env.variables.set(name, value)
+        this.variables.set(name, value)
         return value
     }
 
