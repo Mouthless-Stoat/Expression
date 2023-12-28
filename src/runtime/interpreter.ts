@@ -117,8 +117,21 @@ function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
 
 function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
     const prop = new Map<string, { isConst: boolean; value: RuntimeVal }>()
-    for (const { key, value, isConst } of obj.properties) {
-        prop.set(key, { isConst: isConst, value: value === undefined ? env.getVar(key) : evaluate(value, env) })
+    for (const { key: k, value, isConst } of obj.properties) {
+        let key: string
+        if (k.type !== NodeType.Identifier) {
+            const evalKey = evaluate(k, env)
+            if (!evalKey.toKey) {
+                return error("Object key can't be of type", evalKey.type)
+            }
+            key = evalKey.toKey()
+        } else {
+            key = (k as Identifier).symbol
+        }
+        prop.set(key, {
+            isConst: isConst,
+            value: value === undefined ? env.getVar(key) : evaluate(value, env),
+        })
     }
     return new ObjectVal(prop)
 }
@@ -159,6 +172,15 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     } else {
         return error("Cannot access non object")
     }
-    const prop = (expr.member as Identifier).symbol
-    return (left as ObjectVal).value.get(prop)?.value ?? error(`Propeties ${prop} does not exit on ${left.value}`)
+    let prop
+    if (expr.isCompute) {
+        const evalProp = evaluate(expr.member, env)
+        if (!evalProp.toKey) {
+            return error("Cannot access object with type", evalProp.type)
+        }
+        prop = evalProp.toKey()
+    } else {
+        prop = (expr.member as Identifier).symbol
+    }
+    return (left as ObjectVal).value.get(prop)?.value ?? error("Propeties", prop, "does not exist on", left.value)
 }

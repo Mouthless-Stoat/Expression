@@ -128,10 +128,10 @@ export const TRUELITERAL: BooleanLiteral = { type: NodeType.BooleanLiteral, valu
 export const FALSELITERAL: BooleanLiteral = { type: NodeType.BooleanLiteral, value: false }
 
 export class Property {
-    key: string
+    key: Expr
     value?: Expr
     isConst: boolean
-    constructor(key: string, value?: Expr, isConst = false) {
+    constructor(key: Expr, value?: Expr, isConst = false) {
         this.key = key
         this.value = value
         this.isConst = isConst

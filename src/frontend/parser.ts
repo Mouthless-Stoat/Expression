@@ -225,7 +225,7 @@ export default class Parser {
         const properties: Property[] = []
 
         while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
-            const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
+            const key = this.parseFuncExpr()
 
             // assign shorthand
             if (this.isTypes(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {

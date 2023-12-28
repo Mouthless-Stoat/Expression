@@ -23,6 +23,7 @@ export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): bool
 export interface RuntimeVal {
     type: ValueType
     value: any
+    toKey?(): string
 }
 
 // missing value
@@ -49,6 +50,9 @@ export class NumberVal implements RuntimeVal {
     }
     constructor(value: number) {
         this.value = value
+    }
+    toKey(): string {
+        return this.value.toString()
     }
 }
 
@@ -95,5 +99,8 @@ export class StringVal implements RuntimeVal {
     value: string
     constructor(str: string) {
         this.value = str
+    }
+    toKey(): string {
+        return this.value
     }
 }
