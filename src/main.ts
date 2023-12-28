@@ -77,4 +77,4 @@ function token(ast: boolean) {
         }
     }
 }
-repl(true)
+repl(false)

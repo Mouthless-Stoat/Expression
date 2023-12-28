@@ -11,6 +11,6 @@
 [ ] Code formatting
 [ ] Syntax highlight when in repl
 [x] Repl improvement (Don't crash when error)
-[ ] More type for object key (most primary litetral)
-[ ] Computed key when making object
+[x] More type for object key (most primary litetral)
+[x] Computed key when making object
 [ ] Pre Unary Expr

@@ -19,6 +19,16 @@ export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): bool
     return valueType.some((t) => value.type === t)
 }
 
+export const valueName: Record<ValueType, string> = {
+    [ValueType.Null]: "Null",
+    [ValueType.Number]: "Number",
+    [ValueType.Boolean]: "Boolean",
+    [ValueType.Object]: "Object",
+    [ValueType.NativeFuntion]: "NativeFunction",
+    [ValueType.Function]: "Function",
+    [ValueType.String]: "String",
+}
+
 // value during run time
 export interface RuntimeVal {
     type: ValueType
@@ -33,7 +43,13 @@ export interface NullVal extends RuntimeVal {
 }
 
 // constant so for ease of use
-export const NULLVAL: NullVal = { type: ValueType.Null, value: null }
+export const NULLVAL: NullVal = {
+    type: ValueType.Null,
+    value: null,
+    toKey() {
+        return "null"
+    },
+}
 
 // number during run time
 export class NumberVal implements RuntimeVal {
@@ -61,8 +77,20 @@ export interface BooleanVal extends RuntimeVal {
     value: boolean
 }
 
-export const TRUEVAL: BooleanVal = { type: ValueType.Boolean, value: true }
-export const FALSEVAL: BooleanVal = { type: ValueType.Boolean, value: false }
+export const TRUEVAL: BooleanVal = {
+    type: ValueType.Boolean,
+    value: true,
+    toKey() {
+        return "true"
+    },
+}
+export const FALSEVAL: BooleanVal = {
+    type: ValueType.Boolean,
+    value: false,
+    toKey() {
+        return "false"
+    },
+}
 
 export class ObjectVal implements RuntimeVal {
     type = ValueType.Object

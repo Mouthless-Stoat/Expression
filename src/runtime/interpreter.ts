@@ -26,6 +26,7 @@ import {
     NativeFunctionVal,
     isValueTypes,
     StringVal,
+    valueName,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -122,7 +123,7 @@ function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
         if (k.type !== NodeType.Identifier) {
             const evalKey = evaluate(k, env)
             if (!evalKey.toKey) {
-                return error("Object key can't be of type", evalKey.type)
+                return error("Object key can't be of type", valueName[evalKey.type])
             }
             key = evalKey.toKey()
         } else {
@@ -168,7 +169,7 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     } else if (isValueTypes(left, ValueType.Number)) {
         const prop = (expr.member as Identifier).symbol
         //@ts-expect-error
-        return left.method[prop] ?? error("Type", left.type, "does not have method", prop)
+        return left.method[prop] ?? error("Type", valueName[left.type], "does not have method", prop)
     } else {
         return error("Cannot access non object")
     }
@@ -176,7 +177,7 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     if (expr.isCompute) {
         const evalProp = evaluate(expr.member, env)
         if (!evalProp.toKey) {
-            return error("Cannot access object with type", evalProp.type)
+            return error("Cannot access object with type", valueName[evalProp.type])
         }
         prop = evalProp.toKey()
     } else {
