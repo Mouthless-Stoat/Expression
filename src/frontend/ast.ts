@@ -74,12 +74,12 @@ export class MemberExpr implements Expr {
     type = NodeType.MemberExpr
     object: Expr
     member: Expr
-    isCompute: boolean
+    isComputed: boolean
 
     constructor(object: Expr, member: Expr, isCompute: boolean) {
         this.object = object
         this.member = member
-        this.isCompute = isCompute
+        this.isComputed = isCompute
     }
 }
 

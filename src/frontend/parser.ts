@@ -255,7 +255,12 @@ export default class Parser {
         let items: Expr[] = []
         while (this.notEOF() && !this.isTypes(TokenType.CloseBracket)) {
             const item = this.parseExpr()
-            if (!this.isTypes(TokenType.CloseBracket, TokenType.Comma)) return error("SyntaxError: Expected , or ]")
+            if (this.isTypes(TokenType.Comma)) {
+                this.next()
+            } else if (!this.isTypes(TokenType.CloseBracket)) {
+                return error("SyntaxError: Expected , or ]")
+            }
+
             items.push(item)
         }
         this.expect(TokenType.CloseBracket, "SyntaxError: Expected ]")

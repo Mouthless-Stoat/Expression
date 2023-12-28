@@ -106,14 +106,14 @@ function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
         if (!isValueTypes(obj, ValueType.Object)) {
-            return error("Cannot access non object")
+            return error("Cannot access non Object")
         }
         const prop = (left.member as Identifier).symbol
         const val = evaluate(expr.rightHand, env)
         if (!(obj as ObjectVal).value.get(prop)?.isConst) {
             ;(obj as ObjectVal).value.set(prop, { isConst: false, value: val })
         } else {
-            return error("Cannot assign to constant")
+            return error("Cannot assign to Constant")
         }
         return val
     }
@@ -160,7 +160,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
         return evalBlock(fn.value, scope)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
-    else return error("Cannot call on non-function")
+    else return error("Cannot call on non Function")
 }
 
 function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
@@ -169,19 +169,34 @@ function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
 
 function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     const left = evaluate(expr.object, env)
+    if (isValueTypes(left, ValueType.List) && expr.isComputed) {
+        const list = (left as ListVal).value
+        const evalIndex = evaluate(expr.member, env)
+        if (!isValueTypes(evalIndex, ValueType.Number)) {
+            return error("Cannot index List using type", valueName[evalIndex.type])
+        }
+        const index: number =
+            (evalIndex as NumberVal).value >= 0
+                ? (evalIndex as NumberVal).value
+                : list.length + (evalIndex as NumberVal).value
+        if (index > list.length) {
+            return error("Index", index, "Out of Bound")
+        }
+        return list[index]
+    }
     if (isValueTypes(left, ValueType.Object)) {
     } else if (isValueTypes(left, ValueType.Number)) {
         const prop = (expr.member as Identifier).symbol
         //@ts-expect-error
         return left.method[prop] ?? error("Type", valueName[left.type], "does not have method", prop)
     } else {
-        return error("Cannot access non object")
+        return error("Cannot access non Object")
     }
     let prop
-    if (expr.isCompute) {
+    if (expr.isComputed) {
         const evalProp = evaluate(expr.member, env)
         if (!evalProp.toKey) {
-            return error("Cannot access object with type", valueName[evalProp.type])
+            return error("Cannot access Object with type", valueName[evalProp.type])
         }
         prop = evalProp.toKey()
     } else {
