@@ -55,7 +55,7 @@ export default class Parser {
     }
 
     private parseArgs(): Expr[] {
-        this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
+        this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
         let args: Expr[] = []
         // if not a empty function call keep parsing arg
         if (!this.isTypes(TokenType.CloseParen)) {
@@ -64,7 +64,7 @@ export default class Parser {
                 args.push(this.parseAssignmentExpr())
             }
         }
-        this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
         return args
     }
 
@@ -172,7 +172,7 @@ export default class Parser {
             let member = comp
                 ? (() => {
                       let temp = this.parseExpr()
-                      this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
+                      this.expect(TokenType.CloseBracket, "SyntaxError: Expected ]")
                       return temp
                   })()
                 : (() => {
@@ -211,12 +211,12 @@ export default class Parser {
     }
 
     private parseBlockExpr(): Expr {
-        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "("')
+        this.expect(TokenType.OpenBrace, "SyntaxError: Expected {")
         const body: Expr[] = []
         while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
             body.push(this.parseExpr())
         }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected ")"')
+        this.expect(TokenType.CloseBrace, "SyntaxError: Expected }")
         return new BlockLiteral(body)
     }
 
@@ -235,15 +235,15 @@ export default class Parser {
             }
             let isConst: boolean = this.current().isType(TokenType.Colon, TokenType.Equal)
                 ? this.next().isType(TokenType.Colon)
-                : error('SyntaxError: Expected "=" or ":"')
+                : error("SyntaxError: Expected = or :")
 
             const value = this.parseExpr()
             properties.push(new Property(key, value, isConst))
             if (!this.isTypes(TokenType.CloseDoubleAngle)) {
-                this.expect(TokenType.Comma, 'SyntaxError: Expected ","')
+                this.expect(TokenType.Comma, "SyntaxError: Expected ,")
             }
         }
-        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect "}"')
+        this.expect(TokenType.CloseDoubleAngle, "SyntaxError: Expect >>")
         return new ObjectLiteral(properties)
     }
 }

@@ -5,7 +5,7 @@ import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
 
-function repl(debug: boolean, run: boolean, stack: boolean) {
+function repl(debug: boolean, stack: boolean) {
     const parser = new Parser()
     const env = new Enviroment()
     console.log("v0.0.1")
@@ -23,12 +23,10 @@ function repl(debug: boolean, run: boolean, stack: boolean) {
             console.log("AST:", program)
             console.log("-".repeat(50))
         }
-        if (run) {
-            console.log("Output:")
-            const result = evalBlock(program, env, true)
-            console.log("Program Return:", result)
-            if (stack) console.log("Eval Stack:", env.evalStack)
-        }
+        console.log("Output:")
+        const result = evalBlock(program, env, true)
+        console.log("Program Return:", result)
+        if (stack) console.log("Eval Stack:", env.evalStack)
         console.log("=".repeat(50))
     }
 }
@@ -51,4 +49,23 @@ function run(debug: boolean) {
     console.log("Program Return:", result)
     console.log("Eval Stack:", env.evalStack)
 }
-repl(false, true, false)
+
+function token(ast: boolean) {
+    const parser = new Parser()
+    const env = new Enviroment()
+    console.log("v0.0.1")
+
+    while (true) {
+        const input = prompt("> ")
+
+        if (!input || input === "exit") {
+            throw new Error("Exit")
+        }
+
+        console.log("Tokens:", tokenize(input))
+        if (ast) {
+            console.log("AST:", parser.produceAST(input))
+        }
+    }
+}
+token(false)

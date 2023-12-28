@@ -140,15 +140,30 @@ export function tokenize(source: string): Token[] {
             if (!isNumber && !isNamic(char) && !isString) {
                 error("WHAT THE FUCK IS THIS", char, char.charCodeAt(0))
             }
-            if (isString) src.shift()
-            const condition = () =>
-                src.length > 0 && (isString ? (c: string) => c !== '"' : isNumber ? isNumeric : isNamic)(src[0])
             let acc = ""
-            while (condition()) acc += src.shift()
+
             if (isString) {
-                push(TokenType.StringLiteral, acc)
-                src.shift() // remove the closing "
-            } else if (isNumber) {
+                src.shift()
+                while (src.length > 0 && src[0] !== '"') {
+                    let char = src.shift()
+                    if (char === "\\") {
+                        char += src.shift()
+                    }
+                    acc += char
+                }
+                if (src.shift() !== '"') {
+                    return error('SyntaxError: Expected "')
+                }
+                // using eval here so all escape char work
+                // def not a security issue
+                push(TokenType.StringLiteral, eval(`\"${acc}\"`))
+                continue
+            }
+
+            const condition = () => src.length > 0 && (isNumber ? isNumeric : isNamic)(src[0])
+            while (condition()) acc += src.shift()
+
+            if (isNumber) {
                 push(TokenType.Number, acc)
             } else {
                 push(TokenType.Identifier, acc)
