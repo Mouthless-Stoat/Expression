@@ -3,6 +3,7 @@
 import { Block, Expr } from "./ast"
 import Enviroment from "./enviroment"
 import { NATIVEFUNC } from "./nativeFunc"
+import { error } from "./utils"
 
 // type of value at run time
 export enum ValueType {
@@ -39,7 +40,10 @@ export class NumberVal implements RuntimeVal {
     value: number
     method: Record<string, NativeFunctionVal | FunctionVal> = {
         toFixed: new NativeFunctionVal((args: RuntimeVal[]) => {
-            this.value = parseFloat(this.value.toFixed((args[0] ?? { value: 1 }).value))
+            if (args.length > 1) {
+                return error("Expected 1 argument but given", args.length)
+            }
+            this.value = parseFloat(this.value.toFixed(args[0] === undefined ? 1 : args[0].value))
             return this as NumberVal
         }),
     }
