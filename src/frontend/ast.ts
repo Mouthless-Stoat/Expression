@@ -1,5 +1,5 @@
-import { PreUnaryOpType } from "./UnaryOp"
-import { BinaryOpType } from "./binaryOp"
+import { PreUnaryOpType } from "../runtime/UnaryOp"
+import { BinaryOpType } from "../runtime/binaryOp"
 
 // this file contant definition for the ast
 
@@ -14,7 +14,7 @@ export enum NodeType {
     AssigmentExpr,
     MemberExpr,
     CallExpr,
-    UnaryExpr,
+    PreUnaryExpr,
     FunctionExpr,
 
     // literal
@@ -45,8 +45,8 @@ export class BinaryExpr implements Expr {
     }
 }
 
-export class UnaryExpr implements Expr {
-    type = NodeType.UnaryExpr
+export class PreUnaryExpr implements Expr {
+    type = NodeType.PreUnaryExpr
     expr: Expr
     operator: PreUnaryOpType
 

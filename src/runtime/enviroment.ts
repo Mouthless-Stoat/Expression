@@ -1,5 +1,5 @@
 import { RuntimeVal, NativeFunctionVal } from "./value"
-import { error } from "./utils"
+import { error } from "../utils"
 import { NATIVEFUNC } from "./nativeFunc"
 
 export default class Enviroment {

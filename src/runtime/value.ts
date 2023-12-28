@@ -1,8 +1,8 @@
 // this file contain all value to be store at runtime definition
 
-import { BlockLiteral, Expr } from "./ast"
+import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
-import { error } from "./utils"
+import { error } from "../utils"
 
 // type of value at run time
 export enum ValueType {

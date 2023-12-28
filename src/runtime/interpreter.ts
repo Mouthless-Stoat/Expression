@@ -9,11 +9,11 @@ import {
     ObjectLiteral,
     CallExpr,
     FunctionExpr,
-    UnaryExpr,
+    PreUnaryExpr,
     BlockLiteral,
     MemberExpr,
     StringLiteral,
-} from "./ast"
+} from "../frontend/ast"
 import {
     NULLVAL,
     NumberVal,
@@ -28,7 +28,7 @@ import {
     StringVal,
 } from "./value"
 import Enviroment from "./enviroment"
-import { error } from "./utils"
+import { error } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
 
@@ -61,8 +61,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalCallExpr(astNode as CallExpr, env)
         case NodeType.FunctionExpr:
             return evalFuncExpr(astNode as FunctionExpr, env)
-        case NodeType.UnaryExpr:
-            return evalUnaryExpr(astNode as UnaryExpr, env)
+        case NodeType.PreUnaryExpr:
+            return evalUnaryExpr(astNode as PreUnaryExpr, env)
         case NodeType.MemberExpr:
             return evalMemberExpr(astNode as MemberExpr, env)
         default:
@@ -86,7 +86,7 @@ function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
     return BinaryOp[expr.operator](left as RuntimeVal, right as RuntimeVal, env)
 }
 
-function evalUnaryExpr(expr: UnaryExpr, env: Enviroment): RuntimeVal {
+function evalUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
     return PreUnaryOp[expr.operator](evaluate(expr.expr, env), env)
 }
 

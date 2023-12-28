@@ -1,4 +1,3 @@
-import { PreUnaryOpTokens, PreUnaryOpType } from "./UnaryOp"
 import {
     Expr,
     Identifier,
@@ -14,13 +13,14 @@ import {
     NodeType,
     MemberExpr,
     FunctionExpr,
-    UnaryExpr,
+    PreUnaryExpr,
     BlockLiteral,
     StringLiteral,
 } from "./ast"
-import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "./binaryOp"
+import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "../runtime/binaryOp"
+import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
-import { error } from "./utils"
+import { error } from "../utils"
 
 // class to parse and store stuff
 export default class Parser {
@@ -91,9 +91,9 @@ export default class Parser {
     // 1. Primary (Literal)
     // 2. Member access
     // 3. Call
-    // 4. Unary Operator
+    // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add) NOTE flow from add to mul
-    // 6. Function Construction
+    // 6. Function Construction NOTE function here because you can't add function together
     // 7. Assignment
     //
     // Highest priority will be parse last so it can be chain
@@ -137,24 +137,24 @@ export default class Parser {
     }
 
     private parseMultiplicativeExpr(): Expr {
-        let leftHand = this.parseUnaryExpr()
+        let leftHand = this.parsePreUnaryExpr()
 
         while (this.isTypes(...MultiplicativeToken)) {
             const operator = this.next().value
-            const rightHand = this.parseUnaryExpr()
+            const rightHand = this.parsePreUnaryExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
         }
 
         return leftHand
     }
 
-    private parseUnaryExpr(): Expr {
+    private parsePreUnaryExpr(): Expr {
         if (!this.isTypes(...PreUnaryOpTokens)) {
             return this.parseMemberCallExpr()
         }
         const op = this.next().value
         const expr = this.parseMemberCallExpr()
-        return new UnaryExpr(expr, op as PreUnaryOpType)
+        return new PreUnaryExpr(expr, op as PreUnaryOpType)
     }
 
     private parseMemberCallExpr(): Expr {

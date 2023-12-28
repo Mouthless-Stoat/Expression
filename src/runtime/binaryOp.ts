@@ -1,6 +1,6 @@
 // all binary op definition for ease of use
 import Enviroment from "./enviroment"
-import { TokenType } from "./lexer"
+import { TokenType } from "../frontend/lexer"
 import { NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
 
 // export type BinaryOpTokenType = TokenType.Plus | TokenType.Minus | TokenType.Star | TokenType.Slash | TokenType.Percent

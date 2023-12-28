@@ -1,7 +1,7 @@
-import { tokenize } from "./backend/lexer"
-import Parser from "./backend/parser"
-import { evalBlock } from "./backend/interpreter"
-import Enviroment from "./backend/enviroment"
+import { tokenize } from "./frontend/lexer"
+import Parser from "./frontend/parser"
+import { evalBlock } from "./runtime/interpreter"
+import Enviroment from "./runtime/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
 
@@ -77,4 +77,4 @@ function token(ast: boolean) {
         }
     }
 }
-token(true)
+repl(true)
