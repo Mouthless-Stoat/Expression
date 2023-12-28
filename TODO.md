@@ -7,3 +7,7 @@
 [ ] More method
 [ ] More native helper like type checking
 [ ] Boolean operator
+[ ] Computed access for object
+[ ] Code formatting
+[ ] Syntax highlight when in repl
+[ ] Repl improvement (Don't crash when error)
