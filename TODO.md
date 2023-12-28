@@ -11,3 +11,5 @@
 [ ] Code formatting
 [ ] Syntax highlight when in repl
 [ ] Repl improvement (Don't crash when error)
+[ ] More type for object key (most primary litetral)
+[ ] Computed key when making object
