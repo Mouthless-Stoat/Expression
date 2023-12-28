@@ -23,7 +23,7 @@ import {
     ObjectVal,
     ValueType,
     NativeFunctionVal,
-    isValueType,
+    isValueTypes,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "./utils"
@@ -93,7 +93,7 @@ function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     } else if (expr.lefthand.type === NodeType.MemberExpr) {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
-        if (!isValueType(obj, ValueType.Object)) {
+        if (!isValueTypes(obj, ValueType.Object)) {
             return error("Cannot access non object")
         }
         const prop = (left.member as Identifier).symbol
@@ -116,7 +116,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
     const args = caller.args.map((arg) => evaluate(arg, env))
     const func = evaluate(caller.caller, env)
 
-    if (isValueType(func, ValueType.Function)) {
+    if (isValueTypes(func, ValueType.Function)) {
         const fn = func as FunctionVal
         const scope = new Enviroment(env)
 
@@ -130,7 +130,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
         }
 
         return evalBlock(fn.value, scope)
-    } else if (isValueType(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
+    } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
     else return error("Cannot call on non-function")
 }
 
@@ -140,7 +140,12 @@ function evalFuncExpr(func: FunctionLiteral, env: Enviroment): RuntimeVal {
 
 function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     const left = evaluate(expr.object, env)
-    if (!isValueType(left, ValueType.Object)) {
+    if (isValueTypes(left, ValueType.Object)) {
+    } else if (isValueTypes(left, ValueType.Number)) {
+        const prop = (expr.member as Identifier).symbol
+        //@ts-expect-error
+        return left.method[prop] ?? error("Type", left.type, "does not have method", prop)
+    } else {
         return error("Cannot access non object")
     }
     const prop = (expr.member as Identifier).symbol

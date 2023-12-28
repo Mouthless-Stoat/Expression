@@ -14,8 +14,8 @@ export enum ValueType {
     Function,
 }
 
-export function isValueType(value: RuntimeVal, valueType: ValueType): boolean {
-    return value.type === valueType
+export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
+    return valueType.some((t) => value.type === t)
 }
 
 // value during run time
@@ -37,6 +37,12 @@ export const NULLVAL: NullVal = { type: ValueType.Null, value: null }
 export class NumberVal implements RuntimeVal {
     type = ValueType.Number
     value: number
+    method: Record<string, NativeFunctionVal | FunctionVal> = {
+        toFixed: new NativeFunctionVal((args: RuntimeVal[]) => {
+            this.value = parseFloat(this.value.toFixed((args[0] ?? { value: 1 }).value))
+            return this as NumberVal
+        }),
+    }
     constructor(value: number) {
         this.value = value
     }

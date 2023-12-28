@@ -1,6 +1,5 @@
 import { PreUnaryOpType } from "./UnaryOp"
 import { BinaryOpType } from "./binaryOp"
-import Enviroment from "./enviroment"
 
 // this file contant definition for the ast
 

@@ -53,8 +53,8 @@ export class Token {
         this.value = value
     }
 
-    isType(tokenType: TokenType): boolean {
-        return this.type === tokenType
+    isType(...tokenType: TokenType[]): boolean {
+        return tokenType.some((t) => this.type === t)
     }
 }
 

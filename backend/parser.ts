@@ -30,10 +30,6 @@ export default class Parser {
         return this.token[0]
     }
 
-    private isType(tokenType: TokenType): boolean {
-        return this.current().isType(tokenType)
-    }
-
     private isTypes(...tokenType: TokenType[]): boolean {
         return tokenType.some((t) => this.current().isType(t))
     }
@@ -54,16 +50,16 @@ export default class Parser {
 
     // condition for end of file
     private notEOF(): boolean {
-        return !this.isType(TokenType.EOF)
+        return !this.isTypes(TokenType.EOF)
     }
 
     private parseArgs(): Expr[] {
         this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
         let args: Expr[] = []
         // if not a empty function call keep parsing arg
-        if (!this.isType(TokenType.CloseParen)) {
+        if (!this.isTypes(TokenType.CloseParen)) {
             args = [this.parseAssignmentExpr()]
-            while (this.isType(TokenType.Comma) && this.next()) {
+            while (this.isTypes(TokenType.Comma) && this.next()) {
                 args.push(this.parseAssignmentExpr())
             }
         }
@@ -74,7 +70,7 @@ export default class Parser {
     // helper function
     private parseCallExpr(caller: Expr): CallExpr {
         let callExpr = new CallExpr(caller, this.parseArgs())
-        if (this.isType(TokenType.OpenParen)) callExpr = this.parseCallExpr(callExpr) // chaining call expression
+        if (this.isTypes(TokenType.OpenParen)) callExpr = this.parseCallExpr(callExpr) // chaining call expression
         return callExpr
     }
 
@@ -116,7 +112,7 @@ export default class Parser {
     }
 
     private parseFuncExpr(): Expr {
-        if (!this.isType(TokenType.Function)) {
+        if (!this.isTypes(TokenType.Function)) {
             return this.parseAdditiveExpr()
         }
         this.next()
@@ -162,7 +158,7 @@ export default class Parser {
 
     private parseMemberCallExpr(): Expr {
         const member = this.parseMemberExpr()
-        if (this.isType(TokenType.OpenParen)) {
+        if (this.isTypes(TokenType.OpenParen)) {
             return this.parseCallExpr(member) // chaning call
         }
         return member
@@ -225,12 +221,12 @@ export default class Parser {
         this.next()
         const properties: Property[] = []
 
-        while (this.notEOF() && !this.isType(TokenType.CloseDoubleAngle)) {
+        while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
             const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
 
             // assign shorthand
-            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseParen)) {
-                if (this.isType(TokenType.Comma)) this.next() // discard ,
+            if (this.isTypes(TokenType.Comma) || this.current().isType(TokenType.CloseParen)) {
+                if (this.isTypes(TokenType.Comma)) this.next() // discard ,
                 properties.push(new Property(key))
                 continue
             }
@@ -238,7 +234,7 @@ export default class Parser {
             this.expect(TokenType.Colon, "Missing Colon")
             const value = this.parseExpr()
             properties.push(new Property(key, value))
-            if (!this.isType(TokenType.CloseDoubleAngle)) {
+            if (!this.isTypes(TokenType.CloseDoubleAngle)) {
                 this.expect(TokenType.Comma, "SyntaxError: Expected comma")
             }
         }
