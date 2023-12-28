@@ -13,6 +13,7 @@ import {
     BlockLiteral,
     MemberExpr,
     StringLiteral,
+    ListLiteral,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -27,6 +28,7 @@ import {
     isValueTypes,
     StringVal,
     valueName,
+    ListVal,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -50,6 +52,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalBlock(astNode as BlockLiteral, env)
         case NodeType.ObjectLiteral:
             return evalObjExpr(astNode as ObjectLiteral, env)
+        case NodeType.ListLiteral:
+            return evalListExpr(astNode as ListLiteral, env)
 
         // expr
         case NodeType.BinaryExpr:
@@ -184,4 +188,7 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
         prop = (expr.member as Identifier).symbol
     }
     return (left as ObjectVal).value.get(prop)?.value ?? error("Propeties", prop, "does not exist on", left.value)
+}
+function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
+    return new ListVal(list.items.map((e) => evaluate(e, env)))
 }

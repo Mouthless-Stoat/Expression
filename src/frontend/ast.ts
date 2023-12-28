@@ -24,6 +24,7 @@ export enum NodeType {
     NullLiteral,
     BlockLiteral,
     StringLiteral,
+    ListLiteral,
 }
 
 // a stament node, stament does not return anything
@@ -169,5 +170,13 @@ export class StringLiteral implements Expr {
     string: string
     constructor(str: string) {
         this.string = str
+    }
+}
+
+export class ListLiteral implements Expr {
+    type = NodeType.ListLiteral
+    items: Expr[]
+    constructor(items: Expr[]) {
+        this.items = items
     }
 }

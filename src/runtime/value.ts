@@ -1,6 +1,6 @@
 // this file contain all value to be store at runtime definition
 
-import { BlockLiteral } from "../frontend/ast"
+import { BlockLiteral, Expr } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
 
@@ -13,6 +13,7 @@ export enum ValueType {
     NativeFuntion,
     Function,
     String,
+    List,
 }
 
 export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
@@ -27,6 +28,7 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.NativeFuntion]: "NativeFunction",
     [ValueType.Function]: "Function",
     [ValueType.String]: "String",
+    [ValueType.List]: "List",
 }
 
 // value during run time
@@ -130,5 +132,13 @@ export class StringVal implements RuntimeVal {
     }
     toKey(): string {
         return this.value
+    }
+}
+
+export class ListVal implements RuntimeVal {
+    type = ValueType.List
+    value: RuntimeVal[]
+    constructor(items: RuntimeVal[]) {
+        this.value = items
     }
 }

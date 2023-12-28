@@ -16,6 +16,7 @@ import {
     PreUnaryExpr,
     BlockLiteral,
     StringLiteral,
+    ListLiteral,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -205,6 +206,8 @@ export default class Parser {
                 return this.parseBlockExpr()
             case TokenType.OpenDoubleAngle:
                 return this.parseObjExpr()
+            case TokenType.OpenBracket:
+                return this.parseListLiteral()
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }
@@ -221,19 +224,19 @@ export default class Parser {
     }
 
     private parseObjExpr(): Expr {
-        this.next()
+        this.expect(TokenType.OpenDoubleAngle, "SyntaxError: Expected <<")
         const properties: Property[] = []
 
         while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
             const key = this.parseFuncExpr()
 
             // assign shorthand
-            if (this.isTypes(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
+            if (this.isTypes(TokenType.Comma) || this.isTypes(TokenType.CloseDoubleAngle)) {
                 if (this.isTypes(TokenType.Comma)) this.next() // discard ,
                 properties.push(new Property(key))
                 continue
             }
-            let isConst: boolean = this.current().isType(TokenType.Colon, TokenType.Equal)
+            let isConst: boolean = this.isTypes(TokenType.Colon, TokenType.Equal)
                 ? this.next().isType(TokenType.Colon)
                 : error("SyntaxError: Expected = or :")
 
@@ -245,5 +248,17 @@ export default class Parser {
         }
         this.expect(TokenType.CloseDoubleAngle, "SyntaxError: Expect >>")
         return new ObjectLiteral(properties)
+    }
+
+    private parseListLiteral(): Expr {
+        this.expect(TokenType.OpenBracket, "SyntaxError: Expected [")
+        let items: Expr[] = []
+        while (this.notEOF() && !this.isTypes(TokenType.CloseBracket)) {
+            const item = this.parseExpr()
+            if (!this.isTypes(TokenType.CloseBracket, TokenType.Comma)) return error("SyntaxError: Expected , or ]")
+            items.push(item)
+        }
+        this.expect(TokenType.CloseBracket, "SyntaxError: Expected ]")
+        return new ListLiteral(items)
     }
 }
