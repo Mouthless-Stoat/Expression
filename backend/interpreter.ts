@@ -88,10 +88,20 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
-    if (expr.lefthand.type !== NodeType.Identifier) {
-        return error("Invalid Left Hand")
+    if (expr.lefthand.type === NodeType.Identifier) {
+        return env.assingVar((expr.lefthand as Identifier).symbol, evaluate(expr.rightHand, env), expr.isConst)
+    } else if (expr.lefthand.type === NodeType.MemberExpr) {
+        const left = expr.lefthand as MemberExpr
+        const obj = evaluate(left.object, env)
+        if (!isValueType(obj, ValueType.Object)) {
+            return error("Cannot access non object")
+        }
+        const prop = (left.member as Identifier).symbol
+        const val = evaluate(expr.rightHand, env)
+        ;(obj as ObjectVal).value.set(prop, val)
+        return val
     }
-    return env.assingVar((expr.lefthand as Identifier).symbol, evaluate(expr.rightHand, env), expr.isConst)
+    return error("Invalid Left Hand")
 }
 
 function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {

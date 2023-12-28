@@ -1,4 +1,3 @@
-import { resolveTxt } from "dns"
 import { PreUnaryOpTokens, PreUnaryOpType } from "./UnaryOp"
 import {
     Expr,
@@ -19,7 +18,6 @@ import {
     Block,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "./binaryOp"
-import Enviroment from "./enviroment"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "./utils"
 
@@ -94,12 +92,12 @@ export default class Parser {
 
     // expression order
     // 1. Primary (Literal)
-    // 3. Member access
-    // 4. Call
-    // 5. Unary Operator
-    // 6. Binary Operator (Multi then Add) NOTE flow from add to mul
-    // 8. Function Construction
-    // 9. Assignment
+    // 2. Member access
+    // 3. Call
+    // 4. Unary Operator
+    // 5. Binary Operator (Multi then Add) NOTE flow from add to mul
+    // 6. Function Construction
+    // 7. Assignment
     //
     // Highest will be parse the deepest
     // lower will be parse first and place here
@@ -181,7 +179,7 @@ export default class Parser {
                       return temp
                   })()
                 : (() => {
-                      let temp = this.parseBlockExpr()
+                      let temp = this.parsePrimaryExpr()
                       if (temp.type != NodeType.Identifier) {
                           return error("SyntaxError: Expected Indentifier")
                       }
@@ -199,24 +197,30 @@ export default class Parser {
                 return new Identifier(this.next().value)
             case TokenType.Number:
                 return new NumberLiteral(parseFloat(this.next().value))
-            case TokenType.OpenParen:
-                this.next() // cycle open parent
-                const value = this.parseExpr()
-                this.expect(TokenType.CloseParen, "SyntaxError: Expected Close Parenthesis")
-                return value
             case TokenType.Null:
                 this.next()
                 return NULLLITERAL
             case TokenType.Boolean:
                 return this.next().value == "true" ? TRUELITERAL : FALSELITERAL
-            case TokenType.OpenDoubleAngle:
-                return this.parseObjExpr()
             case TokenType.OpenBrace:
                 return this.parseBlockExpr()
+            case TokenType.OpenDoubleAngle:
+                return this.parseObjExpr()
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }
     }
+
+    private parseBlockExpr(): Expr {
+        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "("')
+        const body: Expr[] = []
+        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
+            body.push(this.parseExpr())
+        }
+        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected ")"')
+        return new Block(body)
+    }
+
     private parseObjExpr(): Expr {
         this.next()
         const properties: Property[] = []
@@ -225,7 +229,7 @@ export default class Parser {
             const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
 
             // assign shorthand
-            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
+            if (this.isType(TokenType.Comma) || this.current().isType(TokenType.CloseParen)) {
                 if (this.isType(TokenType.Comma)) this.next() // discard ,
                 properties.push(new Property(key))
                 continue
@@ -238,17 +242,7 @@ export default class Parser {
                 this.expect(TokenType.Comma, "SyntaxError: Expected comma")
             }
         }
-        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
+        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect "}"')
         return new ObjectLiteral(properties)
-    }
-
-    private parseBlockExpr(): Expr {
-        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
-        const body: Expr[] = []
-        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
-            body.push(this.parseExpr())
-        }
-        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
-        return new Block(body)
     }
 }
