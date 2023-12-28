@@ -4,7 +4,6 @@ import { evalBlock } from "./backend/interpreter"
 import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
-import { BlockLiteral } from "./backend/ast"
 
 function repl(debug: boolean, stack = false) {
     const parser = new Parser()
@@ -29,7 +28,7 @@ function repl(debug: boolean, stack = false) {
             console.log("Program Return:", result.value)
             if (stack) console.log("Eval Stack:", env.evalStack)
             console.log("=".repeat(50))
-        } catch (_) {
+        } catch {
             continue
         }
     }
@@ -53,14 +52,13 @@ function run(debug: boolean) {
         const result = evalBlock(program, env)
         console.log("Program Return:", result)
         console.log("Eval Stack:", env.evalStack)
-    } catch (_) {
+    } catch {
         return
     }
 }
 
 function token(ast: boolean) {
     const parser = new Parser()
-    const env = new Enviroment()
     console.log("v0.0.1")
 
     while (true) {
@@ -69,11 +67,14 @@ function token(ast: boolean) {
         if (!input || input === "exit") {
             throw new Error("Exit")
         }
-
-        console.log("Tokens:", tokenize(input))
-        if (ast) {
-            console.log("AST:", parser.produceAST(input))
+        try {
+            console.log("Tokens:", tokenize(input))
+            if (ast) {
+                console.log("AST:", parser.produceAST(input))
+            }
+        } catch {
+            continue
         }
     }
 }
-repl(false)
+token(true)

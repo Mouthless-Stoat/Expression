@@ -31,7 +31,6 @@ import Enviroment from "./enviroment"
 import { error } from "./utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
-import { resolveTripleslashReference } from "typescript"
 
 //main eval function
 
