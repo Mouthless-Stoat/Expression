@@ -5,7 +5,7 @@ import Enviroment from "./backend/enviroment"
 const prompt = require("prompt-sync")()
 import fs from "fs"
 
-function repl(debug: boolean, run: boolean) {
+function repl(debug: boolean, run: boolean, stack: boolean) {
     const parser = new Parser()
     const env = new Enviroment()
     console.log("v0.0.1")
@@ -27,7 +27,7 @@ function repl(debug: boolean, run: boolean) {
             console.log("Output:")
             const result = evalBlock(program, env, true)
             console.log("Program Return:", result)
-            console.log("Eval Stack:", env.evalStack)
+            if (stack) console.log("Eval Stack:", env.evalStack)
         }
         console.log("=".repeat(50))
     }
@@ -51,4 +51,4 @@ function run(debug: boolean) {
     console.log("Program Return:", result)
     console.log("Eval Stack:", env.evalStack)
 }
-repl(true, true)
+repl(false, true, false)

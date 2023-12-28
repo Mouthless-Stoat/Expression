@@ -62,8 +62,8 @@ export const FALSEVAL: BooleanVal = { type: ValueType.Boolean, value: false }
 
 export class ObjectVal implements RuntimeVal {
     type = ValueType.Object
-    value: Map<string, RuntimeVal>
-    constructor(value: Map<string, RuntimeVal>) {
+    value: Map<string, { isConst: boolean; value: RuntimeVal }>
+    constructor(value: Map<string, { isConst: boolean; value: RuntimeVal }>) {
         this.value = value
     }
 }

@@ -129,9 +129,11 @@ export const FALSELITERAL: BooleanLiteral = { type: NodeType.BooleanLiteral, val
 export class Property {
     key: string
     value?: Expr
-    constructor(key: string, value?: Expr) {
+    isConst: boolean
+    constructor(key: string, value?: Expr, isConst = false) {
         this.key = key
         this.value = value
+        this.isConst = isConst
     }
 }
 

@@ -98,16 +98,20 @@ function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         }
         const prop = (left.member as Identifier).symbol
         const val = evaluate(expr.rightHand, env)
-        ;(obj as ObjectVal).value.set(prop, val)
+        if (!(obj as ObjectVal).value.get(prop)?.isConst) {
+            ;(obj as ObjectVal).value.set(prop, { isConst: false, value: val })
+        } else {
+            return error("Cannot assign to constant")
+        }
         return val
     }
     return error("Invalid Left Hand")
 }
 
 function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
-    const prop = new Map<string, RuntimeVal>()
-    for (const { key, value } of obj.properties) {
-        prop.set(key, value === undefined ? env.getVar(key) : evaluate(value, env))
+    const prop = new Map<string, { isConst: boolean; value: RuntimeVal }>()
+    for (const { key, value, isConst } of obj.properties) {
+        prop.set(key, { isConst: isConst, value: value === undefined ? env.getVar(key) : evaluate(value, env) })
     }
     return new ObjectVal(prop)
 }
@@ -149,5 +153,5 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
         return error("Cannot access non object")
     }
     const prop = (expr.member as Identifier).symbol
-    return (left as ObjectVal).value.get(prop) ?? error(`Propeties ${prop} does not exit on ${left.value}`)
+    return (left as ObjectVal).value.get(prop)?.value ?? error(`Propeties ${prop} does not exit on ${left.value}`)
 }

@@ -225,17 +225,19 @@ export default class Parser {
             const key = this.expect(TokenType.Identifier, "SyntaxError: Expected key name").value
 
             // assign shorthand
-            if (this.isTypes(TokenType.Comma) || this.current().isType(TokenType.CloseParen)) {
+            if (this.isTypes(TokenType.Comma) || this.current().isType(TokenType.CloseDoubleAngle)) {
                 if (this.isTypes(TokenType.Comma)) this.next() // discard ,
                 properties.push(new Property(key))
                 continue
             }
+            let isConst: boolean = this.current().isType(TokenType.Colon, TokenType.Equal)
+                ? this.next().isType(TokenType.Colon)
+                : error('SyntaxError: Expected "=" or ":"')
 
-            this.expect(TokenType.Colon, "Missing Colon")
             const value = this.parseExpr()
-            properties.push(new Property(key, value))
+            properties.push(new Property(key, value, isConst))
             if (!this.isTypes(TokenType.CloseDoubleAngle)) {
-                this.expect(TokenType.Comma, "SyntaxError: Expected comma")
+                this.expect(TokenType.Comma, 'SyntaxError: Expected ","')
             }
         }
         this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect "}"')
