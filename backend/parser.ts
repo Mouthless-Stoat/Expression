@@ -13,9 +13,10 @@ import {
     CallExpr,
     NodeType,
     MemberExpr,
-    FunctionLiteral,
+    FunctionExpr,
     UnaryExpr,
-    Block,
+    BlockLiteral,
+    StringLiteral,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "./binaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
@@ -75,7 +76,7 @@ export default class Parser {
     }
 
     // produce the ast for the interpreter
-    public produceAST(source: string): Block {
+    public produceAST(source: string): BlockLiteral {
         this.token = tokenize(source)
         const program: Expr[] = []
 
@@ -83,7 +84,7 @@ export default class Parser {
         while (this.notEOF()) {
             program.push(this.parseExpr())
         }
-        return new Block(program)
+        return new BlockLiteral(program)
     }
 
     // expression order
@@ -95,8 +96,8 @@ export default class Parser {
     // 6. Function Construction
     // 7. Assignment
     //
-    // Highest will be parse the deepest
-    // lower will be parse first and place here
+    // Highest priority will be parse last so it can be chain
+    // Normal programming statement usually have low priority
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
     }
@@ -119,8 +120,8 @@ export default class Parser {
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
         )
-        const body = this.parseBlockExpr() as Block
-        return new FunctionLiteral(args, body)
+        const body = this.parseBlockExpr() as BlockLiteral
+        return new FunctionExpr(args, body)
     }
 
     private parseAdditiveExpr(): Expr {
@@ -198,6 +199,8 @@ export default class Parser {
                 return NULLLITERAL
             case TokenType.Boolean:
                 return this.next().value == "true" ? TRUELITERAL : FALSELITERAL
+            case TokenType.StringLiteral:
+                return new StringLiteral(this.next().value)
             case TokenType.OpenBrace:
                 return this.parseBlockExpr()
             case TokenType.OpenDoubleAngle:
@@ -214,7 +217,7 @@ export default class Parser {
             body.push(this.parseExpr())
         }
         this.expect(TokenType.CloseBrace, 'SyntaxError: Expected ")"')
-        return new Block(body)
+        return new BlockLiteral(body)
     }
 
     private parseObjExpr(): Expr {

@@ -8,10 +8,11 @@ import {
     AssignmentExpr,
     ObjectLiteral,
     CallExpr,
-    FunctionLiteral,
+    FunctionExpr,
     UnaryExpr,
-    Block,
+    BlockLiteral,
     MemberExpr,
+    StringLiteral,
 } from "./ast"
 import {
     NULLVAL,
@@ -24,38 +25,45 @@ import {
     ValueType,
     NativeFunctionVal,
     isValueTypes,
+    StringVal,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "./utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
+import { resolveTripleslashReference } from "typescript"
 
 //main eval function
 
 export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     switch (astNode.type) {
+        // literal
         case NodeType.NumberLiteral:
             return new NumberVal((astNode as NumberLiteral).number)
         case NodeType.NullLiteral:
             return NULLVAL
         case NodeType.BooleanLiteral:
             return (astNode as BooleanLiteral).value ? TRUEVAL : FALSEVAL
+        case NodeType.StringLiteral:
+            return new StringVal((astNode as StringLiteral).string)
+        case NodeType.BlockLiteral:
+            return evalBlock(astNode as BlockLiteral, env)
+        case NodeType.ObjectLiteral:
+            return evalObjExpr(astNode as ObjectLiteral, env)
+
+        // expr
         case NodeType.BinaryExpr:
             return evalBinExpr(astNode as BinaryExpr, env)
         case NodeType.Identifier:
             return evalIdentifier(astNode as Identifier, env)
         case NodeType.AssigmentExpr:
             return evalAssignExpr(astNode as AssignmentExpr, env)
-        case NodeType.ObjectLiteral:
-            return evalObjExpr(astNode as ObjectLiteral, env)
         case NodeType.CallExpr:
             return evalCallExpr(astNode as CallExpr, env)
-        case NodeType.FunctionLiteral:
-            return evalFuncExpr(astNode as FunctionLiteral, env)
+        case NodeType.FunctionExpr:
+            return evalFuncExpr(astNode as FunctionExpr, env)
         case NodeType.UnaryExpr:
             return evalUnaryExpr(astNode as UnaryExpr, env)
-        case NodeType.BlockLiteral:
-            return evalBlock(astNode as Block, env)
         case NodeType.MemberExpr:
             return evalMemberExpr(astNode as MemberExpr, env)
         default:
@@ -63,7 +71,7 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     }
 }
 
-export function evalBlock(block: Block, env: Enviroment, isGlobal = false): RuntimeVal {
+export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false): RuntimeVal {
     let out: RuntimeVal = NULLVAL
     const blockEnv = isGlobal ? env : new Enviroment(env)
     for (const expr of block.value) {
@@ -138,7 +146,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
     else return error("Cannot call on non-function")
 }
 
-function evalFuncExpr(func: FunctionLiteral, env: Enviroment): RuntimeVal {
+function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
     return new FunctionVal(func.parameter, func.body, env)
 }
 

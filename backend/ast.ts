@@ -15,14 +15,15 @@ export enum NodeType {
     MemberExpr,
     CallExpr,
     UnaryExpr,
+    FunctionExpr,
 
     // literal
     NumberLiteral,
     BooleanLiteral,
     ObjectLiteral,
     NullLiteral,
-    FunctionLiteral,
     BlockLiteral,
+    StringLiteral,
 }
 
 // a stament node, stament does not return anything
@@ -145,20 +146,28 @@ export class ObjectLiteral implements Expr {
     }
 }
 
-export class FunctionLiteral implements Expr {
-    type = NodeType.FunctionLiteral
+export class FunctionExpr implements Expr {
+    type = NodeType.FunctionExpr
     parameter: string[]
-    body: Block
-    constructor(param: string[], body: Block) {
+    body: BlockLiteral
+    constructor(param: string[], body: BlockLiteral) {
         this.parameter = param
         this.body = body
     }
 }
 
-export class Block implements Expr {
+export class BlockLiteral implements Expr {
     type = NodeType.BlockLiteral
     value: Expr[]
     constructor(body: Expr[]) {
         this.value = body
+    }
+}
+
+export class StringLiteral implements Expr {
+    type = NodeType.StringLiteral
+    string: string
+    constructor(str: string) {
+        this.string = str
     }
 }

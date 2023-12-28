@@ -7,6 +7,7 @@ export enum TokenType {
     Identifier,
     Null,
     Boolean,
+    StringLiteral,
 
     // keyword
     Function,
@@ -32,7 +33,6 @@ export enum TokenType {
     Slash,
     Percent,
     Pipe,
-    DoubleQuote,
     Quote,
     Dollar,
     Ampersand,
@@ -84,7 +84,6 @@ const charToken: Record<string, TokenType> = {
     "=": TokenType.Equal,
     ",": TokenType.Comma,
     "|": TokenType.Pipe,
-    '"': TokenType.DoubleQuote,
     "'": TokenType.Quote,
     $: TokenType.Dollar,
     "&": TokenType.Ampersand,
@@ -137,13 +136,19 @@ export function tokenize(source: string): Token[] {
             push(multiToken.get(keyword) ?? 0, src.splice(0, keyword.length).join(""))
         } else {
             const isNumber = isNumeric(char)
-            if (!isNumber && !isNamic(char)) {
+            const isString = char === '"'
+            if (!isNumber && !isNamic(char) && !isString) {
                 error("WHAT THE FUCK IS THIS", char, char.charCodeAt(0))
             }
-            const condition = () => src.length > 0 && (isNumber ? isNumeric : isNamic)(src[0])
+            if (isString) src.shift()
+            const condition = () =>
+                src.length > 0 && (isString ? (c: string) => c !== '"' : isNumber ? isNumeric : isNamic)(src[0])
             let acc = ""
             while (condition()) acc += src.shift()
-            if (isNumber) {
+            if (isString) {
+                push(TokenType.StringLiteral, acc)
+                src.shift() // remove the closing "
+            } else if (isNumber) {
                 push(TokenType.Number, acc)
             } else {
                 push(TokenType.Identifier, acc)

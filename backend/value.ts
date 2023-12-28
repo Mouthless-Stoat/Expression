@@ -1,8 +1,7 @@
 // this file contain all value to be store at runtime definition
 
-import { Block, Expr } from "./ast"
+import { BlockLiteral, Expr } from "./ast"
 import Enviroment from "./enviroment"
-import { NATIVEFUNC } from "./nativeFunc"
 import { error } from "./utils"
 
 // type of value at run time
@@ -13,6 +12,7 @@ export enum ValueType {
     Object,
     NativeFuntion,
     Function,
+    String,
 }
 
 export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
@@ -80,12 +80,20 @@ export class NativeFunctionVal implements RuntimeVal {
 
 export class FunctionVal implements RuntimeVal {
     type = ValueType.Function
-    value: Block
+    value: BlockLiteral
     parameter: string[] // where the function was declare in
     enviroment: Enviroment
-    constructor(param: string[], body: Block, env: Enviroment) {
+    constructor(param: string[], body: BlockLiteral, env: Enviroment) {
         this.parameter = param
         this.value = body
         this.enviroment = env
+    }
+}
+
+export class StringVal implements RuntimeVal {
+    type = ValueType.String
+    value: string
+    constructor(str: string) {
+        this.value = str
     }
 }
