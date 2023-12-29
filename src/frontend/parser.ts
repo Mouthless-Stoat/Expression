@@ -217,6 +217,9 @@ export default class Parser {
     }
 
     private parseBlockExpr(): Expr {
+        // small block containing a single expr
+        if (!this.isTypes(TokenType.OpenBrace)) return new BlockLiteral([this.parseExpr()])
+
         this.expect(TokenType.OpenBrace, "SyntaxError: Expected {")
         const body: Expr[] = []
         while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
