@@ -40,6 +40,8 @@ export enum TokenType {
     Exclamation,
     Omega,
     Question,
+    Greater,
+    Lesser,
 
     // long symbol
     Increment, // ++
@@ -104,6 +106,8 @@ const charToken: Record<string, TokenType> = {
     "!": TokenType.Exclamation,
     ω: TokenType.Omega,
     "?": TokenType.Question,
+    ">": TokenType.Greater,
+    "<": TokenType.Lesser,
 }
 
 // multichar token

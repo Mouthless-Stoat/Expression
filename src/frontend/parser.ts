@@ -19,7 +19,7 @@ import {
     ListLiteral,
     IfExpr,
 } from "./ast"
-import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "../runtime/binaryOp"
+import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
@@ -94,18 +94,18 @@ export default class Parser {
     // 2. Member access
     // 3. Call
     // 4. Prefix Unary Operator
-    // 5. Binary Operator (Multi then Add) NOTE flow from add to mul
+    // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // 7. If
     // 8. Assignment
     // 7. Function Construction
     //
     // Highest priority will be parse last so it can be chain
+    // Lower priority can't be use for higher without grouping
     // Normal programming statement usually have low priority
-    // Put something lower if you don't want it to be use for higher up expr
     // Ex:
     // - Function is lower than assignment because you can't assign function to something
     // but you can assign something **to** function
-    //
+
     private parseExpr(): Expr {
         return this.parseFuncExpr()
     }
@@ -133,16 +133,31 @@ export default class Parser {
     }
 
     private parseIfExpr(): Expr {
-        let condition = this.parseAdditiveExpr()
+        let condition = this.parseLogicalExpr()
         if (this.isTypes(TokenType.Question)) {
             this.next() // discard the ?
             const trueBlock = this.parseBlockExpr() as BlockLiteral
             const falseBlock = this.isTypes(TokenType.Colon)
-                ? (this.parseBlockExpr() as BlockLiteral)
+                ? (() => {
+                      this.next()
+                      return this.parseBlockExpr() as BlockLiteral
+                  })()
                 : new BlockLiteral([NULLLITERAL])
             condition = new IfExpr(condition, trueBlock, falseBlock)
         }
         return condition
+    }
+
+    private parseLogicalExpr(): Expr {
+        let leftHand = this.parseAdditiveExpr()
+
+        while (this.isTypes(...LogicalOpToken)) {
+            const operator = this.next().value
+            const rightHand = this.parseAdditiveExpr()
+            leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
+        }
+
+        return leftHand
     }
 
     private parseAdditiveExpr(): Expr {

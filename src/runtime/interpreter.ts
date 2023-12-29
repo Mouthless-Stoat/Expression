@@ -89,11 +89,11 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false
 
 // other eval
 function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
-    return BinaryOp[expr.operator](expr.leftHand, expr.rightHand, env)
+    return BinaryOp[expr.operator](evaluate(expr.leftHand, env), evaluate(expr.rightHand, env), env)
 }
 
 function evalUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
-    return PreUnaryOp[expr.operator](expr.expr, env)
+    return PreUnaryOp[expr.operator](evaluate(expr.expr, env), env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
