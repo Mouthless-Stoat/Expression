@@ -38,8 +38,11 @@ export enum TokenType {
     Ampersand,
     Octothorp,
     Exclamation,
+    Omega,
 
     // long symbol
+    Increment,
+    Decrement,
 
     // special for handling
     EOF,
@@ -94,6 +97,7 @@ const charToken: Record<string, TokenType> = {
     "/": TokenType.Slash,
     "%": TokenType.Percent,
     "!": TokenType.Exclamation,
+    ω: TokenType.Omega,
 }
 
 // multichar token
@@ -107,6 +111,8 @@ const multiToken: Map<string, TokenType> = (() => {
                 fn: TokenType.Function,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
+                "++": TokenType.Increment,
+                "--": TokenType.Decrement,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )
@@ -130,10 +136,10 @@ export function tokenize(source: string): Token[] {
         })()
         if (isSkip(char)) {
             src.shift()
-        } else if (charToken[char]) {
-            push(charToken[char], src.shift())
         } else if (keyword) {
             push(multiToken.get(keyword) ?? 0, src.splice(0, keyword.length).join(""))
+        } else if (charToken[char]) {
+            push(charToken[char], src.shift())
         } else {
             const isNumber = isNumeric(char)
             const isString = char === '"'

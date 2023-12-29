@@ -208,6 +208,9 @@ export default class Parser {
                 return this.parseObjExpr()
             case TokenType.OpenBracket:
                 return this.parseListLiteral()
+            case TokenType.Omega:
+                this.next()
+                return new NumberLiteral(0)
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }
