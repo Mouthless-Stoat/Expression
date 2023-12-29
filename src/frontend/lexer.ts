@@ -154,6 +154,9 @@ export function tokenize(source: string): Token[] {
                     let char = src.shift()
                     if (char === "\\") {
                         char += src.shift()
+                    } else if (char === "\n" || char === "\r") {
+                        src.shift()
+                        char = "\\n"
                     }
                     acc += char
                 }
