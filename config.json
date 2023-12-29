@@ -1,6 +1,6 @@
 {
-    "commands": {
-        "run": "npm run",
-        "repl": "npm run repl"
-    }
+    "commands": [
+        ["repl", "npm run repl"],
+        ["run", "npm run run"]
+    ]
 }

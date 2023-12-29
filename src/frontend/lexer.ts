@@ -39,10 +39,15 @@ export enum TokenType {
     Octothorp,
     Exclamation,
     Omega,
+    Question,
 
     // long symbol
-    Increment,
-    Decrement,
+    Increment, // ++
+    Decrement, // --
+    Bunny, // =:
+    DoubleColon, // ::
+    Walrus, // :=
+    DoubleArrow, // =>
 
     // special for handling
     EOF,
@@ -98,6 +103,7 @@ const charToken: Record<string, TokenType> = {
     "%": TokenType.Percent,
     "!": TokenType.Exclamation,
     ω: TokenType.Omega,
+    "?": TokenType.Question,
 }
 
 // multichar token
@@ -113,6 +119,8 @@ const multiToken: Map<string, TokenType> = (() => {
                 ">>": TokenType.CloseDoubleAngle,
                 "++": TokenType.Increment,
                 "--": TokenType.Decrement,
+                "::": TokenType.DoubleColon,
+                "=>": TokenType.DoubleArrow,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )

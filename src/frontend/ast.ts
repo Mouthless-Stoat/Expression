@@ -16,6 +16,7 @@ export enum NodeType {
     CallExpr,
     PreUnaryExpr,
     FunctionExpr,
+    IfExpr,
 
     // literal
     NumberLiteral,
@@ -178,5 +179,17 @@ export class ListLiteral implements Expr {
     items: Expr[]
     constructor(items: Expr[]) {
         this.items = items
+    }
+}
+
+export class IfExpr implements Expr {
+    type = NodeType.IfExpr
+    condition: Expr
+    trueBlock: BlockLiteral
+    falseBlock: BlockLiteral
+    constructor(condition: Expr, trueBlock: BlockLiteral, falseBlock: BlockLiteral) {
+        this.condition = condition
+        this.trueBlock = trueBlock
+        this.falseBlock = falseBlock
     }
 }

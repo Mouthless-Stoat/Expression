@@ -17,6 +17,7 @@ import {
     BlockLiteral,
     StringLiteral,
     ListLiteral,
+    IfExpr,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -94,35 +95,54 @@ export default class Parser {
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add) NOTE flow from add to mul
-    // 6. Function Construction NOTE function here because you can't add function together
-    // 7. Assignment
+    // 7. If
+    // 8. Assignment
+    // 7. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Normal programming statement usually have low priority
+    // Put something lower if you don't want it to be use for higher up expr
+    // Ex:
+    // - Function is lower than assignment because you can't assign function to something
+    // but you can assign something **to** function
+    //
     private parseExpr(): Expr {
-        return this.parseAssignmentExpr()
+        return this.parseFuncExpr()
+    }
+
+    private parseFuncExpr(): Expr {
+        if (!this.isTypes(TokenType.OpenParen)) {
+            return this.parseAssignmentExpr()
+        }
+        const args = this.parseArgs().map((a) =>
+            a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
+        )
+        this.expect(TokenType.DoubleArrow, "SyntaxError: Expected =>")
+        const body = this.parseBlockExpr() as BlockLiteral
+        return new FunctionExpr(args, body)
     }
 
     private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseFuncExpr()
-        if (this.isTypes(TokenType.Equal, TokenType.Colon)) {
-            const isConst = this.next().isType(TokenType.Colon)
-            const rightHand = this.parseAssignmentExpr()
+        const leftHand = this.parseIfExpr()
+        if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
+            const isConst = this.next().isType(TokenType.DoubleColon)
+            const rightHand = this.parseFuncExpr() // go up so u can assign to function
             return new AssignmentExpr(leftHand, rightHand, isConst)
         }
         return leftHand
     }
 
-    private parseFuncExpr(): Expr {
-        if (!this.isTypes(TokenType.Function)) {
-            return this.parseAdditiveExpr()
+    private parseIfExpr(): Expr {
+        let condition = this.parseAdditiveExpr()
+        if (this.isTypes(TokenType.Question)) {
+            this.next() // discard the ?
+            const trueBlock = this.parseBlockExpr() as BlockLiteral
+            const falseBlock = this.isTypes(TokenType.Colon)
+                ? (this.parseBlockExpr() as BlockLiteral)
+                : new BlockLiteral([NULLLITERAL])
+            condition = new IfExpr(condition, trueBlock, falseBlock)
         }
-        this.next()
-        const args = this.parseArgs().map((a) =>
-            a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
-        )
-        const body = this.parseBlockExpr() as BlockLiteral
-        return new FunctionExpr(args, body)
+        return condition
     }
 
     private parseAdditiveExpr(): Expr {
@@ -242,8 +262,8 @@ export default class Parser {
                 properties.push(new Property(key))
                 continue
             }
-            let isConst: boolean = this.isTypes(TokenType.Colon, TokenType.Equal)
-                ? this.next().isType(TokenType.Colon)
+            let isConst: boolean = this.isTypes(TokenType.DoubleColon, TokenType.Equal)
+                ? this.next().isType(TokenType.DoubleColon)
                 : error("SyntaxError: Expected = or :")
 
             const value = this.parseExpr()

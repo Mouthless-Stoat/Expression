@@ -2,6 +2,8 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
 import { NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
+import { Expr } from "../frontend/ast"
+import { evaluate } from "./interpreter"
 
 // export type BinaryOpTokenType = TokenType.Plus | TokenType.Minus | TokenType.Star | TokenType.Slash | TokenType.Percent
 
@@ -14,33 +16,40 @@ export const MultiplicativeToken = [TokenType.Star, TokenType.Slash, TokenType.P
 export type BinaryOpType = "+" | "-" | "*" | "/" | "%"
 
 // implementation for all binary operator between every run time value
-export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal, env: Enviroment) => RuntimeVal> = {
-    "+": (lhs, rhs) => {
+export const BinaryOp: Record<BinaryOpType, (lhsExpr: Expr, rhsExpr: Expr, env: Enviroment) => RuntimeVal> = {
+    "+": (lhsExpr, rhsExpr, env) => {
+        const [lhs, rhs] = [evaluate(lhsExpr, env), evaluate(rhsExpr, env)]
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value + rhs.value)
         }
 
         return NULLVAL
     },
-    "-": (lhs, rhs) => {
+    "-": (lhsExpr, rhsExpr, env) => {
+        const [lhs, rhs] = [evaluate(lhsExpr, env), evaluate(rhsExpr, env)]
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value - rhs.value)
         }
         return NULLVAL
     },
-    "*": (lhs, rhs) => {
+    "*": (lhsExpr, rhsExpr, env) => {
+        const [lhs, rhs] = [evaluate(lhsExpr, env), evaluate(rhsExpr, env)]
+
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value * rhs.value)
         }
         return NULLVAL
     },
-    "/": (lhs, rhs) => {
+    "/": (lhsExpr, rhsExpr, env) => {
+        const [lhs, rhs] = [evaluate(lhsExpr, env), evaluate(rhsExpr, env)]
+
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value - rhs.value)
         }
         return NULLVAL
     },
-    "%": (lhs, rhs) => {
+    "%": (lhsExpr, rhsExpr, env) => {
+        const [lhs, rhs] = [evaluate(lhsExpr, env), evaluate(rhsExpr, env)]
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
             return new NumberVal(lhs.value - rhs.value)
         }

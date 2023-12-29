@@ -14,6 +14,7 @@ import {
     MemberExpr,
     StringLiteral,
     ListLiteral,
+    IfExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -70,6 +71,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalUnaryExpr(astNode as PreUnaryExpr, env)
         case NodeType.MemberExpr:
             return evalMemberExpr(astNode as MemberExpr, env)
+        case NodeType.IfExpr:
+            return evalIfExpr(astNode as IfExpr, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -86,13 +89,11 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false
 
 // other eval
 function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
-    const left = evaluate(expr.leftHand, env)
-    const right = evaluate(expr.rightHand, env)
-    return BinaryOp[expr.operator](left as RuntimeVal, right as RuntimeVal, env)
+    return BinaryOp[expr.operator](expr.leftHand, expr.rightHand, env)
 }
 
 function evalUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
-    return PreUnaryOp[expr.operator](evaluate(expr.expr, env), env)
+    return PreUnaryOp[expr.operator](expr.expr, env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
@@ -206,4 +207,11 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
 }
 function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
     return new ListVal(list.items.map((e) => evaluate(e, env)))
+}
+
+function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
+    const condition = evaluate(expr.condition, env)
+    if (!isValueTypes(condition, ValueType.Boolean))
+        return error("Cannot evaluate if condition with type", valueName[condition.type])
+    return evaluate((condition.value as boolean) ? expr.trueBlock : expr.falseBlock, env)
 }
