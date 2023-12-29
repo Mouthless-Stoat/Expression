@@ -4,7 +4,8 @@
     "description": "",
     "main": "lexer.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "repl": "ts-node \"./src/repl.ts\"",
+        "run": "ts-node \"./src/main.ts\""
     },
     "author": "",
     "license": "ISC",

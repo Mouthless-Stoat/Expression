@@ -1,4 +1,6 @@
 {
-    "file": "./src/main.ts",
-    "type": "typescript"
+    "commands": {
+        "run": "npm run",
+        "repl": "npm run repl"
+    }
 }
