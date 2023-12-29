@@ -2,25 +2,24 @@ import { tokenize } from "./frontend/lexer"
 import Parser from "./frontend/parser"
 import { evalBlock } from "./runtime/interpreter"
 import Enviroment from "./runtime/enviroment"
-const prompt = require("prompt-sync")()
 import fs from "fs"
+var readlineSync = require("readline-sync")
 
-function repl(debug: boolean, stack = false) {
+async function repl(debug: boolean, stack = false) {
     const parser = new Parser()
     const env = new Enviroment()
     console.log("v0.0.1")
 
     while (true) {
-        const input = prompt("> ")
-
-        if (!input || input === "exit") {
+        let inp = readlineSync.question("> ")
+        if (!inp || inp === "exit") {
             throw new Error("Exit")
         }
 
         try {
-            const program = parser.produceAST(input)
+            const program = parser.produceAST(inp)
             if (debug) {
-                console.log("Tokens:", tokenize(input))
+                console.log("Tokens:", tokenize(inp))
                 console.log("AST:", program)
                 console.log("-".repeat(50))
             }
@@ -50,8 +49,7 @@ function run(debug: boolean) {
         process.stdout.write(input)
         console.log("-".repeat(50))
         const result = evalBlock(program, env)
-        console.log("Program Return:", result)
-        console.log("Eval Stack:", env.evalStack)
+        console.log("Program Return:", result.value)
     } catch {
         return
     }
@@ -62,7 +60,7 @@ function token(ast: boolean) {
     console.log("v0.0.1")
 
     while (true) {
-        const input = prompt("> ")
+        const input = readlineSync.question("> ")
 
         if (!input || input === "exit") {
             throw new Error("Exit")

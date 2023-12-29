@@ -10,7 +10,7 @@
     "license": "ISC",
     "dependencies": {
         "@types/node": "^20.10.5",
-        "prompt-sync": "^4.2.0",
+        "readline-sync": "^1.4.10",
         "typescript": "^5.3.3"
     }
 }
