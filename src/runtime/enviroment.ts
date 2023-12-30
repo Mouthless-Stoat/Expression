@@ -51,4 +51,11 @@ export default class Enviroment {
         if (!env) return false
         return env.constances.has(name)
     }
+
+    public unsignVar(name: string): RuntimeVal {
+        const oldVal = this.getVar(name)
+        this.variables.delete(name)
+        if (this.isConstant(name)) this.constances.delete(name)
+        return oldVal
+    }
 }
