@@ -189,7 +189,7 @@ export default class Parser {
             return this.parseMemberCallExpr()
         }
         const op = this.next().value
-        const expr = this.parseMemberCallExpr()
+        const expr = this.parsePreUnaryExpr()
         return new PreUnaryExpr(expr, op as PreUnaryOpType)
     }
 
