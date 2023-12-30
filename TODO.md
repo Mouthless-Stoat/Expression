@@ -14,10 +14,10 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] List Type
 [-] Stack Call
 [X] If Expr
-[ ] For loop Expr
-[ ] While Loop Expr
-[ ] For of Loop Expr (track item)
-[ ] For in Loop Expr (track loop count)
+[X] For loop Expr
+[X] While Loop Expr
+[X] For of Loop Expr (track item)
+[X] For in Loop Expr (track loop count)
 [I] Enviroment Stack (each enviroment have a stack that carry from parent)
 [ ] More method
 [ ] More native helper like type checking

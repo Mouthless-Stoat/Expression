@@ -19,6 +19,9 @@ export enum NodeType {
     IfExpr,
     ShiftExpr,
     WhileExpr,
+    ForExpr,
+    ForInExpr,
+    ForOfExpr,
 
     // literal
     NumberLiteral,
@@ -172,6 +175,8 @@ export class BlockLiteral implements Expr {
     }
 }
 
+export const EMPTYBLOCK = new BlockLiteral([])
+
 export class StringLiteral implements Expr {
     type = NodeType.StringLiteral
     string: string
@@ -219,3 +224,36 @@ export class WhileExpr implements Expr {
         this.body = body
     }
 }
+
+export enum ForLoopType {
+    Traditional,
+    In,
+    Of,
+}
+
+interface ForLoopExpr extends Expr {
+    type: NodeType.ForExpr
+    loopType: ForLoopType.Traditional
+    init: Expr
+    condition: Expr
+    step: Expr
+    body: Expr
+}
+
+interface ForOfExpr extends Expr {
+    type: NodeType.ForExpr
+    loopType: ForLoopType.Of
+    identifier: string
+    enumerable: Expr
+    body: Expr
+}
+
+interface ForInExpr extends Expr {
+    type: NodeType.ForExpr
+    loopType: ForLoopType.In
+    identifier: string
+    enumerable: Expr
+    body: Expr
+}
+
+export type ForExpr = ForLoopExpr | ForInExpr | ForOfExpr

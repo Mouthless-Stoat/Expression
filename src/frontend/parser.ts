@@ -20,6 +20,10 @@ import {
     IfExpr,
     ShiftExpr,
     WhileExpr,
+    isNodeType,
+    EMPTYBLOCK,
+    ForExpr,
+    ForLoopType,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -36,7 +40,7 @@ export default class Parser {
     }
 
     private isTypes(...tokenType: TokenType[]): boolean {
-        return tokenType.some((t) => this.current().isType(t))
+        return tokenType.some((t) => this.current().isTypes(t))
     }
     // destroy the current token and return it
     private next(): Token {
@@ -47,7 +51,7 @@ export default class Parser {
     private expect(expected: TokenType, err: string): Token {
         const tk = this.next()
         // if no token or not the correct type throw error
-        if (!tk || !tk.isType(expected)) {
+        if (!tk || !tk.isTypes(expected)) {
             return error(err)
         }
         return tk
@@ -100,7 +104,7 @@ export default class Parser {
     // ------ Statment ------ these order mean nothing
     // 6. Assignment
     // 7. Shift
-    // 8. While
+    // 8. Loop
     // 9. If
     // 10. Function Construction
     //
@@ -117,7 +121,7 @@ export default class Parser {
 
     private parseFuncExpr(): Expr {
         if (!this.isTypes(TokenType.OpenParen)) {
-            return this.parseWhileExpr()
+            return this.parseLoopExpr()
         }
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
@@ -127,12 +131,68 @@ export default class Parser {
         return new FunctionExpr(args, body)
     }
 
-    private parseWhileExpr(): Expr {
-        if (!this.isTypes(TokenType.While)) {
+    private parseLoopExpr(): Expr {
+        if (!this.isTypes(TokenType.While, TokenType.For)) {
             return this.parseShiftExpr()
         }
-        this.next()
-        return new WhileExpr(this.parseExpr(), this.parseBlockExpr() as BlockLiteral)
+        const isWhile = this.next().isTypes(TokenType.While)
+        if (isWhile) {
+            return new WhileExpr(this.parseExpr(), this.parseBlockExpr() as BlockLiteral)
+        } else {
+            this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
+            if (this.isTypes(TokenType.Comma)) {
+                return this.parseTradFor()
+            }
+            let first = this.parseExpr()
+            if (this.isTypes(TokenType.In, TokenType.Of)) {
+                return this.parseNonTradFor(first)
+            } else if (this.isTypes(TokenType.Comma)) {
+                return this.parseTradFor(first)
+            } else {
+                return error("SyntaxError: Expected ,")
+            }
+        }
+    }
+
+    private parseTradFor(init?: Expr): Expr {
+        this.next() // discard , cus both case start with comman
+        if (!init) init = EMPTYBLOCK
+        let condition: Expr
+        if (!this.isTypes(TokenType.Comma)) {
+            condition = this.parseExpr()
+        } else condition = TRUELITERAL
+        this.next() // discard second ,
+        let step: Expr
+        if (!this.isTypes(TokenType.CloseParen)) {
+            step = this.parseExpr()
+        } else step = EMPTYBLOCK
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        const body = this.parseBlockExpr()
+        return {
+            type: NodeType.ForExpr,
+            loopType: ForLoopType.Traditional,
+            init,
+            condition,
+            step,
+            body,
+        } as ForExpr
+    }
+
+    private parseNonTradFor(identifier: Expr): Expr {
+        // for of and for in
+        if (!isNodeType(identifier, NodeType.Identifier)) return error("SyntaxError: Expected Identifier")
+        const isIn = this.isTypes(TokenType.In)
+        this.next() // discard in or of
+        const enumerable = this.parseExpr()
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        const body = this.parseBlockExpr()
+        return {
+            type: NodeType.ForExpr,
+            loopType: isIn ? ForLoopType.In : ForLoopType.Of,
+            identifier: (identifier as Identifier).symbol,
+            enumerable,
+            body,
+        } as ForExpr
     }
 
     private parseShiftExpr(): Expr {
@@ -164,7 +224,7 @@ export default class Parser {
     private parseAssignmentExpr(): Expr {
         const leftHand = this.parseLogicalExpr()
         if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
-            const isConst = this.next().isType(TokenType.DoubleColon)
+            const isConst = this.next().isTypes(TokenType.DoubleColon)
             const rightHand = this.parseExpr()
             return new AssignmentExpr(leftHand, rightHand, isConst)
         }
@@ -227,7 +287,7 @@ export default class Parser {
     private parseMemberExpr(): Expr {
         let object = this.parsePrimaryExpr()
         while (this.isTypes(TokenType.Dot, TokenType.OpenBracket)) {
-            let comp = !this.next().isType(TokenType.Dot)
+            let comp = !this.next().isTypes(TokenType.Dot)
             let member = comp
                 ? (() => {
                       let temp = this.parseExpr()
@@ -301,7 +361,7 @@ export default class Parser {
                 continue
             }
             let isConst: boolean = this.isTypes(TokenType.DoubleColon, TokenType.Equal)
-                ? this.next().isType(TokenType.DoubleColon)
+                ? this.next().isTypes(TokenType.DoubleColon)
                 : error("SyntaxError: Expected = or :")
 
             const value = this.parseExpr()

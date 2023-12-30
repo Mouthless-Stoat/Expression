@@ -11,6 +11,10 @@ export enum TokenType {
 
     // keyword
     While,
+    For,
+    In,
+    Of,
+    Break,
 
     // delimiter
     OpenParen,
@@ -70,7 +74,7 @@ export class Token {
         this.value = value
     }
 
-    isType(...tokenType: TokenType[]): boolean {
+    isTypes(...tokenType: TokenType[]): boolean {
         return tokenType.some((t) => this.type === t)
     }
 }
@@ -127,6 +131,9 @@ const multiToken: Map<string, TokenType> = (() => {
                 false: TokenType.Boolean,
                 omega: TokenType.Omega,
                 while: TokenType.While,
+                for: TokenType.For,
+                in: TokenType.In,
+                of: TokenType.Of,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
                 "++": TokenType.Increment,

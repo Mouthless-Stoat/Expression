@@ -18,6 +18,8 @@ import {
     ShiftExpr,
     isNodeType,
     WhileExpr,
+    ForExpr,
+    ForLoopType,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -81,6 +83,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalShiftExpr(astNode as ShiftExpr, env)
         case NodeType.WhileExpr:
             return evalWhileExpr(astNode as WhileExpr, env)
+        case NodeType.ForExpr:
+            return evalForExpr(astNode as ForExpr, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -249,11 +253,50 @@ function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {
         if (!isValueTypes(condition, ValueType.Boolean)) {
             return error("TypeError: Cannot evaluate while condition with type", valueName[condition.type])
         }
-        if (!condition.value) {
-            break
-        }
+        if (!condition.value) break
         evaluate(expr.body, env)
         i++
     }
     return new NumberVal(i)
+}
+
+function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
+    if (expr.loopType === ForLoopType.Traditional) {
+        evaluate(expr.init, env)
+        let i = 0
+        while (true) {
+            const condition = evaluate(expr.condition, env) as BooleanVal
+            if (!isValueTypes(condition, ValueType.Boolean)) {
+                return error("TypeError: Cannot evaluate for loop condition with type", valueName[condition.type])
+            }
+            if (!condition.value) break
+            evaluate(expr.body, env)
+            evaluate(expr.step, env)
+            i++
+        }
+        return new NumberVal(i)
+    } else {
+        const evalEnumerable = evaluate(expr.enumerable, env)
+        if (!isValueTypes(evalEnumerable, ValueType.List, ValueType.Object)) {
+            return error("TypeError: Cannot enumerate through type", valueName[evalEnumerable.type])
+        }
+        const enumerable: RuntimeVal[] =
+            expr.loopType === ForLoopType.In
+                ? [
+                      ...Array(
+                          evalEnumerable.value[isValueTypes(evalEnumerable, ValueType.Object) ? "size" : "length"]
+                      ).keys(),
+                  ].map((v) => new NumberVal(v))
+                : isValueTypes(evalEnumerable, ValueType.List)
+                ? (evalEnumerable as ListVal).value
+                : [...(evalEnumerable as ObjectVal).value.entries()].map(
+                      ([k, v]) => new ListVal([new StringVal(k), v.value])
+                  )
+        for (const i of enumerable) {
+            env.assingVar(expr.identifier, i, false)
+            evaluate(expr.body, env)
+        }
+        env.unsignVar(expr.identifier)
+        return new NumberVal(enumerable.length)
+    }
 }
