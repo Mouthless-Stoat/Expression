@@ -96,10 +96,11 @@ export default class Parser {
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
+    // ------ Statment ------
     // 6. If
     // 7. Assignment
-    // 8. Function Construction
-    // 9. Shift
+    // 8. Shift
+    // 9. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -109,22 +110,12 @@ export default class Parser {
     // but you can assign something **to** function
 
     private parseExpr(): Expr {
-        return this.parseShiftExpr()
-    }
-
-    private parseShiftExpr(): Expr {
-        let leftHand = this.parseFuncExpr()
-        while (this.isTypes(TokenType.Arrow)) {
-            this.next()
-            const rightHand = this.parseFuncExpr() // go up so u can shift function
-            leftHand = new ShiftExpr(leftHand, rightHand)
-        }
-        return leftHand
+        return this.parseFuncExpr()
     }
 
     private parseFuncExpr(): Expr {
         if (!this.isTypes(TokenType.OpenParen)) {
-            return this.parseAssignmentExpr()
+            return this.parseShiftExpr()
         }
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
@@ -132,6 +123,16 @@ export default class Parser {
         this.expect(TokenType.DoubleArrow, "SyntaxError: Expected =>")
         const body = this.parseBlockExpr() as BlockLiteral
         return new FunctionExpr(args, body)
+    }
+
+    private parseShiftExpr(): Expr {
+        let leftHand = this.parseAssignmentExpr()
+        while (this.isTypes(TokenType.Arrow)) {
+            this.next()
+            const rightHand = this.parseAssignmentExpr() // function below shift so you can shift function into var
+            leftHand = new ShiftExpr(leftHand, rightHand)
+        }
+        return leftHand
     }
 
     private parseAssignmentExpr(): Expr {
