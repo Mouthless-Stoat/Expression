@@ -282,7 +282,7 @@ export default class Parser {
         const properties: Property[] = []
 
         while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
-            const key = this.parseFuncExpr()
+            const key = this.parseLogicalExpr()
 
             // assign shorthand
             if (this.isTypes(TokenType.Comma) || this.isTypes(TokenType.CloseDoubleAngle)) {
