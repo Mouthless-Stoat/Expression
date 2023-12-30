@@ -1,6 +1,6 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { FALSEVAL, MKBOOL, NULLVAL, NumberVal, RuntimeVal, TRUEVAL, ValueType, isValueTypes } from "./value"
+import { MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
 
 export const PreUnaryOpTokens = [TokenType.Minus, TokenType.Exclamation, TokenType.Increment, TokenType.Decrement]
 
