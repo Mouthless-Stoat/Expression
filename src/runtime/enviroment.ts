@@ -45,4 +45,10 @@ export default class Enviroment {
         this.evalStack.unshift(value)
         return value
     }
+
+    public isConstant(name: string): boolean {
+        const env = this.resolve(name)
+        if (!env) return false
+        return env.constances.has(name)
+    }
 }
