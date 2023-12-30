@@ -257,7 +257,7 @@ export default class Parser {
 
         this.expect(TokenType.OpenBrace, "SyntaxError: Expected {")
         const body: Expr[] = []
-        while (this.notEOF() && !this.current().isType(TokenType.CloseBrace)) {
+        while (this.notEOF() && !this.isTypes(TokenType.CloseBrace)) {
             body.push(this.parseExpr())
         }
         this.expect(TokenType.CloseBrace, "SyntaxError: Expected }")
