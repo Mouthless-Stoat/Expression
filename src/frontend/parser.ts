@@ -19,6 +19,7 @@ import {
     ListLiteral,
     IfExpr,
     ShiftExpr,
+    WhileExpr,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -96,11 +97,12 @@ export default class Parser {
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
-    // ------ Statment ------
-    // 6. If
-    // 7. Assignment
-    // 8. Shift
-    // 9. Function Construction
+    // ------ Statment ------ these order mean nothing
+    // 6. Assignment
+    // 7. Shift
+    // 8. While
+    // 9. If
+    // 10. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -115,7 +117,7 @@ export default class Parser {
 
     private parseFuncExpr(): Expr {
         if (!this.isTypes(TokenType.OpenParen)) {
-            return this.parseShiftExpr()
+            return this.parseWhileExpr()
         }
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
@@ -125,8 +127,16 @@ export default class Parser {
         return new FunctionExpr(args, body)
     }
 
+    private parseWhileExpr(): Expr {
+        if (!this.isTypes(TokenType.While)) {
+            return this.parseShiftExpr()
+        }
+        this.next()
+        return new WhileExpr(this.parseExpr(), this.parseBlockExpr() as BlockLiteral)
+    }
+
     private parseShiftExpr(): Expr {
-        let leftHand = this.parseAssignmentExpr()
+        let leftHand = this.parseIfExpr()
         while (this.isTypes(TokenType.Arrow)) {
             this.next()
             const rightHand = this.parseAssignmentExpr() // function below shift so you can shift function into var
@@ -135,18 +145,8 @@ export default class Parser {
         return leftHand
     }
 
-    private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseIfExpr()
-        if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
-            const isConst = this.next().isType(TokenType.DoubleColon)
-            const rightHand = this.parseFuncExpr() // go up so u can assign to function
-            return new AssignmentExpr(leftHand, rightHand, isConst)
-        }
-        return leftHand
-    }
-
     private parseIfExpr(): Expr {
-        let condition = this.parseLogicalExpr()
+        let condition = this.parseAssignmentExpr()
         if (this.isTypes(TokenType.Question)) {
             this.next() // discard the ?
             const trueBlock = this.parseBlockExpr() as BlockLiteral
@@ -159,6 +159,16 @@ export default class Parser {
             condition = new IfExpr(condition, trueBlock, falseBlock)
         }
         return condition
+    }
+
+    private parseAssignmentExpr(): Expr {
+        const leftHand = this.parseLogicalExpr()
+        if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
+            const isConst = this.next().isType(TokenType.DoubleColon)
+            const rightHand = this.parseExpr()
+            return new AssignmentExpr(leftHand, rightHand, isConst)
+        }
+        return leftHand
     }
 
     private parseLogicalExpr(): Expr {

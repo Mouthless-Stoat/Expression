@@ -10,6 +10,7 @@ export enum TokenType {
     StringLiteral,
 
     // keyword
+    While,
 
     // delimiter
     OpenParen,
@@ -125,6 +126,7 @@ const multiToken: Map<string, TokenType> = (() => {
                 true: TokenType.Boolean,
                 false: TokenType.Boolean,
                 omega: TokenType.Omega,
+                while: TokenType.While,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
                 "++": TokenType.Increment,

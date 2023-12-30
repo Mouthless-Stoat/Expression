@@ -17,6 +17,7 @@ import {
     IfExpr,
     ShiftExpr,
     isNodeType,
+    WhileExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -32,6 +33,7 @@ import {
     StringVal,
     valueName,
     ListVal,
+    BooleanVal,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -77,6 +79,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalIfExpr(astNode as IfExpr, env)
         case NodeType.ShiftExpr:
             return evalShiftExpr(astNode as ShiftExpr, env)
+        case NodeType.WhileExpr:
+            return evalWhileExpr(astNode as WhileExpr, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -236,4 +240,20 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
         env.unsignVar((expr.leftHand as Identifier).symbol)
     }
     return oldVal ?? NULLVAL
+}
+
+function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {
+    let i = 0
+    while (true) {
+        const condition = evaluate(expr.condition, env) as BooleanVal
+        if (!isValueTypes(condition, ValueType.Boolean)) {
+            return error("TypeError: Cannot evaluate while condition with type", valueName[condition.type])
+        }
+        if (!condition.value) {
+            break
+        }
+        evaluate(expr.body, env)
+        i++
+    }
+    return new NumberVal(i)
 }

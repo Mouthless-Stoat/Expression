@@ -18,6 +18,7 @@ export enum NodeType {
     FunctionExpr,
     IfExpr,
     ShiftExpr,
+    WhileExpr,
 
     // literal
     NumberLiteral,
@@ -192,8 +193,8 @@ export class IfExpr implements Expr {
     condition: Expr
     trueBlock: BlockLiteral
     falseBlock: BlockLiteral
-    constructor(condition: Expr, trueBlock: BlockLiteral, falseBlock: BlockLiteral) {
-        this.condition = condition
+    constructor(cond: Expr, trueBlock: BlockLiteral, falseBlock: BlockLiteral) {
+        this.condition = cond
         this.trueBlock = trueBlock
         this.falseBlock = falseBlock
     }
@@ -206,5 +207,15 @@ export class ShiftExpr implements Expr {
     constructor(left: Expr, right: Expr) {
         this.leftHand = left
         this.rightHand = right
+    }
+}
+
+export class WhileExpr implements Expr {
+    type = NodeType.WhileExpr
+    condition: Expr
+    body: BlockLiteral
+    constructor(cond: Expr, body: BlockLiteral) {
+        this.condition = cond
+        this.body = body
     }
 }
