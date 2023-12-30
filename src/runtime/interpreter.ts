@@ -224,10 +224,16 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
     if (!isNodeType(expr.rightHand, NodeType.Identifier)) {
         return error("TypeError: Cannot shift value into non-identifier")
     }
-    const oldVar = env.getVar((expr.rightHand as Identifier).symbol)
+    let oldVal = null
+    if (env.resolve((expr.rightHand as Identifier).symbol)) {
+        oldVal = env.getVar((expr.rightHand as Identifier).symbol)
+    }
     evalAssignExpr(
         new AssignmentExpr(expr.rightHand, expr.leftHand, env.isConstant((expr.rightHand as Identifier).symbol)),
         env
     )
-    return oldVar
+    if (isNodeType(expr.leftHand, NodeType.Identifier)) {
+        env.unsignVar((expr.leftHand as Identifier).symbol)
+    }
+    return oldVal ?? NULLVAL
 }
