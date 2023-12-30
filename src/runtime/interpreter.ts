@@ -15,6 +15,8 @@ import {
     StringLiteral,
     ListLiteral,
     IfExpr,
+    ShiftExpr,
+    isNodeType,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -73,6 +75,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalMemberExpr(astNode as MemberExpr, env)
         case NodeType.IfExpr:
             return evalIfExpr(astNode as IfExpr, env)
+        case NodeType.ShiftExpr:
+            return evalShiftExpr(astNode as ShiftExpr, env)
         default:
             return error(`This AST Node is not implemented in interpreter:`, astNode)
     }
@@ -214,4 +218,16 @@ function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
     if (!isValueTypes(condition, ValueType.Boolean))
         return error("Cannot evaluate if condition with type", valueName[condition.type])
     return evaluate((condition.value as boolean) ? expr.trueBlock : expr.falseBlock, env)
+}
+
+function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
+    if (!isNodeType(expr.rightHand, NodeType.Identifier)) {
+        return error("TypeError: Cannot shift value into non-identifier")
+    }
+    const oldVar = env.getVar((expr.rightHand as Identifier).symbol)
+    evalAssignExpr(
+        new AssignmentExpr(expr.rightHand, expr.leftHand, env.isConstant((expr.rightHand as Identifier).symbol)),
+        env
+    )
+    return oldVar
 }

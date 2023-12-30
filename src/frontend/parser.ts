@@ -18,6 +18,7 @@ import {
     StringLiteral,
     ListLiteral,
     IfExpr,
+    ShiftExpr,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -95,9 +96,10 @@ export default class Parser {
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
-    // 7. If
-    // 8. Assignment
-    // 7. Function Construction
+    // 6. If
+    // 7. Assignment
+    // 8. Function Construction
+    // 9. Shift
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -107,7 +109,17 @@ export default class Parser {
     // but you can assign something **to** function
 
     private parseExpr(): Expr {
-        return this.parseFuncExpr()
+        return this.parseShiftExpr()
+    }
+
+    private parseShiftExpr(): Expr {
+        let leftHand = this.parseFuncExpr()
+        while (this.isTypes(TokenType.Arrow)) {
+            this.next()
+            const rightHand = this.parseFuncExpr() // go up so u can shift function
+            leftHand = new ShiftExpr(leftHand, rightHand)
+        }
+        return leftHand
     }
 
     private parseFuncExpr(): Expr {

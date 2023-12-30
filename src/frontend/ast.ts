@@ -17,6 +17,7 @@ export enum NodeType {
     PreUnaryExpr,
     FunctionExpr,
     IfExpr,
+    ShiftExpr,
 
     // literal
     NumberLiteral,
@@ -26,6 +27,10 @@ export enum NodeType {
     BlockLiteral,
     StringLiteral,
     ListLiteral,
+}
+
+export function isNodeType(node: Expr, ...nodeType: NodeType[]): boolean {
+    return nodeType.some((t) => node.type === t)
 }
 
 // a stament node, stament does not return anything
@@ -191,5 +196,15 @@ export class IfExpr implements Expr {
         this.condition = condition
         this.trueBlock = trueBlock
         this.falseBlock = falseBlock
+    }
+}
+
+export class ShiftExpr implements Expr {
+    type = NodeType.ShiftExpr
+    leftHand: Expr
+    rightHand: Expr
+    constructor(left: Expr, right: Expr) {
+        this.leftHand = left
+        this.rightHand = right
     }
 }

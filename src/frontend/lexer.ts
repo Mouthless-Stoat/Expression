@@ -50,6 +50,7 @@ export enum TokenType {
     DoubleColon, // ::
     Walrus, // :=
     DoubleArrow, // =>
+    Arrow, // ->
     GreaterEqual, // >=
     LesserEqual, // <=
     Spaceship, // <=>
@@ -132,6 +133,7 @@ const multiToken: Map<string, TokenType> = (() => {
                 "--": TokenType.Decrement,
                 "::": TokenType.DoubleColon,
                 "=>": TokenType.DoubleArrow,
+                "->": TokenType.Arrow,
                 ">=": TokenType.GreaterEqual,
                 "<=": TokenType.LesserEqual,
                 "<=>": TokenType.Spaceship,
