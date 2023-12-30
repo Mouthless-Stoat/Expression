@@ -1,6 +1,6 @@
 // this file contain all value to be store at runtime definition
 
-import { BlockLiteral, Expr } from "../frontend/ast"
+import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
 
@@ -93,6 +93,8 @@ export const FALSEVAL: BooleanVal = {
         return "false"
     },
 }
+
+export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
 
 export class ObjectVal implements RuntimeVal {
     type = ValueType.Object

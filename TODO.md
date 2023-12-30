@@ -13,12 +13,12 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] String Type
 [X] List Type
 [-] Stack Call
-[ ] If Expr
+[X] If Expr
 [ ] Loop Expr
 [I] Enviroment Stack (each enviroment have a stack that carry from parent)
-[|] More method
+[ ] More method
 [ ] More native helper like type checking
-[ ] Boolean operator
+[X] Boolean operator
 [X] Computed access for object
 [ ] Code formatting
 [ ] Syntax highlight when in repl
@@ -27,4 +27,5 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] Computed key when making object
 [X] Pre Unary Expr
 [ ] Post Unary Expr
+[ ] Expression literal
 ```

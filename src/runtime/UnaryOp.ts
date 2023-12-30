@@ -1,6 +1,6 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { FALSEVAL, NULLVAL, NumberVal, RuntimeVal, TRUEVAL, ValueType, isValueTypes } from "./value"
+import { FALSEVAL, MKBOOL, NULLVAL, NumberVal, RuntimeVal, TRUEVAL, ValueType, isValueTypes } from "./value"
 
 export const PreUnaryOpTokens = [TokenType.Minus, TokenType.Exclamation, TokenType.Increment, TokenType.Decrement]
 
@@ -17,7 +17,7 @@ export const PreUnaryOp: Record<PreUnaryOpType, (value: RuntimeVal, env: Envirom
     },
     "!": (value) => {
         if (isValueTypes(value, ValueType.Boolean)) {
-            return value.value ? FALSEVAL : TRUEVAL
+            return MKBOOL(!value.value)
         }
         return NULLVAL
     },

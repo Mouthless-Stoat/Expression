@@ -50,6 +50,12 @@ export enum TokenType {
     DoubleColon, // ::
     Walrus, // :=
     DoubleArrow, // =>
+    GreaterEqual, // >=
+    LesserEqual, // <=
+    Spaceship, // <=>
+    Equality, // ==
+    And, // &&
+    Or, // ||
 
     // special for handling
     EOF,
@@ -119,12 +125,19 @@ const multiToken: Map<string, TokenType> = (() => {
                 true: TokenType.Boolean,
                 false: TokenType.Boolean,
                 fn: TokenType.Function,
+                omega: TokenType.Omega,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
                 "++": TokenType.Increment,
                 "--": TokenType.Decrement,
                 "::": TokenType.DoubleColon,
                 "=>": TokenType.DoubleArrow,
+                ">=": TokenType.GreaterEqual,
+                "<=": TokenType.LesserEqual,
+                "<=>": TokenType.Spaceship,
+                "==": TokenType.Equality,
+                "&&": TokenType.And,
+                "||": TokenType.Or,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )
