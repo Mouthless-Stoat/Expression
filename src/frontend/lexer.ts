@@ -10,7 +10,6 @@ export enum TokenType {
     StringLiteral,
 
     // keyword
-    Function,
 
     // delimiter
     OpenParen,
@@ -125,7 +124,6 @@ const multiToken: Map<string, TokenType> = (() => {
                 null: TokenType.Null,
                 true: TokenType.Boolean,
                 false: TokenType.Boolean,
-                fn: TokenType.Function,
                 omega: TokenType.Omega,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
