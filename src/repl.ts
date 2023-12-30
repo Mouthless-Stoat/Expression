@@ -21,7 +21,16 @@ while (true) {
         const program = parser.produceAST(inp)
         if (debug) {
             console.log("Tokens:", tokenize(inp))
-            console.log("AST:", program)
+            console.log(
+                "AST:",
+                (() => {
+                    try {
+                        return JSON.stringify(program, null, 4)
+                    } catch {
+                        return program
+                    }
+                })()
+            )
             console.log("-".repeat(50))
         }
         const result = evalBlock(program, env, true)
