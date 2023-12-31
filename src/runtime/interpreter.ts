@@ -20,6 +20,7 @@ import {
     WhileExpr,
     ForExpr,
     ForLoopType,
+    ControlLiteral,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -36,6 +37,7 @@ import {
     valueName,
     ListVal,
     BooleanVal,
+    ControlVal,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -61,6 +63,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalObjectExpr(astNode as ObjectLiteral, env)
         case NodeType.ListLiteral:
             return evalListExpr(astNode as ListLiteral, env)
+        case NodeType.ControlLiteral:
+            return new ControlVal((astNode as ControlLiteral).control)
 
         // expr
         case NodeType.BinaryExpr:
@@ -95,6 +99,15 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false
     const blockEnv = isGlobal ? env : new Enviroment(env)
     for (const expr of block.value) {
         out = blockEnv.pushStack(evaluate(expr, blockEnv))
+        if (isValueTypes(out, ValueType.Control)) {
+            switch (out.value) {
+                // short circuit the block to end and return null to end the block
+                case "break":
+                    return NULLVAL
+                case "continue":
+                    return TRUEVAL
+            }
+        }
     }
     return out
 }

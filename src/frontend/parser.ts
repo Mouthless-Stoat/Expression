@@ -24,6 +24,7 @@ import {
     EMPTYBLOCK,
     ForExpr,
     ForLoopType,
+    ControlLiteral,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -342,6 +343,8 @@ export default class Parser {
             case TokenType.Omega:
                 this.next()
                 return new NumberLiteral(0)
+            case TokenType.ControlLiteral:
+                return new ControlLiteral(this.next().value)
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }

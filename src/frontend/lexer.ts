@@ -8,13 +8,13 @@ export enum TokenType {
     Null,
     Boolean,
     StringLiteral,
+    ControlLiteral,
 
     // keyword
     While,
     For,
     In,
     Of,
-    Break,
 
     // delimiter
     OpenParen,
@@ -153,6 +153,8 @@ const keyword = {
     for: TokenType.For,
     in: TokenType.In,
     of: TokenType.Of,
+    break: TokenType.ControlLiteral,
+    continue: TokenType.ControlLiteral,
 }
 
 // parse input into a list of token that can be use to generate an ast later

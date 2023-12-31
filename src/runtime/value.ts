@@ -14,6 +14,7 @@ export enum ValueType {
     Function,
     String,
     List,
+    Control,
 }
 
 export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
@@ -29,6 +30,7 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.Function]: "Function",
     [ValueType.String]: "String",
     [ValueType.List]: "List",
+    [ValueType.Control]: "CONTROL",
 }
 
 export function genEnumerable(length: number) {
@@ -180,5 +182,13 @@ export class ListVal implements RuntimeVal {
     }
     iterate(): RuntimeVal[] {
         return this.value
+    }
+}
+
+export class ControlVal implements RuntimeVal {
+    type = ValueType.Control
+    value: string
+    constructor(type: string) {
+        this.value = type
     }
 }

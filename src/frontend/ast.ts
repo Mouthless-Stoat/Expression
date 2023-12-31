@@ -31,6 +31,7 @@ export enum NodeType {
     BlockLiteral,
     StringLiteral,
     ListLiteral,
+    ControlLiteral,
 }
 
 export function isNodeType(node: Expr, ...nodeType: NodeType[]): boolean {
@@ -261,3 +262,11 @@ interface ForInExpr extends Expr {
 }
 
 export type ForExpr = ForLoopExpr | ForInExpr | ForOfExpr
+
+export class ControlLiteral implements Expr {
+    type = NodeType.ControlLiteral
+    control: string
+    constructor(control: string) {
+        this.control = control
+    }
+}
