@@ -33,4 +33,5 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [ ] Expression literal
 [ ] Unsign Expr (Unsign a variable and return it value)
 [X] Break Expr (idk how to make this make sense)
+[ ] Math Build-in
 ```

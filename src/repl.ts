@@ -5,7 +5,7 @@ import Enviroment from "./runtime/enviroment"
 var readlineSync = require("readline-sync")
 
 const debug = false
-const stack = true
+const stack = false
 
 const parser = new Parser()
 const env = new Enviroment()

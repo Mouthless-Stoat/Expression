@@ -58,7 +58,7 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
         case NodeType.BlockLiteral:
             return evalBlock(astNode as BlockLiteral, env)
         case NodeType.ObjectLiteral:
-            return evalObjExpr(astNode as ObjectLiteral, env)
+            return evalObjectExpr(astNode as ObjectLiteral, env)
         case NodeType.ListLiteral:
             return evalListExpr(astNode as ListLiteral, env)
 
@@ -114,12 +114,10 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     if (expr.lefthand.type === NodeType.Identifier) {
-        return env.assingVar(
-            (expr.lefthand as Identifier).symbol,
-            evaluate(expr.rightHand, env),
-            expr.isConst,
-            expr.isParent
-        )
+        const iden = (expr.lefthand as Identifier).symbol
+        const value = evaluate(expr.rightHand, env)
+        if (!(value.isConst ?? true)) value.isConst = expr.isConst
+        return env.assingVar(iden, value, expr.isConst, expr.isParent)
     } else if (expr.lefthand.type === NodeType.MemberExpr) {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
@@ -131,14 +129,14 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         if (!(obj as ObjectVal).value.get(prop)?.isConst) {
             ;(obj as ObjectVal).value.set(prop, { isConst: false, value: val })
         } else {
-            return error('TypeError: Cannot assign to Constant properties"', prop, '"')
+            return error(`TypeError: Cannot assign to Constant properties "${prop}"`)
         }
         return val
     }
     return error("SyntaxError: Invalid left-hand of assignment")
 }
 
-function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
+function evalObjectExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
     const prop = new Map<string, { isConst: boolean; value: RuntimeVal }>()
     for (const { key: k, value, isConst } of obj.properties) {
         let key: string
@@ -151,9 +149,11 @@ function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
         } else {
             key = (k as Identifier).symbol
         }
+        const evalValue = value === undefined ? env.getVar(key) : evaluate(value, env)
+        if (!(evalValue.isConst ?? true)) evalValue.isConst = isConst
         prop.set(key, {
             isConst: isConst,
-            value: value === undefined ? env.getVar(key) : evaluate(value, env),
+            value: evalValue,
         })
     }
     return new ObjectVal(prop)
@@ -222,7 +222,7 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     }
     return (
         (left as ObjectVal).value.get(prop)?.value ??
-        error("ReferenceError: Propeties", prop, "does not exist on", left.value)
+        error(`ReferenceError: Propeties "${prop}" does not exist on`, left.value)
     )
 }
 function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {

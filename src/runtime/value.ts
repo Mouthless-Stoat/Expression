@@ -39,6 +39,7 @@ export function genEnumerable(length: number) {
 export interface RuntimeVal {
     type: ValueType
     value: any
+    isConst?: boolean
     toKey?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
@@ -106,6 +107,7 @@ export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
 export class ObjectVal implements RuntimeVal {
     type = ValueType.Object
     value: Map<string, { isConst: boolean; value: RuntimeVal }>
+    isConst: boolean = false
     constructor(value: Map<string, { isConst: boolean; value: RuntimeVal }>) {
         this.value = value
     }
@@ -145,6 +147,7 @@ export class FunctionVal implements RuntimeVal {
 export class StringVal implements RuntimeVal {
     type = ValueType.String
     value: string
+    isConst: boolean = false
     constructor(str: string) {
         this.value = str
     }
@@ -165,6 +168,7 @@ export class StringVal implements RuntimeVal {
 export class ListVal implements RuntimeVal {
     type = ValueType.List
     value: RuntimeVal[]
+    isConst: boolean = false
     constructor(items: RuntimeVal[]) {
         this.value = items
     }
