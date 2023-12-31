@@ -126,14 +126,6 @@ const multiToken: Map<string, TokenType> = (() => {
     return new Map<string, TokenType>(
         [
             ...Object.entries({
-                null: TokenType.Null,
-                true: TokenType.Boolean,
-                false: TokenType.Boolean,
-                omega: TokenType.Omega,
-                while: TokenType.While,
-                for: TokenType.For,
-                in: TokenType.In,
-                of: TokenType.Of,
                 "<<": TokenType.OpenDoubleAngle,
                 ">>": TokenType.CloseDoubleAngle,
                 "++": TokenType.Increment,
@@ -152,6 +144,17 @@ const multiToken: Map<string, TokenType> = (() => {
     )
 })()
 
+const keyword = {
+    null: TokenType.Null,
+    true: TokenType.Boolean,
+    false: TokenType.Boolean,
+    omega: TokenType.Omega,
+    while: TokenType.While,
+    for: TokenType.For,
+    in: TokenType.In,
+    of: TokenType.Of,
+}
+
 // parse input into a list of token that can be use to generate an ast later
 export function tokenize(source: string): Token[] {
     const tokens = Array<Token>()
@@ -160,18 +163,18 @@ export function tokenize(source: string): Token[] {
 
     while (src.length > 0) {
         const char = src[0]
-        const keyword = (() => {
-            for (const [keyword, _] of multiToken) {
-                if (src.slice(0, keyword.length).join("") === keyword) {
-                    return keyword
+        const multichar = (() => {
+            for (const [token, _] of multiToken) {
+                if (src.slice(0, token.length).join("") === token) {
+                    return token
                 }
             }
             return false
         })()
         if (isSkip(char)) {
             src.shift()
-        } else if (keyword) {
-            push(multiToken.get(keyword) ?? 0, src.splice(0, keyword.length).join(""))
+        } else if (multichar) {
+            push(multiToken.get(multichar) ?? 0, src.splice(0, multichar.length).join(""))
         } else if (charToken[char]) {
             push(charToken[char], src.shift())
         } else {
@@ -209,7 +212,8 @@ export function tokenize(source: string): Token[] {
             if (isNumber) {
                 push(TokenType.Number, acc)
             } else {
-                push(TokenType.Identifier, acc)
+                if (keyword[acc as keyof typeof keyword]) push(keyword[acc as keyof typeof keyword], acc)
+                else push(TokenType.Identifier, acc)
             }
         }
         continue
