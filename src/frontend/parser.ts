@@ -83,6 +83,47 @@ export default class Parser {
         return callExpr
     }
 
+    private parseTradFor(init?: Expr): Expr {
+        this.next() // discard , cus both case start with comman
+        if (!init) init = EMPTYBLOCK
+        let condition: Expr
+        if (!this.isTypes(TokenType.Comma)) {
+            condition = this.parseExpr()
+        } else condition = TRUELITERAL
+        this.next() // discard second ,
+        let step: Expr
+        if (!this.isTypes(TokenType.CloseParen)) {
+            step = this.parseExpr()
+        } else step = EMPTYBLOCK
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        const body = this.parseBlockExpr()
+        return {
+            type: NodeType.ForExpr,
+            loopType: ForLoopType.Traditional,
+            init,
+            condition,
+            step,
+            body,
+        } as ForExpr
+    }
+
+    private parseNonTradFor(identifier: Expr): Expr {
+        // for of and for in
+        if (!isNodeType(identifier, NodeType.Identifier)) return error("SyntaxError: Expected Identifier")
+        const isIn = this.isTypes(TokenType.In)
+        this.next() // discard in or of
+        const enumerable = this.parseExpr()
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        const body = this.parseBlockExpr()
+        return {
+            type: NodeType.ForExpr,
+            loopType: isIn ? ForLoopType.In : ForLoopType.Of,
+            identifier: (identifier as Identifier).symbol,
+            enumerable,
+            body,
+        } as ForExpr
+    }
+
     // produce the ast for the interpreter
     public produceAST(source: string): BlockLiteral {
         this.token = tokenize(source)
@@ -137,7 +178,10 @@ export default class Parser {
         }
         const isWhile = this.next().isTypes(TokenType.While)
         if (isWhile) {
-            return new WhileExpr(this.parseExpr(), this.parseBlockExpr() as BlockLiteral)
+            this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
+            const condition = this.parseExpr()
+            this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+            return new WhileExpr(condition, this.parseBlockExpr() as BlockLiteral)
         } else {
             this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
             if (this.isTypes(TokenType.Comma)) {
@@ -152,47 +196,6 @@ export default class Parser {
                 return error("SyntaxError: Expected ,")
             }
         }
-    }
-
-    private parseTradFor(init?: Expr): Expr {
-        this.next() // discard , cus both case start with comman
-        if (!init) init = EMPTYBLOCK
-        let condition: Expr
-        if (!this.isTypes(TokenType.Comma)) {
-            condition = this.parseExpr()
-        } else condition = TRUELITERAL
-        this.next() // discard second ,
-        let step: Expr
-        if (!this.isTypes(TokenType.CloseParen)) {
-            step = this.parseExpr()
-        } else step = EMPTYBLOCK
-        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
-        const body = this.parseBlockExpr()
-        return {
-            type: NodeType.ForExpr,
-            loopType: ForLoopType.Traditional,
-            init,
-            condition,
-            step,
-            body,
-        } as ForExpr
-    }
-
-    private parseNonTradFor(identifier: Expr): Expr {
-        // for of and for in
-        if (!isNodeType(identifier, NodeType.Identifier)) return error("SyntaxError: Expected Identifier")
-        const isIn = this.isTypes(TokenType.In)
-        this.next() // discard in or of
-        const enumerable = this.parseExpr()
-        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
-        const body = this.parseBlockExpr()
-        return {
-            type: NodeType.ForExpr,
-            loopType: isIn ? ForLoopType.In : ForLoopType.Of,
-            identifier: (identifier as Identifier).symbol,
-            enumerable,
-            body,
-        } as ForExpr
     }
 
     private parseShiftExpr(): Expr {
