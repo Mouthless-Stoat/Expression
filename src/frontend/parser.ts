@@ -63,7 +63,7 @@ export default class Parser {
     }
 
     private parseArgs(): Expr[] {
-        this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
+        this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
         let args: Expr[] = []
         // if not a empty function call keep parsing arg
         if (!this.isTypes(TokenType.CloseParen)) {
@@ -72,7 +72,7 @@ export default class Parser {
                 args.push(this.parseAssignmentExpr())
             }
         }
-        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
         return args
     }
 
@@ -95,7 +95,7 @@ export default class Parser {
         if (!this.isTypes(TokenType.CloseParen)) {
             step = this.parseExpr()
         } else step = EMPTYBLOCK
-        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
         const body = this.parseBlockExpr()
         return {
             type: NodeType.ForExpr,
@@ -113,7 +113,7 @@ export default class Parser {
         const isIn = this.isTypes(TokenType.In)
         this.next() // discard in or of
         const enumerable = this.parseExpr()
-        this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+        this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
         const body = this.parseBlockExpr()
         return {
             type: NodeType.ForExpr,
@@ -167,7 +167,7 @@ export default class Parser {
         const args = this.parseArgs().map((a) =>
             a.type === NodeType.Identifier ? (a as Identifier).symbol : error("SyntaxError: Expected Identifier")
         )
-        this.expect(TokenType.DoubleArrow, "SyntaxError: Expected =>")
+        this.expect(TokenType.DoubleArrow, 'SyntaxError: Expected "=>"')
         const body = this.parseBlockExpr() as BlockLiteral
         return new FunctionExpr(args, body)
     }
@@ -178,12 +178,12 @@ export default class Parser {
         }
         const isWhile = this.next().isTypes(TokenType.While)
         if (isWhile) {
-            this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
+            this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
             const condition = this.parseExpr()
-            this.expect(TokenType.CloseParen, "SyntaxError: Expected )")
+            this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
             return new WhileExpr(condition, this.parseBlockExpr() as BlockLiteral)
         } else {
-            this.expect(TokenType.OpenParen, "SyntaxError: Expected (")
+            this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
             if (this.isTypes(TokenType.Comma)) {
                 return this.parseTradFor()
             }
@@ -193,7 +193,7 @@ export default class Parser {
             } else if (this.isTypes(TokenType.Comma)) {
                 return this.parseTradFor(first)
             } else {
-                return error("SyntaxError: Expected ,")
+                return error('SyntaxError: Expected ","')
             }
         }
     }
@@ -304,7 +304,7 @@ export default class Parser {
             let member = comp
                 ? (() => {
                       let temp = this.parseExpr()
-                      this.expect(TokenType.CloseBracket, "SyntaxError: Expected ]")
+                      this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
                       return temp
                   })()
                 : (() => {
@@ -351,17 +351,17 @@ export default class Parser {
         // small block containing a single expr
         if (!this.isTypes(TokenType.OpenBrace)) return new BlockLiteral([this.parseExpr()])
 
-        this.expect(TokenType.OpenBrace, "SyntaxError: Expected {")
+        this.expect(TokenType.OpenBrace, 'SyntaxError: Expected "{"')
         const body: Expr[] = []
         while (this.notEOF() && !this.isTypes(TokenType.CloseBrace)) {
             body.push(this.parseExpr())
         }
-        this.expect(TokenType.CloseBrace, "SyntaxError: Expected }")
+        this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
         return new BlockLiteral(body)
     }
 
     private parseObjExpr(): Expr {
-        this.expect(TokenType.OpenDoubleAngle, "SyntaxError: Expected <<")
+        this.expect(TokenType.OpenDoubleAngle, 'SyntaxError: Expected "<<"')
         const properties: Property[] = []
 
         while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
@@ -375,32 +375,32 @@ export default class Parser {
             }
             let isConst: boolean = this.isTypes(TokenType.DoubleColon, TokenType.Equal)
                 ? this.next().isTypes(TokenType.DoubleColon)
-                : error("SyntaxError: Expected = or :")
+                : error('SyntaxError: Expected "=" or ":"')
 
             const value = this.parseExpr()
             properties.push(new Property(key, value, isConst))
             if (!this.isTypes(TokenType.CloseDoubleAngle)) {
-                this.expect(TokenType.Comma, "SyntaxError: Expected ,")
+                this.expect(TokenType.Comma, 'SyntaxError: Expected ","')
             }
         }
-        this.expect(TokenType.CloseDoubleAngle, "SyntaxError: Expect >>")
+        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
         return new ObjectLiteral(properties)
     }
 
     private parseListLiteral(): Expr {
-        this.expect(TokenType.OpenBracket, "SyntaxError: Expected [")
+        this.expect(TokenType.OpenBracket, 'SyntaxError: Expected "["')
         let items: Expr[] = []
         while (this.notEOF() && !this.isTypes(TokenType.CloseBracket)) {
             const item = this.parseExpr()
             if (this.isTypes(TokenType.Comma)) {
                 this.next()
             } else if (!this.isTypes(TokenType.CloseBracket)) {
-                return error("SyntaxError: Expected , or ]")
+                return error('SyntaxError: Expected "," or "]"')
             }
 
             items.push(item)
         }
-        this.expect(TokenType.CloseBracket, "SyntaxError: Expected ]")
+        this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
         return new ListLiteral(items)
     }
 }

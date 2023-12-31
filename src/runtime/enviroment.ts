@@ -21,7 +21,7 @@ export default class Enviroment {
     // lower scope should not breed out
     public assingVar(name: string, value: RuntimeVal, isConst: boolean, isParent: boolean = false): RuntimeVal {
         const env = isParent ? this.resolve(name) ?? this : this
-        if (env.constances.has(name)) return error(`Cannot assign value to constant`)
+        if (env.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) env.constances.add(name)
         env.variables.set(name, value)
         return value
@@ -30,7 +30,7 @@ export default class Enviroment {
     public getVar(name: string): RuntimeVal {
         const env = this.resolve(name)
         if (env === undefined) {
-            return error(`Cannot access "${name}" because it does not exist`)
+            return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
         return env.variables.get(name) as RuntimeVal
     }

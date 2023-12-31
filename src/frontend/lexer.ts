@@ -198,7 +198,7 @@ export function tokenize(source: string): Token[] {
                     acc += char
                 }
                 if (src.shift() !== '"') {
-                    return error('SyntaxError: Expected "')
+                    return error("SyntaxError: Expected End of String")
                 }
                 // using eval here so all escape char work
                 // def not a security issue

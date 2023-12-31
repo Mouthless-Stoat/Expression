@@ -124,18 +124,18 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
         if (!isValueTypes(obj, ValueType.Object)) {
-            return error("Cannot access non Object")
+            return error("TypeError: Cannot access type", ValueType[obj.type])
         }
         const prop = (left.member as Identifier).symbol
         const val = evaluate(expr.rightHand, env)
         if (!(obj as ObjectVal).value.get(prop)?.isConst) {
             ;(obj as ObjectVal).value.set(prop, { isConst: false, value: val })
         } else {
-            return error("Cannot assign to Constant")
+            return error('TypeError: Cannot assign to Constant properties"', prop, '"')
         }
         return val
     }
-    return error("Invalid Left Hand")
+    return error("SyntaxError: Invalid left-hand of assignment")
 }
 
 function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
@@ -145,7 +145,7 @@ function evalObjExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
         if (k.type !== NodeType.Identifier) {
             const evalKey = evaluate(k, env)
             if (!evalKey.toKey) {
-                return error("Object key can't be of type", valueName[evalKey.type])
+                return error("TypeError: Object key can't be of type", valueName[evalKey.type])
             }
             key = evalKey.toKey()
         } else {
@@ -178,7 +178,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
         return evalBlock(fn.value, scope)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
-    else return error("Cannot call on non Function")
+    else return error("TypeError:", func.value, "is not a Function")
 }
 
 function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
@@ -191,14 +191,14 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
         const list = (left as ListVal).value
         const evalIndex = evaluate(expr.member, env)
         if (!isValueTypes(evalIndex, ValueType.Number)) {
-            return error("Cannot index List using type", valueName[evalIndex.type])
+            return error("TypeError: Cannot index List using type", valueName[evalIndex.type])
         }
         const index: number =
             (evalIndex as NumberVal).value >= 0
                 ? (evalIndex as NumberVal).value
                 : list.length + (evalIndex as NumberVal).value
         if (index > list.length) {
-            return error("Index", index, "Out of Bound")
+            return error("RangeError: Index", index, "Out of Bound")
         }
         return list[index]
     }
@@ -206,21 +206,24 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
     } else if (isValueTypes(left, ValueType.Number)) {
         const prop = (expr.member as Identifier).symbol
         //@ts-expect-error
-        return left.method[prop] ?? error("Type", valueName[left.type], "does not have method", prop)
+        return left.method[prop] ?? error("TypeError: Type", valueName[left.type], "does not have method", prop)
     } else {
-        return error("Cannot access non Object")
+        return error("TypeError: Cannot access type", valueName[left.type])
     }
     let prop
     if (expr.isComputed) {
         const evalProp = evaluate(expr.member, env)
         if (!evalProp.toKey) {
-            return error("Cannot access Object with type", valueName[evalProp.type])
+            return error("TypeError: Cannot access Object with type", valueName[evalProp.type])
         }
         prop = evalProp.toKey()
     } else {
         prop = (expr.member as Identifier).symbol
     }
-    return (left as ObjectVal).value.get(prop)?.value ?? error("Propeties", prop, "does not exist on", left.value)
+    return (
+        (left as ObjectVal).value.get(prop)?.value ??
+        error("ReferenceError: Propeties", prop, "does not exist on", left.value)
+    )
 }
 function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
     return new ListVal(list.items.map((e) => evaluate(e, env)))
@@ -229,7 +232,7 @@ function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
 function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
     const condition = evaluate(expr.condition, env)
     if (!isValueTypes(condition, ValueType.Boolean))
-        return error("Cannot evaluate if condition with type", valueName[condition.type])
+        return error("TypeError: Cannot evaluate if condition with type", valueName[condition.type])
     return evaluate((condition.value as boolean) ? expr.trueBlock : expr.falseBlock, env)
 }
 
