@@ -2,15 +2,16 @@
     "name": "programminglang",
     "version": "1.0.0",
     "description": "",
-    "main": "lexer.js",
+    "main": "./src/main.js",
     "scripts": {
-        "repl": "ts-node \"./src/repl.ts\"",
-        "run": "ts-node \"./src/main.ts\""
+        "repl": "ts-node \"./src/main.ts\" repl",
+        "run": "ts-node \"./src/main.ts\" run"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "@types/node": "^20.10.5",
+        "commander": "^11.1.0",
         "typescript": "^5.3.3"
     }
 }
