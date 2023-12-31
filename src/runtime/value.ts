@@ -42,6 +42,7 @@ export interface RuntimeVal {
     type: ValueType
     value: any
     isConst?: boolean
+    method?: Record<string, NativeFunctionVal | FunctionVal>
     toKey?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
@@ -171,6 +172,7 @@ export class ListVal implements RuntimeVal {
     type = ValueType.List
     value: RuntimeVal[]
     isConst: boolean = false
+
     constructor(items: RuntimeVal[]) {
         this.value = items
     }

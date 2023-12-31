@@ -224,12 +224,10 @@ function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
         }
         return list[index]
     }
-    if (isValueTypes(left, ValueType.Object)) {
-    } else if (isValueTypes(left, ValueType.Number)) {
+    if (left.method) {
         const prop = (expr.member as Identifier).symbol
-        //@ts-expect-error
         return left.method[prop] ?? error("TypeError: Type", valueName[left.type], "does not have method", prop)
-    } else {
+    } else if (!isValueTypes(left, ValueType.Object)) {
         return error("TypeError: Cannot access type", valueName[left.type])
     }
     let prop
