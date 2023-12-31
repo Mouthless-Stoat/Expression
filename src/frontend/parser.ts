@@ -199,8 +199,13 @@ export default class Parser {
         let leftHand = this.parseIfExpr()
         while (this.isTypes(TokenType.Arrow)) {
             this.next()
+            let isParent = true
+            if (this.isTypes(TokenType.Ampersand)) {
+                isParent = false
+                this.next() // discard &
+            }
             const rightHand = this.parseAssignmentExpr() // function below shift so you can shift function into var
-            leftHand = new ShiftExpr(leftHand, rightHand)
+            leftHand = new ShiftExpr(leftHand, rightHand, isParent)
         }
         return leftHand
     }
@@ -225,8 +230,13 @@ export default class Parser {
         const leftHand = this.parseLogicalExpr()
         if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const isConst = this.next().isTypes(TokenType.DoubleColon)
+            let isParent = true
+            if (this.isTypes(TokenType.Ampersand)) {
+                isParent = false
+                this.next() // discard &
+            }
             const rightHand = this.parseExpr()
-            return new AssignmentExpr(leftHand, rightHand, isConst)
+            return new AssignmentExpr(leftHand, rightHand, isConst, isParent)
         }
         return leftHand
     }

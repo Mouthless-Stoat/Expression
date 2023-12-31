@@ -68,7 +68,7 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
         case NodeType.Identifier:
             return evalIdentifier(astNode as Identifier, env)
         case NodeType.AssigmentExpr:
-            return evalAssignExpr(astNode as AssignmentExpr, env)
+            return evalAssignmentExpr(astNode as AssignmentExpr, env)
         case NodeType.CallExpr:
             return evalCallExpr(astNode as CallExpr, env)
         case NodeType.FunctionExpr:
@@ -112,9 +112,14 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
     return env.getVar(iden.symbol)
 }
 
-function evalAssignExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
+function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     if (expr.lefthand.type === NodeType.Identifier) {
-        return env.assingVar((expr.lefthand as Identifier).symbol, evaluate(expr.rightHand, env), expr.isConst)
+        return env.assingVar(
+            (expr.lefthand as Identifier).symbol,
+            evaluate(expr.rightHand, env),
+            expr.isConst,
+            expr.isParent
+        )
     } else if (expr.lefthand.type === NodeType.MemberExpr) {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
@@ -236,8 +241,13 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
     if (env.resolve((expr.rightHand as Identifier).symbol)) {
         oldVal = env.getVar((expr.rightHand as Identifier).symbol)
     }
-    evalAssignExpr(
-        new AssignmentExpr(expr.rightHand, expr.leftHand, env.isConstant((expr.rightHand as Identifier).symbol)),
+    evalAssignmentExpr(
+        new AssignmentExpr(
+            expr.rightHand,
+            expr.leftHand,
+            env.isConstant((expr.rightHand as Identifier).symbol),
+            expr.isParent
+        ),
         env
     )
     if (isNodeType(expr.leftHand, NodeType.Identifier)) {

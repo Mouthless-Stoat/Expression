@@ -72,11 +72,13 @@ export class AssignmentExpr implements Expr {
     lefthand: Expr
     rightHand: Expr
     isConst: boolean
+    isParent: boolean
 
-    constructor(left: Expr, right: Expr, isConst: boolean) {
+    constructor(left: Expr, right: Expr, isConst: boolean, isParent: boolean) {
         this.lefthand = left
         this.rightHand = right
         this.isConst = isConst
+        this.isParent = isParent
     }
 }
 
@@ -209,9 +211,11 @@ export class ShiftExpr implements Expr {
     type = NodeType.ShiftExpr
     leftHand: Expr
     rightHand: Expr
-    constructor(left: Expr, right: Expr) {
+    isParent: boolean
+    constructor(left: Expr, right: Expr, isParent: boolean) {
         this.leftHand = left
         this.rightHand = right
+        this.isParent = isParent
     }
 }
 

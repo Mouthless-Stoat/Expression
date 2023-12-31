@@ -1,4 +1,4 @@
-import { RuntimeVal, NativeFunctionVal } from "./value"
+import { RuntimeVal, NativeFunctionVal, TRUEVAL } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC } from "./nativeFunc"
 
@@ -19,10 +19,11 @@ export default class Enviroment {
 
     // assign a var, change variable value is it doesn;t exit make it
     // lower scope should not breed out
-    public assingVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
-        if (this.constances.has(name)) return error(`Cannot assign value to constant`)
-        if (isConst) this.constances.add(name)
-        this.variables.set(name, value)
+    public assingVar(name: string, value: RuntimeVal, isConst: boolean, isParent: boolean = false): RuntimeVal {
+        const env = isParent ? this.resolve(name) ?? this : this
+        if (env.constances.has(name)) return error(`Cannot assign value to constant`)
+        if (isConst) env.constances.add(name)
+        env.variables.set(name, value)
         return value
     }
 
