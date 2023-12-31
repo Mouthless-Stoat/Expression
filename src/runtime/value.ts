@@ -31,11 +31,18 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.List]: "List",
 }
 
+export function genEnumerable(length: number) {
+    return [...Array(length).keys()].map((n) => new NumberVal(n))
+}
+
 // value during run time
 export interface RuntimeVal {
     type: ValueType
     value: any
     toKey?(): string
+    length?(): number
+    enumerate?(): RuntimeVal[]
+    iterate?(): RuntimeVal[]
 }
 
 // missing value
@@ -102,6 +109,15 @@ export class ObjectVal implements RuntimeVal {
     constructor(value: Map<string, { isConst: boolean; value: RuntimeVal }>) {
         this.value = value
     }
+    length(): number {
+        return this.value.size
+    }
+    enumerate(): RuntimeVal[] {
+        return genEnumerable(this.length())
+    }
+    iterate(): RuntimeVal[] {
+        return [...this.value.entries()].map(([k, v]) => new ListVal([new StringVal(k), v.value]))
+    }
 }
 
 export type FunctionCall = (args: RuntimeVal[], env: Enviroment) => RuntimeVal
@@ -135,6 +151,15 @@ export class StringVal implements RuntimeVal {
     toKey(): string {
         return this.value
     }
+    length(): number {
+        return this.value.length
+    }
+    enumerate(): RuntimeVal[] {
+        return genEnumerable(this.length())
+    }
+    iterate(): RuntimeVal[] {
+        return this.value.split("").map((s) => new StringVal(s))
+    }
 }
 
 export class ListVal implements RuntimeVal {
@@ -142,5 +167,14 @@ export class ListVal implements RuntimeVal {
     value: RuntimeVal[]
     constructor(items: RuntimeVal[]) {
         this.value = items
+    }
+    length(): number {
+        return this.value.length
+    }
+    enumerate(): RuntimeVal[] {
+        return genEnumerable(this.length())
+    }
+    iterate(): RuntimeVal[] {
+        return this.value
     }
 }

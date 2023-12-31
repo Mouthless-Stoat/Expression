@@ -289,21 +289,16 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
         return new NumberVal(i)
     } else {
         const evalEnumerable = evaluate(expr.enumerable, env)
-        if (!isValueTypes(evalEnumerable, ValueType.List, ValueType.Object)) {
-            return error("TypeError: Cannot enumerate through type", valueName[evalEnumerable.type])
+        const isIn = expr.loopType === ForLoopType.In
+        if (isIn ? !evalEnumerable.length : !evalEnumerable.enumerate) {
+            return error(
+                `TypeError: Cannot ${isIn ? "enumerate" : "iterate"} through type`,
+                valueName[evalEnumerable.type]
+            )
         }
-        const enumerable: RuntimeVal[] =
-            expr.loopType === ForLoopType.In
-                ? [
-                      ...Array(
-                          evalEnumerable.value[isValueTypes(evalEnumerable, ValueType.Object) ? "size" : "length"]
-                      ).keys(),
-                  ].map((v) => new NumberVal(v))
-                : isValueTypes(evalEnumerable, ValueType.List)
-                ? (evalEnumerable as ListVal).value
-                : [...(evalEnumerable as ObjectVal).value.entries()].map(
-                      ([k, v]) => new ListVal([new StringVal(k), v.value])
-                  )
+
+        //@ts-expect-error Tell ts to stfu cus we already check for undefined
+        let enumerable: RuntimeVal[] = isIn ? evalEnumerable.enumerate() : evalEnumerable.iterate()
         for (const i of enumerable) {
             env.assingVar(expr.identifier, i, false)
             const bodyVal = evaluate(expr.body, env)
