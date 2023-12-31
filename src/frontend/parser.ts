@@ -344,7 +344,13 @@ export default class Parser {
                 this.next()
                 return new NumberLiteral(0)
             case TokenType.ControlLiteral:
-                return new ControlLiteral(this.next().value)
+                const type = this.next().value
+                let carryCount = 0
+                while (this.isTypes(TokenType.Octothorp)) {
+                    this.next()
+                    carryCount++
+                }
+                return new ControlLiteral(type, carryCount)
             default:
                 return error(`SyntaxError: Unexpected Token:`, this.current())
         }

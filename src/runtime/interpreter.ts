@@ -38,6 +38,7 @@ import {
     ListVal,
     BooleanVal,
     ControlVal,
+    ControlType,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -64,7 +65,10 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
         case NodeType.ListLiteral:
             return evalListExpr(astNode as ListLiteral, env)
         case NodeType.ControlLiteral:
-            return new ControlVal((astNode as ControlLiteral).control)
+            return new ControlVal(
+                (astNode as ControlLiteral).control as ControlType,
+                (astNode as ControlLiteral).carryCount
+            )
 
         // expr
         case NodeType.BinaryExpr:
@@ -100,12 +104,17 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false
     for (const expr of block.value) {
         out = blockEnv.pushStack(evaluate(expr, blockEnv))
         if (isValueTypes(out, ValueType.Control)) {
-            switch (out.value) {
-                // short circuit the block to end and return null to end the block
-                case "break":
-                    return NULLVAL
-                case "continue":
-                    return TRUEVAL
+            let control = out as ControlVal
+            if (control.carryCount > 0) {
+                control.carryCount--
+                return control
+            } else {
+                switch (control.value) {
+                    case "break":
+                        return NULLVAL
+                    case "continue":
+                        return TRUEVAL
+                }
             }
         }
     }

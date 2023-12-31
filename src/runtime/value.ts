@@ -185,10 +185,13 @@ export class ListVal implements RuntimeVal {
     }
 }
 
+export type ControlType = "break" | "continue"
 export class ControlVal implements RuntimeVal {
     type = ValueType.Control
-    value: string
-    constructor(type: string) {
+    value: ControlType
+    carryCount: number
+    constructor(type: ControlType, carryCount: number) {
         this.value = type
+        this.carryCount = carryCount
     }
 }

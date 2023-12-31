@@ -266,7 +266,9 @@ export type ForExpr = ForLoopExpr | ForInExpr | ForOfExpr
 export class ControlLiteral implements Expr {
     type = NodeType.ControlLiteral
     control: string
-    constructor(control: string) {
+    carryCount: number
+    constructor(control: string, carryCount: number) {
         this.control = control
+        this.carryCount = carryCount
     }
 }
