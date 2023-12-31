@@ -254,7 +254,8 @@ function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {
             return error("TypeError: Cannot evaluate while condition with type", valueName[condition.type])
         }
         if (!condition.value) break
-        evaluate(expr.body, env)
+        const bodyVal = evaluate(expr.body, env)
+        if (bodyVal === NULLVAL) break
         i++
     }
     return new NumberVal(i)
@@ -270,7 +271,8 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
                 return error("TypeError: Cannot evaluate for loop condition with type", valueName[condition.type])
             }
             if (!condition.value) break
-            evaluate(expr.body, env)
+            const bodyVal = evaluate(expr.body, env)
+            if (bodyVal === NULLVAL) break
             evaluate(expr.step, env)
             i++
         }
@@ -294,7 +296,8 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
                   )
         for (const i of enumerable) {
             env.assingVar(expr.identifier, i, false)
-            evaluate(expr.body, env)
+            const bodyVal = evaluate(expr.body, env)
+            if (bodyVal === NULLVAL) break
         }
         env.unsignVar(expr.identifier)
         return new NumberVal(enumerable.length)
