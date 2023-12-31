@@ -46,6 +46,8 @@ export enum TokenType {
     Question,
     Greater,
     Lesser,
+    Pi,
+    Avagadro,
 
     // long symbol
     Increment, // ++
@@ -116,6 +118,7 @@ const charToken: Record<string, TokenType> = {
     "%": TokenType.Percent,
     "!": TokenType.Exclamation,
     ω: TokenType.Omega,
+    π: TokenType.Pi,
     "?": TokenType.Question,
     ">": TokenType.Greater,
     "<": TokenType.Lesser,
@@ -139,6 +142,7 @@ const multiToken: Map<string, TokenType> = (() => {
                 "==": TokenType.Equality,
                 "&&": TokenType.And,
                 "||": TokenType.Or,
+                Nₐ: TokenType.Avagadro,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )
@@ -148,7 +152,6 @@ const keyword = {
     null: TokenType.Null,
     true: TokenType.Boolean,
     false: TokenType.Boolean,
-    omega: TokenType.Omega,
     while: TokenType.While,
     for: TokenType.For,
     in: TokenType.In,

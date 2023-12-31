@@ -106,7 +106,7 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false
         if (isValueTypes(out, ValueType.Control)) {
             let control = out as ControlVal
             if (control.carryCount > 0) {
-                control.carryCount--
+                control.carryCount -= 1
                 return control
             } else {
                 switch (control.value) {
@@ -292,6 +292,7 @@ function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {
         const bodyVal = evaluate(expr.body, env)
         if (bodyVal === NULLVAL) break
         i++
+        if (i > 5000) return error("YOUR LOOP TAKE TOO LONG M8 5000 ITERATION IS TOO MUCH")
     }
     return new NumberVal(i)
 }
@@ -310,6 +311,7 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
             if (bodyVal === NULLVAL) break
             evaluate(expr.step, env)
             i++
+            if (i > 5000) return error("YOUR LOOP TAKE TOO LONG M8 5000 ITERATION IS TOO MUCH")
         }
         return new NumberVal(i)
     } else {
