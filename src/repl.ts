@@ -5,7 +5,7 @@ import Enviroment from "./runtime/enviroment"
 var readlineSync = require("readline-sync")
 
 const debug = false
-const stack = false
+const stack = true
 
 const parser = new Parser()
 const env = new Enviroment()
@@ -34,8 +34,8 @@ while (true) {
             console.log("-".repeat(50))
         }
         const result = evalBlock(program, env, true)
-        console.log("Program Return:", result.value)
         if (stack) console.log("Eval Stack:", env.evalStack)
+        console.log("Program Return:", result.value)
         console.log("=".repeat(50))
     } catch {
         continue

@@ -5,11 +5,13 @@ import Enviroment from "./runtime/enviroment"
 import fs from "fs"
 
 const debug = false
-const parser = new Parser()
+const stack = false
 
+const parser = new Parser()
 const env = new Enviroment()
+
 let input = fs.readFileSync("./test.txt", "utf8")
-let program = parser.produceAST(input)
+const program = parser.produceAST(input)
 if (debug) {
     console.log("Tokens:", tokenize(input))
     console.log("AST:", JSON.stringify(program, null, 2))
@@ -18,5 +20,6 @@ if (debug) {
 console.log("Input:")
 process.stdout.write(input)
 console.log("-".repeat(50))
-const result = evalBlock(program, env)
+const result = evalBlock(program, env, true)
+if (stack) console.log("Eval Stack:", env.evalStack)
 console.log("Program Return:", result.value)
