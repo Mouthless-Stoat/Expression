@@ -34,9 +34,6 @@ function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser,
 
         console.log("-".repeat(50))
     }
-    console.log("code:")
-    process.stdout.write(code)
-    console.log("-".repeat(50))
     const result = evalBlock(program, env, true)
     if (stack) console.log("Eval Stack:", env.evalStack)
     console.log("Program Return:", result.value)
@@ -57,11 +54,13 @@ async function repl(debug: boolean, stack: boolean) {
         } catch {
             continue
         }
+        console.log("=".repeat(50))
     }
 }
 
 function run(path: string, debug: boolean, stack: boolean) {
     let input = fs.readFileSync(path, "utf8")
+    process.stdout.write(input)
     evalXper(input, debug, stack)
 }
 
@@ -102,8 +101,8 @@ program
     .description("Run the Xper Repl")
     .option("-d, --debug", "Run the file and print out AST and Token")
     .option("-s, --stack", "Run the file and print out the Eval Stack")
-    .action((_, flags) => {
-        repl(flags.debug, flags.stack)
+    .action(async (_, flags) => {
+        await repl(flags.debug, flags.stack)
     })
     .addHelpText(
         "after",
@@ -131,6 +130,7 @@ Example:
     $ xper eval --stack a = 10 # evaluate a=10 in Xper and print the Eval Stack
     `
     )
-
-program.parse()
-process.exit(0)
+;(async () => {
+    await program.parseAsync()
+    process.exit(0)
+})()
