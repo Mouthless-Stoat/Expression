@@ -7,7 +7,7 @@
     "scripts": {
         "repl": "ts-node \"./src/main.ts\" repl",
         "run": "ts-node \"./src/main.ts\" run",
-        "build": "tsc --outDir src-but-js && pkg . --out-path build"
+        "build": "tsc -p . --outDir src-but-js && pkg . --out-path build"
     },
     "author": "",
     "license": "ISC",
