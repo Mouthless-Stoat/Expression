@@ -47,6 +47,7 @@ export enum TokenType {
     Question,
     Greater,
     Lesser,
+    Tilde,
     Pi,
     Avagadro,
 
@@ -118,6 +119,7 @@ const charToken: Record<string, TokenType> = {
     "/": TokenType.Slash,
     "%": TokenType.Percent,
     "!": TokenType.Exclamation,
+    "~": TokenType.Tilde,
     ω: TokenType.Omega,
     π: TokenType.Pi,
     "?": TokenType.Question,
