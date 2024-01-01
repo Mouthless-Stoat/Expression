@@ -303,19 +303,16 @@ export default class Parser {
         let object = this.parsePrimaryExpr()
         while (this.isTypes(TokenType.Dot, TokenType.OpenBracket)) {
             let comp = !this.next().isTypes(TokenType.Dot)
-            let member = comp
-                ? (() => {
-                      let temp = this.parseExpr()
-                      this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
-                      return temp
-                  })()
-                : (() => {
-                      let temp = this.parsePrimaryExpr()
-                      if (temp.type != NodeType.Identifier) {
-                          return error("SyntaxError: Expected Indentifier")
-                      }
-                      return temp
-                  })()
+            let member
+            if (comp) {
+                member = this.parseExpr()
+                this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
+            } else {
+                member = this.parsePrimaryExpr()
+                if (member.type != NodeType.Identifier) {
+                    return error("SyntaxError: Expected Indentifier")
+                }
+            }
 
             object = new MemberExpr(object, member, comp)
         }
