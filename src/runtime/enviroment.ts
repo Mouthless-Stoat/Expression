@@ -6,13 +6,14 @@ export default class Enviroment {
     parent?: Enviroment
     private variables: Map<string, RuntimeVal> = new Map()
     private constances: Set<string> = new Set()
+    private startVar: number
     evalStack: RuntimeVal[] = []
 
     constructor(parentEnv?: Enviroment) {
         this.parent = parentEnv
         if (parentEnv ? false : true) {
             for (const [name, val] of Object.entries(NATIVEGLOBAL)) {
-                this.assingVar(name, val, false)
+                this.assingVar(name, val, true)
             }
             for (const [name, func] of Object.entries(NATIVEFUNC)) {
                 this.assingVar(name, new NativeFunctionVal(func), true)
@@ -25,6 +26,7 @@ export default class Enviroment {
                 this.assingVar(namespace, obj, true)
             }
         }
+        this.startVar = this.variables.size
     }
 
     // assign a var, change variable value is it doesn;t exit make it
@@ -34,6 +36,10 @@ export default class Enviroment {
         if (env.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) env.constances.add(name)
         env.variables.set(name, value)
+        if (env.variables.size - this.startVar > 5) {
+            this.unsignVar(name)
+            return error("Xper: Due to memory concern you cannot have more than 5 variables")
+        }
         return value
     }
 
