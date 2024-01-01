@@ -44,7 +44,7 @@ import {
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
-import { BinaryOp } from "./binaryOp"
+import { BinaryOp, BinaryOpToken } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
 
 //main eval function
@@ -139,12 +139,15 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
-    if (expr.lefthand.type === NodeType.Identifier) {
+    if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.MemberExpr))
+        return error("SyntaxError: Invalid left-hand of assignment")
+    if (expr.operator) expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
+    if (isNodeType(expr.lefthand, NodeType.Identifier)) {
         const iden = (expr.lefthand as Identifier).symbol
         const value = evaluate(expr.rightHand, env)
         if (!(value.isConst ?? true)) value.isConst = expr.isConst
         return env.assingVar(iden, value, expr.isConst, expr.isParent)
-    } else if (expr.lefthand.type === NodeType.MemberExpr) {
+    } else {
         const left = expr.lefthand as MemberExpr
         const obj = evaluate(left.object, env)
         if (!isValueTypes(obj, ValueType.Object)) {
@@ -159,7 +162,6 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         }
         return val
     }
-    return error("SyntaxError: Invalid left-hand of assignment")
 }
 
 function evalObjectExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
@@ -272,6 +274,7 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
         new AssignmentExpr(
             expr.rightHand,
             expr.leftHand,
+            undefined,
             env.isConstant((expr.rightHand as Identifier).symbol),
             expr.isParent
         ),

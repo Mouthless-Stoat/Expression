@@ -4,11 +4,7 @@ import { TokenType } from "../frontend/lexer"
 import { BooleanVal, MKBOOL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
 import { error } from "../utils"
 
-// export type BinaryOpTokenType = TokenType.Plus | TokenType.Minus | TokenType.Star | TokenType.Slash | TokenType.Percent
-
-// export const BinaryOPToken = [TokenType.Plus, TokenType.Minus, TokenType.Star, TokenType.Slash, TokenType.Percent]
-
-export const LogicalOpToken = [
+export const LogicOpToken = [
     TokenType.Greater,
     TokenType.Lesser,
     TokenType.GreaterEqual,
@@ -17,8 +13,9 @@ export const LogicalOpToken = [
     TokenType.And,
     TokenType.Or,
 ]
-export const AdditiveOpToken = [TokenType.Plus, TokenType.Minus]
-export const MultiplicativeToken = [TokenType.Star, TokenType.Slash, TokenType.Percent]
+export const AddOpToken = [TokenType.Plus, TokenType.Minus]
+export const MultiOpToken = [TokenType.Star, TokenType.Slash, TokenType.Percent]
+export const BinaryOpToken = LogicOpToken.concat(AddOpToken, MultiOpToken)
 
 // binary operation type
 export type BinaryOpType = "+" | "-" | "*" | "/" | "%" | ">" | "<" | ">=" | "<=" | "==" | "&&" | "||"

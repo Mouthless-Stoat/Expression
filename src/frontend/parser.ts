@@ -27,7 +27,7 @@ import {
     ControlLiteral,
     CharacterLiteral,
 } from "./ast"
-import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
+import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
@@ -233,7 +233,12 @@ export default class Parser {
 
     private parseAssignmentExpr(): Expr {
         const leftHand = this.parseLogicalExpr()
-        if (this.isTypes(TokenType.Equal, TokenType.DoubleColon)) {
+        if (
+            (this.isTypes(...BinaryOpToken) && this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+            this.isTypes(TokenType.Equal, TokenType.DoubleColon)
+        ) {
+            let operator
+            if (this.isTypes(...BinaryOpToken)) operator = this.next().value as BinaryOpType
             const isConst = this.next().isTypes(TokenType.DoubleColon)
             let isParent = true
             if (this.isTypes(TokenType.Ampersand)) {
@@ -241,7 +246,7 @@ export default class Parser {
                 this.next() // discard &
             }
             const rightHand = this.parseExpr()
-            return new AssignmentExpr(leftHand, rightHand, isConst, isParent)
+            return new AssignmentExpr(leftHand, rightHand, operator, isConst, isParent)
         }
         return leftHand
     }
@@ -249,7 +254,7 @@ export default class Parser {
     private parseLogicalExpr(): Expr {
         let leftHand = this.parseAdditiveExpr()
 
-        while (this.isTypes(...LogicalOpToken)) {
+        while (this.isTypes(...LogicOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
             const rightHand = this.parseAdditiveExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
@@ -261,7 +266,7 @@ export default class Parser {
     private parseAdditiveExpr(): Expr {
         let leftHand = this.parseMultiplicativeExpr()
 
-        while (this.isTypes(...AdditiveOpToken)) {
+        while (this.isTypes(...AddOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
             const rightHand = this.parseMultiplicativeExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
@@ -273,7 +278,7 @@ export default class Parser {
     private parseMultiplicativeExpr(): Expr {
         let leftHand = this.parsePreUnaryExpr()
 
-        while (this.isTypes(...MultiplicativeToken)) {
+        while (this.isTypes(...MultiOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
             const rightHand = this.parsePreUnaryExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)

@@ -22,6 +22,7 @@ export enum NodeType {
     ForExpr,
     ForInExpr,
     ForOfExpr,
+    BinaryAssignment,
 
     // literal
     NumberLiteral,
@@ -73,12 +74,14 @@ export class AssignmentExpr implements Expr {
     type = NodeType.AssigmentExpr
     lefthand: Expr
     rightHand: Expr
+    operator: BinaryOpType | undefined
     isConst: boolean
     isParent: boolean
 
-    constructor(left: Expr, right: Expr, isConst: boolean, isParent: boolean) {
+    constructor(left: Expr, right: Expr, op: BinaryOpType | undefined, isConst: boolean, isParent: boolean) {
         this.lefthand = left
         this.rightHand = right
+        this.operator = op
         this.isConst = isConst
         this.isParent = isParent
     }
