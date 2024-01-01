@@ -131,7 +131,7 @@ function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
 }
 
 function evalUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
-    return PreUnaryOp[expr.operator](evaluate(expr.expr, env), env)
+    return PreUnaryOp[expr.operator](expr.expr, env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
