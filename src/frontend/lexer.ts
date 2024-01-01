@@ -9,6 +9,7 @@ export enum TokenType {
     Boolean,
     StringLiteral,
     ControlLiteral,
+    CharacterLiteral,
 
     // keyword
     While,
@@ -185,12 +186,9 @@ export function tokenize(source: string): Token[] {
         } else {
             const isNumber = isNumeric(char)
             const isString = char === '"'
-            if (!isNumber && !isNamic(char) && !isString) {
-                error("WHAT THE FUCK IS THIS", char, char.charCodeAt(0))
-            }
             let acc = ""
 
-            if (isString) {
+            if (char === '"') {
                 src.shift()
                 while (src.length > 0 && src[0] !== '"') {
                     let char = src.shift()
@@ -205,10 +203,35 @@ export function tokenize(source: string): Token[] {
                 if (src.shift() !== '"') {
                     return error("SyntaxError: Expected End of String")
                 }
-                // using eval here so all escape char work
-                // def not a security issue
-                push(TokenType.StringLiteral, eval(`\"${acc}\"`))
-                continue
+                try {
+                    push(TokenType.StringLiteral, JSON.parse(`"${acc}"`))
+                    continue
+                } catch {
+                    return error(
+                        "InterpreterError: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
+                    )
+                }
+            } else if (char === "@") {
+                src.shift()
+                let char = src.shift()
+                if (char === "\\") {
+                    char += src.shift()
+                } else if (char === "\n" || char === "\r") {
+                    src.shift()
+                    char = "\\n"
+                }
+                try {
+                    push(TokenType.CharacterLiteral, JSON.parse(`"${char}"`))
+                    continue
+                } catch {
+                    return error(
+                        "InterpreterError: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
+                    )
+                }
+            }
+
+            if (!isNumber && !isNamic(char) && !isString) {
+                error("WHAT THE FUCK IS THIS", char, char.charCodeAt(0))
             }
 
             const condition = () => src.length > 0 && (isNumber ? isNumeric : isNamic)(src[0])

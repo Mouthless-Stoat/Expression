@@ -12,7 +12,7 @@ export enum ValueType {
     Object,
     NativeFuntion,
     Function,
-    String,
+    Character,
     List,
     Control,
 }
@@ -28,7 +28,7 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.Object]: "Object",
     [ValueType.NativeFuntion]: "NativeFunction",
     [ValueType.Function]: "Function",
-    [ValueType.String]: "String",
+    [ValueType.Character]: "Character",
     [ValueType.List]: "List",
     [ValueType.Control]: "CONTROL",
 }
@@ -125,6 +125,42 @@ export class ObjectVal implements RuntimeVal {
     }
 }
 
+export class ListVal implements RuntimeVal {
+    type = ValueType.List
+    value: RuntimeVal[]
+    isConst: boolean = false
+
+    constructor(items: RuntimeVal[]) {
+        this.value = items
+    }
+    length(): number {
+        return this.value.length
+    }
+    enumerate(): RuntimeVal[] {
+        return genEnumerable(this.length())
+    }
+    iterate(): RuntimeVal[] {
+        return this.value
+    }
+}
+
+export class CharacterVal implements RuntimeVal {
+    type = ValueType.Character
+    value: string
+    constructor(str: string) {
+        this.value = str
+    }
+    toKey(): string {
+        return this.value
+    }
+}
+
+export class StringVal extends ListVal {
+    constructor(string: string) {
+        super(string.split("").map((c) => new CharacterVal(c)))
+    }
+}
+
 export type FunctionCall = (args: RuntimeVal[], env: Enviroment) => RuntimeVal
 
 export class NativeFunctionVal implements RuntimeVal {
@@ -144,46 +180,6 @@ export class FunctionVal implements RuntimeVal {
         this.parameter = param
         this.value = body
         this.enviroment = env
-    }
-}
-
-export class StringVal implements RuntimeVal {
-    type = ValueType.String
-    value: string
-    isConst: boolean = false
-    constructor(str: string) {
-        this.value = str
-    }
-    toKey(): string {
-        return this.value
-    }
-    length(): number {
-        return this.value.length
-    }
-    enumerate(): RuntimeVal[] {
-        return genEnumerable(this.length())
-    }
-    iterate(): RuntimeVal[] {
-        return this.value.split("").map((s) => new StringVal(s))
-    }
-}
-
-export class ListVal implements RuntimeVal {
-    type = ValueType.List
-    value: RuntimeVal[]
-    isConst: boolean = false
-
-    constructor(items: RuntimeVal[]) {
-        this.value = items
-    }
-    length(): number {
-        return this.value.length
-    }
-    enumerate(): RuntimeVal[] {
-        return genEnumerable(this.length())
-    }
-    iterate(): RuntimeVal[] {
-        return this.value
     }
 }
 

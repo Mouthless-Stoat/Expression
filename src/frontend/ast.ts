@@ -30,6 +30,7 @@ export enum NodeType {
     NullLiteral,
     BlockLiteral,
     StringLiteral,
+    CharacterLiteral,
     ListLiteral,
     ControlLiteral,
 }
@@ -179,6 +180,14 @@ export class BlockLiteral implements Expr {
 }
 
 export const EMPTYBLOCK = new BlockLiteral([])
+
+export class CharacterLiteral implements Expr {
+    type = NodeType.CharacterLiteral
+    character: string
+    constructor(char: string) {
+        this.character = char
+    }
+}
 
 export class StringLiteral implements Expr {
     type = NodeType.StringLiteral

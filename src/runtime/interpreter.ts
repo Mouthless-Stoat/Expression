@@ -21,6 +21,7 @@ import {
     ForExpr,
     ForLoopType,
     ControlLiteral,
+    CharacterLiteral,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -39,6 +40,7 @@ import {
     BooleanVal,
     ControlVal,
     ControlType,
+    CharacterVal,
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
@@ -58,6 +60,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return (astNode as BooleanLiteral).value ? TRUEVAL : FALSEVAL
         case NodeType.StringLiteral:
             return new StringVal((astNode as StringLiteral).string)
+        case NodeType.CharacterLiteral:
+            return new CharacterVal((astNode as CharacterLiteral).character)
         case NodeType.BlockLiteral:
             return evalBlock(astNode as BlockLiteral, env)
         case NodeType.ObjectLiteral:

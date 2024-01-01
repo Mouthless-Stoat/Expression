@@ -25,6 +25,7 @@ import {
     ForExpr,
     ForLoopType,
     ControlLiteral,
+    CharacterLiteral,
 } from "./ast"
 import { AdditiveOpToken, BinaryOpType, LogicalOpToken, MultiplicativeToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -334,6 +335,8 @@ export default class Parser {
                 return this.next().value == "true" ? TRUELITERAL : FALSELITERAL
             case TokenType.StringLiteral:
                 return new StringLiteral(this.next().value)
+            case TokenType.CharacterLiteral:
+                return new CharacterLiteral(this.next().value)
             case TokenType.OpenBrace:
                 return this.parseBlockExpr()
             case TokenType.OpenDoubleAngle:
