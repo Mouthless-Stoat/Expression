@@ -55,13 +55,13 @@ export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal, e
     },
     "/": (lhs, rhs) => {
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value - (rhs as NumberVal).value)
+            return new NumberVal((lhs as NumberVal).value / (rhs as NumberVal).value)
         }
         return error("TypeError: Division is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
     },
     "%": (lhs, rhs) => {
         if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value - (rhs as NumberVal).value)
+            return new NumberVal((lhs as NumberVal).value & (rhs as NumberVal).value)
         }
         return error("TypeError: Modulus is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
     },
