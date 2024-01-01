@@ -44,7 +44,7 @@ import {
 } from "./value"
 import Enviroment from "./enviroment"
 import { error } from "../utils"
-import { BinaryOp, BinaryOpToken } from "./binaryOp"
+import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
 
 //main eval function

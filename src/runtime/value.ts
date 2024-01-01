@@ -47,6 +47,18 @@ export interface RuntimeVal {
     length?(): number
     enumerate?(): RuntimeVal[]
     iterate?(): RuntimeVal[]
+    add?(rhs: RuntimeVal): RuntimeVal | undefined
+    sub?(rhs: RuntimeVal): RuntimeVal | undefined
+    mul?(rhs: RuntimeVal): RuntimeVal | undefined
+    div?(rhs: RuntimeVal): RuntimeVal | undefined
+    mod?(rhs: RuntimeVal): RuntimeVal | undefined
+    equal?(rhs: RuntimeVal): RuntimeVal | undefined
+    greater?(rhs: RuntimeVal): RuntimeVal | undefined
+    lesser?(rhs: RuntimeVal): RuntimeVal | undefined
+    greaterEq?(rhs: RuntimeVal): RuntimeVal | undefined
+    lesserEq?(rhs: RuntimeVal): RuntimeVal | undefined
+    and?(rhs: RuntimeVal): RuntimeVal | undefined
+    or?(rhs: RuntimeVal): RuntimeVal | undefined
 }
 
 // missing value
@@ -83,6 +95,36 @@ export class NumberVal implements RuntimeVal {
     toKey(): string {
         return this.value.toString()
     }
+    add(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value + rhs.value)
+    }
+    sub(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value - rhs.value)
+    }
+    mul(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value * rhs.value)
+    }
+    div(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value / rhs.value)
+    }
+    mod(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value % rhs.value)
+    }
+    greater(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value > rhs.value)
+    }
+    lesser(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value < rhs.value)
+    }
+    greaterEq(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value >= rhs.value)
+    }
+    lesserEq(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value <= rhs.value)
+    }
+    equal(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value == rhs.value)
+    }
 }
 
 export interface BooleanVal extends RuntimeVal {
@@ -95,6 +137,12 @@ export const TRUEVAL: BooleanVal = {
     value: true,
     toKey() {
         return "true"
+    },
+    and(rhs) {
+        if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
+    },
+    or(rhs) {
+        if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value || rhs.value)
     },
 }
 export const FALSEVAL: BooleanVal = {

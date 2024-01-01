@@ -1,7 +1,7 @@
 // all binary op definition for ease of use
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { BooleanVal, MKBOOL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
+import { RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
 import { error } from "../utils"
 
 export const LogicOpToken = [
@@ -19,53 +19,62 @@ export const BinaryOpToken = LogicOpToken.concat(AddOpToken, MultiOpToken)
 
 // binary operation type
 export type BinaryOpType = "+" | "-" | "*" | "/" | "%" | ">" | "<" | ">=" | "<=" | "==" | "&&" | "||"
+export type BinaryFunction = (lhs: RuntimeVal, rhs: RuntimeVal, env: Enviroment) => RuntimeVal
+
+export function isSameType(val1: RuntimeVal, val2: RuntimeVal, type: ValueType) {
+    return isValueTypes(val1, type) && isValueTypes(val2, type)
+}
 
 // implementation for all binary operator between every run time value
-export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal, env: Enviroment) => RuntimeVal> = {
+export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
     "+": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value + (rhs as NumberVal).value)
-        }
-        return error("TypeError: Addition is not define between type", valueName[lhs.type], "and", ValueType[rhs.type])
+        let out: RuntimeVal | undefined
+        if (lhs.add) out = lhs.add(rhs)
+        return (
+            out ??
+            error("TypeError: Addition is not define between type", valueName[lhs.type], "and", ValueType[rhs.type])
+        )
     },
     "-": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value - (rhs as NumberVal).value)
-        }
-        return error(
-            "TypeError: Subtraction is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.sub) out = lhs.sub(rhs)
+        return (
+            out ??
+            error("TypeError: Subtraction is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
         )
     },
     "*": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value * (rhs as NumberVal).value)
-        }
-        return error(
-            "TypeError: Multiplication is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.mul) out = lhs.mul(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Multiplication is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     "/": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value / (rhs as NumberVal).value)
-        }
-        return error("TypeError: Division is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        let out: RuntimeVal | undefined
+        if (lhs.div) out = lhs.div(rhs)
+        return (
+            out ??
+            error("TypeError: Division is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        )
     },
     "%": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return new NumberVal((lhs as NumberVal).value & (rhs as NumberVal).value)
-        }
-        return error("TypeError: Modulus is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        let out: RuntimeVal | undefined
+        if (lhs.mod) out = lhs.mod(rhs)
+        return (
+            out ??
+            error("TypeError: Modulus is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        )
     },
     ">": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return MKBOOL((lhs as NumberVal).value > (rhs as NumberVal).value)
-        }
+        let out: RuntimeVal | undefined
+        if (lhs.greater) out = lhs.greater(rhs)
         return error(
             "TypeError: Greater than comparasion is not define between type",
             valueName[lhs.type],
@@ -74,64 +83,81 @@ export const BinaryOp: Record<BinaryOpType, (lhs: RuntimeVal, rhs: RuntimeVal, e
         )
     },
     "<": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return MKBOOL((lhs as NumberVal).value < (rhs as NumberVal).value)
-        }
-        return error(
-            "TypeError: Lesser than comparasion is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.lesser) out = lhs.lesser(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Lesser than comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     ">=": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return MKBOOL((lhs as NumberVal).value >= (rhs as NumberVal).value)
-        }
-        return error(
-            "TypeError: Greater than or Equal to comparasion is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.greaterEq) out = lhs.greaterEq(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Greater than or Equal to comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     "<=": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Number) && isValueTypes(lhs, ValueType.Number)) {
-            return MKBOOL((lhs as NumberVal).value <= (rhs as NumberVal).value)
-        }
-        return error(
-            "TypeError: Lesser than or Equal to comparasion is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.lesserEq) out = lhs.lesserEq(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Lesser than or Equal to than comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     "==": (lhs, rhs) => {
-        if (lhs.type == rhs.type) {
-            return MKBOOL(lhs.value == rhs.value)
-        }
-        return error("TypeError: Equality is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        let out: RuntimeVal | undefined
+        if (lhs.equal) out = lhs.equal(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Equality comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
+        )
     },
     "&&": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Boolean) && isValueTypes(lhs, ValueType.Boolean)) {
-            return MKBOOL((lhs as BooleanVal).value && (rhs as BooleanVal).value)
-        }
-        return error(
-            "TypeError: Logical And is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.and) out = lhs.and(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Logical And comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     "||": (lhs, rhs) => {
-        if (isValueTypes(rhs, ValueType.Boolean) && isValueTypes(lhs, ValueType.Boolean)) {
-            return MKBOOL((lhs as BooleanVal).value || (rhs as BooleanVal).value)
-        }
-        return error(
-            "TypeError: Logical Or is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        let out: RuntimeVal | undefined
+        if (lhs.or) out = lhs.or(rhs)
+        return (
+            out ??
+            error(
+                "TypeError: Logical Or comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
 }
