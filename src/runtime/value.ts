@@ -9,7 +9,6 @@ export enum ValueType {
     Null,
     Number,
     Boolean,
-    Object,
     NativeFuntion,
     Function,
     Character,
@@ -25,7 +24,6 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.Null]: "Null",
     [ValueType.Number]: "Number",
     [ValueType.Boolean]: "Boolean",
-    [ValueType.Object]: "Object",
     [ValueType.NativeFuntion]: "NativeFunction",
     [ValueType.Function]: "Function",
     [ValueType.Character]: "Character",
@@ -160,40 +158,6 @@ export const FALSEVAL: BooleanVal = {
 }
 
 export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
-
-export class ObjectVal implements RuntimeVal {
-    type = ValueType.Object
-    value: Map<string, { isConst: boolean; value: RuntimeVal }>
-    isConst: boolean = false
-    constructor(value: Map<string, { isConst: boolean; value: RuntimeVal }>) {
-        this.value = value
-    }
-    length(): number {
-        return this.value.size
-    }
-    enumerate(): RuntimeVal[] {
-        return genEnumerable(this.length())
-    }
-    iterate(): RuntimeVal[] {
-        return [...this.value.entries()].map(([k, v]) => new ListVal([new StringVal(k), v.value]))
-    }
-    access(key: string): RuntimeVal {
-        return this.value.get(key)?.value ?? error(`ReferenceError: Properties "${key}" does not exist on`, this.value)
-    }
-    accessAsIdentifier(key: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
-        this.value.set(key, { isConst, value })
-        return value
-    }
-    unsignMember(key: string, allowNull: boolean): RuntimeVal {
-        const old = this.value.get(key)?.value
-        if (!(old ?? false) && !allowNull) {
-            return error(`ReferenceError: Properties "${key}" does not exist on`, this.value)
-        }
-        this.value.delete(key)
-        //@ts-expect-error
-        return old
-    }
-}
 
 export class ListVal implements RuntimeVal {
     type = ValueType.List

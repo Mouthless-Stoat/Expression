@@ -1,8 +1,8 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
 import { MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
-import { Expr, Identifier, MemberExpr, NodeType, isNodeType } from "../frontend/ast"
-import { evaluate, parseMemberKey } from "./interpreter"
+import { Expr, Identifier, NodeType, isNodeType } from "../frontend/ast"
+import { evaluate } from "./interpreter"
 import { error } from "../utils"
 
 export const PreUnaryOpTokens = [
@@ -46,15 +46,8 @@ export const PreUnaryOp: Record<PreUnaryOpType, (expr: Expr, env: Enviroment) =>
         }
         return NULLVAL
     },
-    "*": (expr, env, allow = false) => {
+    "*": (expr, env) => {
         if (isNodeType(expr, NodeType.Identifier)) return env.unsignVar((expr as Identifier).symbol)
-        if (isNodeType(expr, NodeType.MemberExpr)) {
-            const member = expr as MemberExpr
-            const left = evaluate(member.object, env)
-            if (left.unsignMember) {
-                return left.unsignMember(parseMemberKey(left, member, env), allow)
-            }
-        }
         return error("TypeError: Cannot unsign")
     },
 }

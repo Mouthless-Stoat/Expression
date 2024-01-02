@@ -1,6 +1,6 @@
-import { RuntimeVal, NativeFunctionVal, ObjectVal } from "./value"
+import { RuntimeVal, NativeFunctionVal } from "./value"
 import { error } from "../utils"
-import { NATIVEFUNC, NATIVEGLOBAL, NATIVENAMESPACE } from "./native"
+import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 
 export default class Enviroment {
     parent?: Enviroment
@@ -17,13 +17,6 @@ export default class Enviroment {
             }
             for (const [name, func] of Object.entries(NATIVEFUNC)) {
                 this.assingVar(name, new NativeFunctionVal(func), true)
-            }
-            for (const [namespace, prop] of Object.entries(NATIVENAMESPACE)) {
-                const obj = new ObjectVal(new Map())
-                for (const [name, func] of Object.entries(prop)) {
-                    obj.value.set(name, { isConst: true, value: func })
-                }
-                this.assingVar(namespace, obj, true)
             }
         }
         this.startVar = this.variables.size

@@ -6,12 +6,10 @@ import {
     Identifier,
     BooleanLiteral,
     AssignmentExpr,
-    ObjectLiteral,
     CallExpr,
     FunctionExpr,
     PreUnaryExpr,
     BlockLiteral,
-    MemberExpr,
     StringLiteral,
     ListLiteral,
     IfExpr,
@@ -30,7 +28,6 @@ import {
     TRUEVAL,
     FALSEVAL,
     FunctionVal,
-    ObjectVal,
     ValueType,
     NativeFunctionVal,
     isValueTypes,
@@ -46,7 +43,6 @@ import Enviroment from "./enviroment"
 import { error } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
-import { executionAsyncResource } from "async_hooks"
 
 //main eval function
 
@@ -65,8 +61,6 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return new CharacterVal((astNode as CharacterLiteral).character)
         case NodeType.BlockLiteral:
             return evalBlock(astNode as BlockLiteral, env)
-        case NodeType.ObjectLiteral:
-            return evalObjectExpr(astNode as ObjectLiteral, env)
         case NodeType.ListLiteral:
             return evalListExpr(astNode as ListLiteral, env)
         case NodeType.ControlLiteral:
@@ -88,12 +82,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalFuncExpr(astNode as FunctionExpr, env)
         case NodeType.PreUnaryExpr:
             return evalUnaryExpr(astNode as PreUnaryExpr, env)
-        case NodeType.MemberExpr:
-            return evalMemberExpr(astNode as MemberExpr, env)
         case NodeType.IfExpr:
             return evalIfExpr(astNode as IfExpr, env)
-        case NodeType.ShiftExpr:
-            return evalShiftExpr(astNode as ShiftExpr, env)
         case NodeType.WhileExpr:
             return evalWhileExpr(astNode as WhileExpr, env)
         case NodeType.ForExpr:
@@ -140,44 +130,14 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
-    if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.MemberExpr))
-        return error("SyntaxError: Invalid left-hand of assignment")
+    if (!isNodeType(expr.lefthand, NodeType.Identifier)) return error("SyntaxError: Invalid left-hand of assignment")
     if (expr.operator) expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
     const value = evaluate(expr.rightHand, env)
     if (value.isConst) value.isConst = expr.isConst
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
         return env.assingVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
-    } else {
-        const member = expr.lefthand as MemberExpr
-        const left = evaluate(member.object, env)
-        if (left.accessAsIdentifier) {
-            return left.accessAsIdentifier(parseMemberKey(left, member, env), value, expr.isConst)
-        }
-        return error("SyntaxError: Invalid left-hand of assignment")
     }
-}
-
-function evalObjectExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
-    const prop = new Map<string, { isConst: boolean; value: RuntimeVal }>()
-    for (const { key: k, value, isConst } of obj.properties) {
-        let key: string
-        if (k.type !== NodeType.Identifier) {
-            const evalKey = evaluate(k, env)
-            if (!evalKey.toKey) {
-                return error("TypeError: Object key can't be of type", valueName[evalKey.type])
-            }
-            key = evalKey.toKey()
-        } else {
-            key = (k as Identifier).symbol
-        }
-        const evalValue = value === undefined ? env.getVar(key) : evaluate(value, env)
-        if (!(evalValue.isConst ?? true)) evalValue.isConst = isConst
-        prop.set(key, {
-            isConst: isConst,
-            value: evalValue,
-        })
-    }
-    return new ObjectVal(prop)
+    return error("SyntaxError: Invalid left-hand of assignment")
 }
 
 export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
@@ -206,35 +166,6 @@ function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
     return new FunctionVal(func.parameter, func.body, env)
 }
 
-export function parseMemberKey(left: RuntimeVal, expr: MemberExpr, env: Enviroment): string {
-    // get the key for accessing if it computed compute the value else it is a identifier and get the symbol
-    let key = (expr.member as Identifier).symbol
-    if (expr.isComputed) {
-        const evalKey = evaluate(expr.member, env)
-        if (!evalKey.toKey)
-            return error(
-                "TypeError: Cannot access or index type",
-                valueName[left.type],
-                "with type",
-                valueName[evalKey.type]
-            )
-        key = evalKey.toKey()
-    }
-    return key
-}
-function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
-    const left = evaluate(expr.object, env)
-    // if the evaluated value have a method return the method value
-    if (left.method) {
-        const name = (expr.member as Identifier).symbol // get the method name
-        return left.method[name] ?? error(`TypeError: Type ${valueName[left.type]} does not have method "${name}"`)
-    }
-    // if the value have a define access trait access it
-    if (left.access) {
-        return left.access(parseMemberKey(left, expr, env))
-    }
-    return error("TypeError: Cannot access type", valueName[left.type])
-}
 function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
     return new ListVal(list.items.map((e) => evaluate(e, env)))
 }
@@ -247,30 +178,7 @@ function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
 }
 
 function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
-    if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.MemberExpr)) {
-        return error("TypeError: Cannot shift value into non-identifier")
-    }
-    let oldVal: RuntimeVal = NULLVAL
-    if (isNodeType(expr.rightHand, NodeType.Identifier)) {
-        if (env.resolve((expr.rightHand as Identifier).symbol)) {
-            oldVal = env.getVar((expr.rightHand as Identifier).symbol)
-        }
-    } else if (isNodeType(expr.rightHand, NodeType.MemberExpr)) {
-        oldVal = evaluate(expr.rightHand, env)
-    }
-    evalAssignmentExpr(
-        new AssignmentExpr(
-            expr.rightHand,
-            expr.leftHand,
-            undefined,
-            env.isConstant((expr.rightHand as Identifier).symbol),
-            expr.isParent
-        ),
-        env
-    )
-    if (isNodeType(expr.leftHand, NodeType.Identifier, NodeType.MemberExpr))
-        return evaluate(new PreUnaryExpr(expr.rightHand, "*"), env)
-    return oldVal
+    return NULLVAL
 }
 
 function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {

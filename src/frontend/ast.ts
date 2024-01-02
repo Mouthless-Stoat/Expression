@@ -12,7 +12,7 @@ export enum NodeType {
     Identifier,
     BinaryExpr,
     AssigmentExpr,
-    MemberExpr,
+    IndexExpr,
     CallExpr,
     PreUnaryExpr,
     FunctionExpr,
@@ -27,7 +27,6 @@ export enum NodeType {
     // literal
     NumberLiteral,
     BooleanLiteral,
-    ObjectLiteral,
     NullLiteral,
     BlockLiteral,
     StringLiteral,
@@ -87,16 +86,14 @@ export class AssignmentExpr implements Expr {
     }
 }
 
-export class MemberExpr implements Expr {
-    type = NodeType.MemberExpr
-    object: Expr
-    member: Expr
-    isComputed: boolean
+export class IndexExpr implements Expr {
+    type = NodeType.IndexExpr
+    list: Expr
+    index: Expr
 
-    constructor(object: Expr, member: Expr, isCompute: boolean) {
-        this.object = object
-        this.member = member
-        this.isComputed = isCompute
+    constructor(object: Expr, member: Expr) {
+        this.list = object
+        this.index = member
     }
 }
 
@@ -144,25 +141,6 @@ export interface BooleanLiteral extends Expr {
 
 export const TRUELITERAL: BooleanLiteral = { type: NodeType.BooleanLiteral, value: true }
 export const FALSELITERAL: BooleanLiteral = { type: NodeType.BooleanLiteral, value: false }
-
-export class Property {
-    key: Expr
-    value?: Expr
-    isConst: boolean
-    constructor(key: Expr, value?: Expr, isConst = false) {
-        this.key = key
-        this.value = value
-        this.isConst = isConst
-    }
-}
-
-export class ObjectLiteral implements Expr {
-    type = NodeType.ObjectLiteral
-    properties: Property[]
-    constructor(prop: Property[]) {
-        this.properties = prop
-    }
-}
 
 export class FunctionExpr implements Expr {
     type = NodeType.FunctionExpr
