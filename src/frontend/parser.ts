@@ -329,7 +329,10 @@ export default class Parser {
             case TokenType.Identifier:
                 return new Identifier(this.next().value)
             case TokenType.Number:
-                return new NumberLiteral(parseFloat(this.next().value))
+                const num = parseFloat(this.next().value)
+                if (this.current().isTypes(TokenType.Identifier, TokenType.Pi, TokenType.Omega, TokenType.Avagadro))
+                    return new BinaryExpr(new NumberLiteral(num), this.parseExpr(), "*")
+                return new NumberLiteral(num)
             case TokenType.Null:
                 this.next()
                 return NULLLITERAL
@@ -395,7 +398,7 @@ export default class Parser {
             }
             let isConst: boolean = this.isTypes(TokenType.DoubleColon, TokenType.Equal)
                 ? this.next().isTypes(TokenType.DoubleColon)
-                : error('SyntaxError: Expected "=" or ":"')
+                : error('SyntaxError: Expected "=" or "::"')
 
             const value = this.parseExpr()
             properties.push(new Property(key, value, isConst))
