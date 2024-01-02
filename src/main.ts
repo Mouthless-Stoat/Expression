@@ -5,7 +5,6 @@ import { evalBlock } from "./runtime/interpreter"
 import Enviroment from "./runtime/enviroment"
 import readline from "readline"
 import fs from "fs"
-
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -101,8 +100,9 @@ program
     .description("Run the Xper Repl")
     .option("-d, --debug", "Run the file and print out AST and Token")
     .option("-s, --stack", "Run the file and print out the Eval Stack")
-    .action(async (_, flags) => {
-        await repl(flags.debug, flags.stack)
+    .action(async function () {
+        //@ts-expect-error
+        await repl(this.opts().debug, this.opts().stack)
     })
     .addHelpText(
         "after",

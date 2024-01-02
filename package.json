@@ -3,11 +3,11 @@
     "version": "1.0.0",
     "description": "",
     "main": "./src/main.ts",
-    "bin": "./src-but-js/main.js",
+    "bin": "./temp/main.js",
     "scripts": {
         "repl": "ts-node \"./src/main.ts\" repl",
         "run": "ts-node \"./src/main.ts\" run",
-        "build": "tsc -p . --outDir src-but-js && pkg . --out-path build"
+        "build": "tsc -p . --outDir temp && pkg . --out-path build && powershell rm -r -fo temp"
     },
     "author": "",
     "license": "ISC",

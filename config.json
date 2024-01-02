@@ -1,6 +1,6 @@
 {
     "commands": [
         ["repl", "npm run repl"],
-        ["run", "npm run run \"test/test.xpr\""]
+        ["run", "npm run run \"test/test.xpr\" --debug"]
     ]
 }
