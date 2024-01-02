@@ -13,7 +13,7 @@ export default class Enviroment {
         this.parent = parentEnv
         if (parentEnv ? false : true) {
             for (const [name, val] of Object.entries(NATIVEGLOBAL)) {
-                this.assingVar(name, val, true)
+                this.assingVar(name, val, false)
             }
             for (const [name, func] of Object.entries(NATIVEFUNC)) {
                 this.assingVar(name, new NativeFunctionVal(func), true)

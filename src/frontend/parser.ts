@@ -346,9 +346,14 @@ export default class Parser {
             case TokenType.OpenBracket:
                 return this.parseListLiteral()
             case TokenType.Omega:
-            case TokenType.Pi:
+                this.next()
+                return new Identifier("omega")
             case TokenType.Avagadro:
-                return new Identifier(this.next().value)
+                this.next()
+                return new Identifier("avogadro")
+            case TokenType.Pi:
+                this.next()
+                return new Identifier("pi")
             case TokenType.ControlLiteral:
                 const type = this.next().value
                 let carryCount = 0

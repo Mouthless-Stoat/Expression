@@ -1,14 +1,21 @@
-import { FunctionCall, NULLVAL, NativeFunctionVal, NumberVal, RuntimeVal } from "./value"
+import {
+    FunctionCall,
+    NULLVAL,
+    NativeFunctionVal,
+    NumberVal,
+    RuntimeVal,
+    ValueType,
+    isValueTypes,
+    valueName,
+} from "./value"
 import { error } from "../utils"
 
 export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
-    π: new NumberVal(Math.PI),
-    ω: new NumberVal(0),
+    omega: new NumberVal(0),
     pi: new NumberVal(Math.PI),
-    NaN: new NumberVal(NaN),
     e: new NumberVal(Math.E),
-    L: new NumberVal(6.02214076e23),
-    Nₐ: new NumberVal(6.02214076e23),
+    NaN: new NumberVal(NaN),
+    avogadro: new NumberVal(6.02214076e-23),
 }
 
 export const NATIVEFUNC: Record<string, FunctionCall> = {
@@ -26,15 +33,33 @@ function expectArgs(args: RuntimeVal[], amount: number, isExact = true): Runtime
 
 type NamespaceProp = Record<string, RuntimeVal>
 function MathProp(func: Function, amount: number): NativeFunctionVal {
-    return new NativeFunctionVal((args, _) => new NumberVal(func(...expectArgs(args, amount).map((n) => n.value))))
+    return new NativeFunctionVal((args, _) => {
+        const values = expectArgs(args, amount)
+        if (values.some((v) => !isValueTypes(v, ValueType.Number)))
+            return error(
+                "TypeError: Can't do math with type",
+                ValueType[values.filter((v) => !isValueTypes(v, ValueType.Number))[0].type]
+            )
+        return new NumberVal(func(...values.map((n) => n.value)))
+    })
 }
 
 export const NATIVENAMESPACE: Record<string, NamespaceProp> = {
-    math: {
+    Math: {
         abs: MathProp(Math.abs, 1),
-        sin: MathProp(Math.sin, 1),
-        cos: MathProp(Math.cos, 1),
-        pi: new NumberVal(Math.PI),
-        e: new NumberVal(Math.E),
+        sin: new NativeFunctionVal((args, env) => {
+            const value = expectArgs(args, 1)[0]
+            if (!isValueTypes(value, ValueType.Number))
+                return error("TypeError: Can't do math with type", valueName[value.type])
+            let x = value.value * (env.getVar("pi").value / 180)
+            return new NumberVal(Math.sin(x))
+        }),
+        cos: new NativeFunctionVal((args, env) => {
+            const value = expectArgs(args, 1)[0]
+            if (!isValueTypes(value, ValueType.Number))
+                return error("TypeError: Can't do math with type", valueName[value.type])
+            let x = value.value * (env.getVar("pi").value / 180)
+            return new NumberVal(Math.sin(x))
+        }),
     },
 }

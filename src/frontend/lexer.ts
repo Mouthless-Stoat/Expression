@@ -122,6 +122,7 @@ const charToken: Record<string, TokenType> = {
     "~": TokenType.Tilde,
     ω: TokenType.Omega,
     π: TokenType.Pi,
+    L: TokenType.Avagadro,
     "?": TokenType.Question,
     ">": TokenType.Greater,
     "<": TokenType.Lesser,
