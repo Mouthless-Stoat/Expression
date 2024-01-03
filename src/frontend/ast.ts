@@ -88,12 +88,12 @@ export class AssignmentExpr implements Expr {
 
 export class IndexExpr implements Expr {
     type = NodeType.IndexExpr
-    list: Expr
+    expr: Expr
     index: Expr
 
-    constructor(object: Expr, member: Expr) {
-        this.list = object
-        this.index = member
+    constructor(expr: Expr, index: Expr) {
+        this.expr = expr
+        this.index = index
     }
 }
 

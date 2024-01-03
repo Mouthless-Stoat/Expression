@@ -23,6 +23,7 @@ import {
     ForLoopType,
     ControlLiteral,
     CharacterLiteral,
+    IndexExpr,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -73,13 +74,6 @@ export default class Parser {
         }
         this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
         return args
-    }
-
-    // helper function
-    private parseCallExpr(caller: Expr): CallExpr {
-        let callExpr = new CallExpr(caller, this.parseArgs())
-        if (this.isTypes(TokenType.OpenParen)) callExpr = this.parseCallExpr(callExpr) // chaining call expression
-        return callExpr
     }
 
     private parseTradFor(init?: Expr): Expr {
@@ -137,15 +131,15 @@ export default class Parser {
 
     // expression order
     // 1. Primary (Literal)
-    // 2. Member access
+    // 2. Indexing List
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // ------ Statment ------ these order mean nothing
     // 6. Assignment
-    // 7. Shift
-    // 8. Loop
-    // 9. If
+    // 7. If
+    // 8. Shift
+    // 9. Loop
     // 10. Function Construction
     //
     // Highest priority will be parse last so it can be chain
@@ -286,11 +280,32 @@ export default class Parser {
 
     private parsePreUnaryExpr(): Expr {
         if (!this.isTypes(...PreUnaryOpTokens)) {
-            return this.parsePrimaryExpr()
+            return this.parseCallExpr()
         }
         const op = this.next().value
         const expr = this.parsePreUnaryExpr()
         return new PreUnaryExpr(expr, op as PreUnaryOpType)
+    }
+
+    private parseCallExpr(): Expr {
+        let caller = this.parseIndexExpr()
+        // go in a loop until no more () can be meaning call stop chaning
+        while (this.isTypes(TokenType.OpenParen)) {
+            const args = this.parseArgs()
+            caller = new CallExpr(caller, args)
+        }
+        return caller
+    }
+
+    private parseIndexExpr(): Expr {
+        let expr = this.parsePrimaryExpr()
+        while (this.isTypes(TokenType.OpenBracket)) {
+            this.next() // discard [
+            const index = this.parseExpr()
+            this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
+            expr = new IndexExpr(expr, index)
+        }
+        return expr
     }
 
     private parsePrimaryExpr(): Expr {

@@ -1,5 +1,7 @@
 {
     "commands": [
+        ["build", "npm run build"],
+        ["replDebug", "npm run build && build\\xper-win\\ repl -d"],
         ["repl", "npm run repl"],
         ["run", "npm run run \"test/test.xpr\" --debug"]
     ]

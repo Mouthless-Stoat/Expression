@@ -152,13 +152,18 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
             return error("Expected", fn.parameter.length, "argument but given", args.length)
         }
 
-        // make param var
+        // assign all the param var using the scope
+        // this is so variable do not bleed out of the function scope
         for (const i in fn.parameter) {
             scope.assingVar(fn.parameter[i], args[i], false)
         }
 
+        // actually evaluating the function body and return the output
         return evalBlock(fn.value, scope)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
+    // ^^ comment for line above ^^
+    // pass args and the env to native fucntion
+    // native function don't need scope they only use the raw value
     else return error("TypeError:", func.value, "is not a Function")
 }
 
