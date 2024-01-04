@@ -40,6 +40,7 @@ export interface RuntimeVal {
     type: ValueType
     value: any
     isConst?: boolean
+    indexable?: boolean
     method?: Record<string, NativeFunctionVal | FunctionVal>
     toKey?(): string
     length?(): number
@@ -160,9 +161,12 @@ export const FALSEVAL: BooleanVal = {
 export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
 
 export class ListVal implements RuntimeVal {
+    // trait
     type = ValueType.List
-    value: RuntimeVal[]
+    indexable = true
     isConst: boolean = false
+
+    value: RuntimeVal[]
 
     constructor(items: RuntimeVal[]) {
         this.value = items

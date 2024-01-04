@@ -20,6 +20,7 @@ import {
     ForLoopType,
     ControlLiteral,
     CharacterLiteral,
+    IndexExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -88,8 +89,10 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalWhileExpr(astNode as WhileExpr, env)
         case NodeType.ForExpr:
             return evalForExpr(astNode as ForExpr, env)
+        case NodeType.IndexExpr:
+            return evalIndexExpr(astNode as IndexExpr, env)
         default:
-            return error(`This AST Node is not implemented in interpreter:`, astNode)
+            return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
 }
 
@@ -239,4 +242,24 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
         env.unsignVar(expr.identifier)
         return new NumberVal(enumerable.length)
     }
+}
+
+function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
+    // get the value being index
+    const value = evaluate(expr.expr, env)
+    if (!value.indexable) return error("TypeError: Cannot index type", valueName[value.type])
+
+    // evaluate the index
+    let indexValue = evaluate(expr.index, env)
+    if (!isValueTypes(indexValue, ValueType.Number))
+        return error("TypeError: Cannot index type", valueName[value.type], "with type", valueName[value.type])
+    let index = (indexValue as NumberVal).value
+
+    if (!value.length) return error("XperBug: Length is not implmented")
+
+    //checking if index is validd
+    if (index < 0) index = index + value.length()
+    if (index > value.length()) return error("RangeError: Index out of bound")
+
+    return value.value[index]
 }
