@@ -68,4 +68,8 @@ export default class Enviroment {
         if (this.isConstant(name)) this.constances.delete(name)
         return oldVal
     }
+
+    public clone(): Enviroment {
+        return Object.assign(Object.create(Object.getPrototypeOf(this)), this) // clone the env to redo some cal
+    }
 }
