@@ -1,5 +1,9 @@
+let scream = true
+
+export const toggleScream = (state?: boolean) => (scream = state ?? !scream)
+
 export function error(...message: any[]): any {
-    console.log(...message)
+    if (scream) console.log(...message)
     throw new Error("Error")
 }
 
