@@ -41,7 +41,7 @@ import {
     CharacterVal,
 } from "./value"
 import Enviroment from "./enviroment"
-import { error } from "../utils"
+import { clamp, error } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
 
@@ -133,12 +133,34 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
-    if (!isNodeType(expr.lefthand, NodeType.Identifier)) return error("SyntaxError: Invalid left-hand of assignment")
+    if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.IndexExpr))
+        return error("SyntaxError: Invalid left-hand of assignment")
     if (expr.operator) expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
+
     const value = evaluate(expr.rightHand, env)
     if (value.isConst) value.isConst = expr.isConst
+
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
         return env.assingVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
+    } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
+        // get the important stuff
+        const indexExpr = expr.lefthand as IndexExpr
+        const indexable = evaluate(indexExpr.expr, env)
+        const indexValue = evaluate(indexExpr.index, env)
+
+        // make sure we can inex
+        if (!indexable.indexable) return error("TypeError: Cannot index type", valueName[indexable.type])
+        if (!indexable.length) return error("XperBug: Length is not implemented on type", valueName[indexable.type])
+        if (!isValueTypes(indexValue, ValueType.Number))
+            return error("TypeError: Cannot index type", ValueType[indexable.type], "with type", valueName[value.type])
+
+        // calculate relative index
+        let index = (indexValue as NumberVal).value
+        if (index < 0) index = index + indexable.length()
+        index = clamp(index, 0, indexable.length())
+
+        indexable.value[index] = value
+        return value
     }
     return error("SyntaxError: Invalid left-hand of assignment")
 }
