@@ -14,6 +14,7 @@ export enum ValueType {
     Character,
     List,
     Control,
+    None,
 }
 
 export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
@@ -29,6 +30,7 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.Character]: "Character",
     [ValueType.List]: "List",
     [ValueType.Control]: "CONTROL",
+    [ValueType.None]: "NONE",
 }
 
 export function genEnumerable(length: number) {

@@ -41,7 +41,7 @@ import {
     CharacterVal,
 } from "./value"
 import Enviroment from "./enviroment"
-import { clamp, error } from "../utils"
+import { clamp, error, toggleScream } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
 
@@ -91,6 +91,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalForExpr(astNode as ForExpr, env)
         case NodeType.IndexExpr:
             return evalIndexExpr(astNode as IndexExpr, env)
+        case NodeType.ShiftExpr:
+            return evalShiftExpr(astNode as ShiftExpr, env)
         default:
             return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
@@ -208,7 +210,21 @@ function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
 }
 
 function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
-    return NULLVAL
+    if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.IndexExpr))
+        return error("SyntaxError: Cannot shift value")
+    toggleScream(false)
+    let oldVal: RuntimeVal
+    try {
+        oldVal = evaluate(expr.rightHand, env.clone())
+    } catch {
+        oldVal = NULLVAL
+    }
+    toggleScream(true)
+    evalAssignmentExpr(
+        new AssignmentExpr(expr.rightHand, new PreUnaryExpr(expr.leftHand, "*"), undefined, false, expr.isParent),
+        env
+    )
+    return oldVal
 }
 
 function evalWhileExpr(expr: WhileExpr, env: Enviroment): RuntimeVal {
