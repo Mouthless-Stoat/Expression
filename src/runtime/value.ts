@@ -48,12 +48,6 @@ export interface RuntimeVal {
     length?(): number
     enumerate?(): RuntimeVal[]
     iterate?(): RuntimeVal[]
-    // When access
-    access?(key: string): RuntimeVal
-    // when use as a identifier for assigning
-    accessAsIdentifier?(key: string, value: RuntimeVal, isConst: boolean): RuntimeVal
-    // unsign member
-    unsignMember?(key: string, allowNull: boolean): RuntimeVal
     add?(rhs: RuntimeVal): RuntimeVal | undefined
     sub?(rhs: RuntimeVal): RuntimeVal | undefined
     mul?(rhs: RuntimeVal): RuntimeVal | undefined
@@ -181,37 +175,6 @@ export class ListVal implements RuntimeVal {
     }
     iterate(): RuntimeVal[] {
         return this.value
-    }
-    access(key: string): RuntimeVal {
-        let index = parseFloat(key)
-        if (isNaN(index)) return error(`TypeError: Cannot index List with "${key}"`)
-        if (index < 0) index = index + this.length()
-        return isNaN(index)
-            ? error(`TypeError: Cannot index List with "${key}"`)
-            : index > this.length()
-            ? error("RangeError: Index", index, "out of bound")
-            : this.value[index]
-    }
-    accessAsIdentifier(key: string, value: RuntimeVal): RuntimeVal {
-        let index: number = parseFloat(key)
-        if (isNaN(index)) {
-            return error(`TypeError: Cannot index List with "${index}"`)
-        }
-        if (index < 0) index = this.length() + index
-        index = Math.min(Math.max(index, this.length()), index)
-        this.value[index] = value
-        return value
-    }
-    unsignMember(key: string, allowNull: boolean): RuntimeVal {
-        let index: number = parseFloat(key)
-        if (isNaN(index)) {
-            return error(`TypeError: Cannot index List with "${index}"`)
-        }
-        if (index < 0) index = this.length() + index
-        if (index > this.length() && !allowNull) return error("RangeError: Index", index, "out of bound")
-        const old = this.value[index]
-        this.value.splice(index, 1)
-        return old
     }
 }
 
