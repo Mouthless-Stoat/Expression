@@ -198,11 +198,7 @@ export class CharacterVal implements RuntimeVal {
     }
 }
 
-export class StringVal extends ListVal {
-    constructor(string: string) {
-        super(string.split("").map((c) => new CharacterVal(c)))
-    }
-}
+export const MKSTRING = (str: string) => new ListVal(str.split("").map((c) => new CharacterVal(c)))
 
 export type FunctionCall = (args: RuntimeVal[], env: Enviroment) => RuntimeVal
 

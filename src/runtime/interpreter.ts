@@ -32,13 +32,13 @@ import {
     ValueType,
     NativeFunctionVal,
     isValueTypes,
-    StringVal,
     valueName,
     ListVal,
     BooleanVal,
     ControlVal,
     ControlType,
     CharacterVal,
+    MKSTRING,
 } from "./value"
 import Enviroment from "./enviroment"
 import { clamp, error, toggleScream } from "../utils"
@@ -57,7 +57,7 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
         case NodeType.BooleanLiteral:
             return (astNode as BooleanLiteral).value ? TRUEVAL : FALSEVAL
         case NodeType.StringLiteral:
-            return new StringVal((astNode as StringLiteral).string)
+            return MKSTRING((astNode as StringLiteral).string)
         case NodeType.CharacterLiteral:
             return new CharacterVal((astNode as CharacterLiteral).character)
         case NodeType.BlockLiteral:
