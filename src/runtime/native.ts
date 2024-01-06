@@ -1,5 +1,16 @@
-import { FunctionCall, NULLVAL, NativeFunctionVal, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
-import { error } from "../utils"
+import {
+    FunctionCall,
+    ListVal,
+    NULLVAL,
+    NativeFunctionVal,
+    NativeObjectVal,
+    NumberVal,
+    RuntimeVal,
+    ValueType,
+    isValueTypes,
+    valueName,
+} from "./value"
+import { error, expectArgs } from "../utils"
 
 export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
     omega: new NumberVal(0),
@@ -23,14 +34,28 @@ function MathProp(func: Function, amount: number): NativeFunctionVal {
 
 const mathFunc = {
     abs: MathProp(Math.abs, 1),
+    sin: new NativeFunctionVal((args, env) => {
+        const value = expectArgs(args, 1)[0] as NumberVal
+        if (!isValueTypes(value, ValueType.Number))
+            return error("TypeError: Can't do math with type", valueName[value.type])
+        let x = value.value * (env.getVar("pi").value / 180)
+        return new NumberVal(Math.sin(x))
+    }),
+    cos: new NativeFunctionVal((args, env) => {
+        const value = expectArgs(args, 1)[0] as NumberVal
+        if (!isValueTypes(value, ValueType.Number))
+            return error("TypeError: Can't do math with type", valueName[value.type])
+        let x = value.value * (env.getVar("pi").value / 180)
+        return new NumberVal(Math.sin(x))
+    }),
 }
 
 export const NATIVEFUNC: Record<string, FunctionCall> = {
-    print: (args: RuntimeVal[], _) => {
+    print: (args, _) => {
         console.log(...args.map((v) => v.value))
         return NULLVAL
     },
-    math: (args: RuntimeVal[], env) => {
+    math: (args, env) => {
         args = expectArgs(args, 1, false)
         if (!args[0].toString)
             return error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
@@ -43,10 +68,27 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
             return mathFunc[name].value(args, env)
         }
     },
-}
+    map: (args, _) => {
+        args = expectArgs(args, 2)
+        if (args.some((v) => !isValueTypes(v, ValueType.List)))
+            return error('TypeError: Both of "map" arguments must be type List')
 
-function expectArgs(args: RuntimeVal[], amount: number, isExact = true): RuntimeVal[] {
-    if (isExact ? args.length !== amount : args.length < amount)
-        return error(`Expected${isExact ? "" : " at least"}`, amount, "argument but given", args.length)
-    return args
+        // processing the value
+        const keys: string[] = (args[0] as ListVal).value.map((v) =>
+            v.toString
+                ? v.toString()
+                : error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
+        )
+        const values = (args[1] as ListVal).value
+
+        // check for equal length
+        if (keys.length !== values.length)
+            return error('RuntimeError: Both of "map" argument must have the same length')
+
+        const obj: Map<string, RuntimeVal> = new Map()
+        for (const i in keys) {
+            obj.set(keys[i], values[i])
+        }
+        return new NativeObjectVal(obj)
+    },
 }

@@ -2,7 +2,7 @@
 
 import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
-import { error } from "../utils"
+import { error, expectArgs } from "../utils"
 
 // type of value at run time
 export enum ValueType {
@@ -211,6 +211,24 @@ export class NativeFunctionVal implements RuntimeVal {
     value: FunctionCall
     constructor(func: FunctionCall) {
         this.value = func
+    }
+}
+
+export class NativeObjectVal extends NativeFunctionVal {
+    object: Map<string, RuntimeVal>
+    constructor(obj: Map<string, RuntimeVal>) {
+        super((args: RuntimeVal[], _) => {
+            args = expectArgs(args, 1)
+            if (!args[0].toString)
+                return error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
+            //@ts-expect-error It should never be undefined cus the list length is at least 1
+            const name = args.shift().toString()
+            if (!this.object.has(name)) return error(`RuntimeError:`, this.object, `does not have properties "${args}"`)
+            if (args.length < 1) {
+                return this.object.get(name)
+            }
+        })
+        this.object = obj
     }
 }
 
