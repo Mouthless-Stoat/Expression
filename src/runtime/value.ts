@@ -44,7 +44,7 @@ export interface RuntimeVal {
     isConst?: boolean
     indexable?: boolean
     method?: Record<string, NativeFunctionVal | FunctionVal>
-    toKey?(): string
+    toString?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
     iterate?(): RuntimeVal[]
@@ -72,7 +72,7 @@ export interface NullVal extends RuntimeVal {
 export const NULLVAL: NullVal = {
     type: ValueType.Null,
     value: null,
-    toKey() {
+    toString() {
         return "null"
     },
 }
@@ -93,7 +93,7 @@ export class NumberVal implements RuntimeVal {
     constructor(value: number) {
         this.value = value
     }
-    toKey(): string {
+    toString(): string {
         return this.value.toString()
     }
     add(rhs: RuntimeVal): RuntimeVal | undefined {
@@ -136,7 +136,7 @@ export interface BooleanVal extends RuntimeVal {
 export const TRUEVAL: BooleanVal = {
     type: ValueType.Boolean,
     value: true,
-    toKey() {
+    toString() {
         return "true"
     },
     and(rhs) {
@@ -149,7 +149,7 @@ export const TRUEVAL: BooleanVal = {
 export const FALSEVAL: BooleanVal = {
     type: ValueType.Boolean,
     value: false,
-    toKey() {
+    toString() {
         return "false"
     },
 }
@@ -166,6 +166,15 @@ export class ListVal implements RuntimeVal {
 
     constructor(items: RuntimeVal[]) {
         this.value = items
+    }
+    toString(): string {
+        return this.value
+            .map((v) =>
+                v.toString
+                    ? v.toString()
+                    : error("TypeError: Cannot convert type", valueName[v.type], "to Character List")
+            )
+            .join("")
     }
     length(): number {
         return this.value.length
@@ -184,7 +193,7 @@ export class CharacterVal implements RuntimeVal {
     constructor(str: string) {
         this.value = str
     }
-    toKey(): string {
+    toString(): string {
         return this.value
     }
 }
