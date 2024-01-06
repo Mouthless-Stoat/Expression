@@ -9,12 +9,12 @@ export enum ValueType {
     Null,
     Number,
     Boolean,
-    Object,
     NativeFuntion,
     Function,
     Character,
     List,
     Control,
+    None,
 }
 
 export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): boolean {
@@ -25,12 +25,12 @@ export const valueName: Record<ValueType, string> = {
     [ValueType.Null]: "Null",
     [ValueType.Number]: "Number",
     [ValueType.Boolean]: "Boolean",
-    [ValueType.Object]: "Object",
     [ValueType.NativeFuntion]: "NativeFunction",
     [ValueType.Function]: "Function",
     [ValueType.Character]: "Character",
     [ValueType.List]: "List",
     [ValueType.Control]: "CONTROL",
+    [ValueType.None]: "NONE",
 }
 
 export function genEnumerable(length: number) {
@@ -42,17 +42,12 @@ export interface RuntimeVal {
     type: ValueType
     value: any
     isConst?: boolean
+    indexable?: boolean
     method?: Record<string, NativeFunctionVal | FunctionVal>
-    toKey?(): string
+    toString?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
     iterate?(): RuntimeVal[]
-    // When access
-    access?(key: string): RuntimeVal
-    // when use as a identifier for assigning
-    accessAsIdentifier?(key: string, value: RuntimeVal, isConst: boolean): RuntimeVal
-    // unsign member
-    unsignMember?(key: string, allowNull: boolean): RuntimeVal
     add?(rhs: RuntimeVal): RuntimeVal | undefined
     sub?(rhs: RuntimeVal): RuntimeVal | undefined
     mul?(rhs: RuntimeVal): RuntimeVal | undefined
@@ -77,7 +72,7 @@ export interface NullVal extends RuntimeVal {
 export const NULLVAL: NullVal = {
     type: ValueType.Null,
     value: null,
-    toKey() {
+    toString() {
         return "null"
     },
 }
@@ -98,7 +93,7 @@ export class NumberVal implements RuntimeVal {
     constructor(value: number) {
         this.value = value
     }
-    toKey(): string {
+    toString(): string {
         return this.value.toString()
     }
     add(rhs: RuntimeVal): RuntimeVal | undefined {
@@ -141,7 +136,7 @@ export interface BooleanVal extends RuntimeVal {
 export const TRUEVAL: BooleanVal = {
     type: ValueType.Boolean,
     value: true,
-    toKey() {
+    toString() {
         return "true"
     },
     and(rhs) {
@@ -154,54 +149,32 @@ export const TRUEVAL: BooleanVal = {
 export const FALSEVAL: BooleanVal = {
     type: ValueType.Boolean,
     value: false,
-    toKey() {
+    toString() {
         return "false"
     },
 }
 
 export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
 
-export class ObjectVal implements RuntimeVal {
-    type = ValueType.Object
-    value: Map<string, { isConst: boolean; value: RuntimeVal }>
-    isConst: boolean = false
-    constructor(value: Map<string, { isConst: boolean; value: RuntimeVal }>) {
-        this.value = value
-    }
-    length(): number {
-        return this.value.size
-    }
-    enumerate(): RuntimeVal[] {
-        return genEnumerable(this.length())
-    }
-    iterate(): RuntimeVal[] {
-        return [...this.value.entries()].map(([k, v]) => new ListVal([new StringVal(k), v.value]))
-    }
-    access(key: string): RuntimeVal {
-        return this.value.get(key)?.value ?? error(`ReferenceError: Properties "${key}" does not exist on`, this.value)
-    }
-    accessAsIdentifier(key: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
-        this.value.set(key, { isConst, value })
-        return value
-    }
-    unsignMember(key: string, allowNull: boolean): RuntimeVal {
-        const old = this.value.get(key)?.value
-        if (!(old ?? false) && !allowNull) {
-            return error(`ReferenceError: Properties "${key}" does not exist on`, this.value)
-        }
-        this.value.delete(key)
-        //@ts-expect-error
-        return old
-    }
-}
-
 export class ListVal implements RuntimeVal {
+    // trait
     type = ValueType.List
-    value: RuntimeVal[]
+    indexable = true
     isConst: boolean = false
+
+    value: RuntimeVal[]
 
     constructor(items: RuntimeVal[]) {
         this.value = items
+    }
+    toString(): string {
+        return this.value
+            .map((v) =>
+                v.toString
+                    ? v.toString()
+                    : error("TypeError: Cannot convert type", valueName[v.type], "to Character List")
+            )
+            .join("")
     }
     length(): number {
         return this.value.length
@@ -212,37 +185,6 @@ export class ListVal implements RuntimeVal {
     iterate(): RuntimeVal[] {
         return this.value
     }
-    access(key: string): RuntimeVal {
-        let index = parseFloat(key)
-        if (isNaN(index)) return error(`TypeError: Cannot index List with "${key}"`)
-        if (index < 0) index = index + this.length()
-        return isNaN(index)
-            ? error(`TypeError: Cannot index List with "${key}"`)
-            : index > this.length()
-            ? error("RangeError: Index", index, "out of bound")
-            : this.value[index]
-    }
-    accessAsIdentifier(key: string, value: RuntimeVal): RuntimeVal {
-        let index: number = parseFloat(key)
-        if (isNaN(index)) {
-            return error(`TypeError: Cannot index List with "${index}"`)
-        }
-        if (index < 0) index = this.length() + index
-        index = Math.min(Math.max(index, this.length()), index)
-        this.value[index] = value
-        return value
-    }
-    unsignMember(key: string, allowNull: boolean): RuntimeVal {
-        let index: number = parseFloat(key)
-        if (isNaN(index)) {
-            return error(`TypeError: Cannot index List with "${index}"`)
-        }
-        if (index < 0) index = this.length() + index
-        if (index > this.length() && !allowNull) return error("RangeError: Index", index, "out of bound")
-        const old = this.value[index]
-        this.value.splice(index, 1)
-        return old
-    }
 }
 
 export class CharacterVal implements RuntimeVal {
@@ -251,7 +193,7 @@ export class CharacterVal implements RuntimeVal {
     constructor(str: string) {
         this.value = str
     }
-    toKey(): string {
+    toString(): string {
         return this.value
     }
 }

@@ -7,11 +7,8 @@ import {
     TRUELITERAL,
     FALSELITERAL,
     AssignmentExpr,
-    Property,
-    ObjectLiteral,
     CallExpr,
     NodeType,
-    MemberExpr,
     FunctionExpr,
     PreUnaryExpr,
     BlockLiteral,
@@ -26,6 +23,7 @@ import {
     ForLoopType,
     ControlLiteral,
     CharacterLiteral,
+    IndexExpr,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -76,13 +74,6 @@ export default class Parser {
         }
         this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
         return args
-    }
-
-    // helper function
-    private parseCallExpr(caller: Expr): CallExpr {
-        let callExpr = new CallExpr(caller, this.parseArgs())
-        if (this.isTypes(TokenType.OpenParen)) callExpr = this.parseCallExpr(callExpr) // chaining call expression
-        return callExpr
     }
 
     private parseTradFor(init?: Expr): Expr {
@@ -140,15 +131,15 @@ export default class Parser {
 
     // expression order
     // 1. Primary (Literal)
-    // 2. Member access
+    // 2. Indexing List
     // 3. Call
     // 4. Prefix Unary Operator
     // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // ------ Statment ------ these order mean nothing
     // 6. Assignment
-    // 7. Shift
-    // 8. Loop
-    // 9. If
+    // 7. If
+    // 8. Shift
+    // 9. Loop
     // 10. Function Construction
     //
     // Highest priority will be parse last so it can be chain
@@ -289,39 +280,32 @@ export default class Parser {
 
     private parsePreUnaryExpr(): Expr {
         if (!this.isTypes(...PreUnaryOpTokens)) {
-            return this.parseMemberCallExpr()
+            return this.parseCallExpr()
         }
         const op = this.next().value
         const expr = this.parsePreUnaryExpr()
         return new PreUnaryExpr(expr, op as PreUnaryOpType)
     }
 
-    private parseMemberCallExpr(): Expr {
-        const member = this.parseMemberExpr()
-        if (this.isTypes(TokenType.OpenParen)) {
-            return this.parseCallExpr(member) // chaning call
+    private parseCallExpr(): Expr {
+        let caller = this.parseIndexExpr()
+        // go in a loop until no more () can be meaning call stop chaning
+        while (this.isTypes(TokenType.OpenParen)) {
+            const args = this.parseArgs()
+            caller = new CallExpr(caller, args)
         }
-        return member
+        return caller
     }
 
-    private parseMemberExpr(): Expr {
-        let object = this.parsePrimaryExpr()
-        while (this.isTypes(TokenType.Dot, TokenType.OpenBracket)) {
-            let comp = !this.next().isTypes(TokenType.Dot)
-            let member
-            if (comp) {
-                member = this.parseExpr()
-                this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
-            } else {
-                member = this.parsePrimaryExpr()
-                if (member.type != NodeType.Identifier) {
-                    return error("SyntaxError: Expected Indentifier")
-                }
-            }
-
-            object = new MemberExpr(object, member, comp)
+    private parseIndexExpr(): Expr {
+        let expr = this.parsePrimaryExpr()
+        while (this.isTypes(TokenType.OpenBracket)) {
+            this.next() // discard [
+            const index = this.parseExpr()
+            this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
+            expr = new IndexExpr(expr, index)
         }
-        return object
+        return expr
     }
 
     private parsePrimaryExpr(): Expr {
@@ -344,8 +328,6 @@ export default class Parser {
                 return new CharacterLiteral(this.next().value)
             case TokenType.OpenBrace:
                 return this.parseBlockExpr()
-            case TokenType.OpenDoubleAngle:
-                return this.parseObjExpr()
             case TokenType.OpenBracket:
                 return this.parseListLiteral()
             case TokenType.Omega:
@@ -381,33 +363,6 @@ export default class Parser {
         }
         this.expect(TokenType.CloseBrace, 'SyntaxError: Expected "}"')
         return new BlockLiteral(body)
-    }
-
-    private parseObjExpr(): Expr {
-        this.expect(TokenType.OpenDoubleAngle, 'SyntaxError: Expected "<<"')
-        const properties: Property[] = []
-
-        while (this.notEOF() && !this.isTypes(TokenType.CloseDoubleAngle)) {
-            const key = this.parseLogicalExpr()
-
-            // assign shorthand
-            if (this.isTypes(TokenType.Comma) || this.isTypes(TokenType.CloseDoubleAngle)) {
-                if (this.isTypes(TokenType.Comma)) this.next() // discard ,
-                properties.push(new Property(key))
-                continue
-            }
-            let isConst: boolean = this.isTypes(TokenType.DoubleColon, TokenType.Equal)
-                ? this.next().isTypes(TokenType.DoubleColon)
-                : error('SyntaxError: Expected "=" or "::"')
-
-            const value = this.parseExpr()
-            properties.push(new Property(key, value, isConst))
-            if (!this.isTypes(TokenType.CloseDoubleAngle)) {
-                this.expect(TokenType.Comma, 'SyntaxError: Expected ","')
-            }
-        }
-        this.expect(TokenType.CloseDoubleAngle, 'SyntaxError: Expect ">>"')
-        return new ObjectLiteral(properties)
     }
 
     private parseListLiteral(): Expr {

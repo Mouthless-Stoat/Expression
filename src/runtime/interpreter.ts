@@ -6,12 +6,10 @@ import {
     Identifier,
     BooleanLiteral,
     AssignmentExpr,
-    ObjectLiteral,
     CallExpr,
     FunctionExpr,
     PreUnaryExpr,
     BlockLiteral,
-    MemberExpr,
     StringLiteral,
     ListLiteral,
     IfExpr,
@@ -22,6 +20,7 @@ import {
     ForLoopType,
     ControlLiteral,
     CharacterLiteral,
+    IndexExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -30,7 +29,6 @@ import {
     TRUEVAL,
     FALSEVAL,
     FunctionVal,
-    ObjectVal,
     ValueType,
     NativeFunctionVal,
     isValueTypes,
@@ -43,10 +41,9 @@ import {
     CharacterVal,
 } from "./value"
 import Enviroment from "./enviroment"
-import { error } from "../utils"
+import { clamp, error, toggleScream } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PreUnaryOp } from "./UnaryOp"
-import { executionAsyncResource } from "async_hooks"
 
 //main eval function
 
@@ -65,8 +62,6 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return new CharacterVal((astNode as CharacterLiteral).character)
         case NodeType.BlockLiteral:
             return evalBlock(astNode as BlockLiteral, env)
-        case NodeType.ObjectLiteral:
-            return evalObjectExpr(astNode as ObjectLiteral, env)
         case NodeType.ListLiteral:
             return evalListExpr(astNode as ListLiteral, env)
         case NodeType.ControlLiteral:
@@ -88,18 +83,18 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalFuncExpr(astNode as FunctionExpr, env)
         case NodeType.PreUnaryExpr:
             return evalUnaryExpr(astNode as PreUnaryExpr, env)
-        case NodeType.MemberExpr:
-            return evalMemberExpr(astNode as MemberExpr, env)
         case NodeType.IfExpr:
             return evalIfExpr(astNode as IfExpr, env)
-        case NodeType.ShiftExpr:
-            return evalShiftExpr(astNode as ShiftExpr, env)
         case NodeType.WhileExpr:
             return evalWhileExpr(astNode as WhileExpr, env)
         case NodeType.ForExpr:
             return evalForExpr(astNode as ForExpr, env)
+        case NodeType.IndexExpr:
+            return evalIndexExpr(astNode as IndexExpr, env)
+        case NodeType.ShiftExpr:
+            return evalShiftExpr(astNode as ShiftExpr, env)
         default:
-            return error(`This AST Node is not implemented in interpreter:`, astNode)
+            return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
 }
 
@@ -140,44 +135,36 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
-    if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.MemberExpr))
+    if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.IndexExpr))
         return error("SyntaxError: Invalid left-hand of assignment")
     if (expr.operator) expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
+
     const value = evaluate(expr.rightHand, env)
     if (value.isConst) value.isConst = expr.isConst
+
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
         return env.assingVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
-    } else {
-        const member = expr.lefthand as MemberExpr
-        const left = evaluate(member.object, env)
-        if (left.accessAsIdentifier) {
-            return left.accessAsIdentifier(parseMemberKey(left, member, env), value, expr.isConst)
-        }
-        return error("SyntaxError: Invalid left-hand of assignment")
-    }
-}
+    } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
+        // get the important stuff
+        const indexExpr = expr.lefthand as IndexExpr
+        const indexable = evaluate(indexExpr.expr, env)
+        const indexValue = evaluate(indexExpr.index, env)
 
-function evalObjectExpr(obj: ObjectLiteral, env: Enviroment): RuntimeVal {
-    const prop = new Map<string, { isConst: boolean; value: RuntimeVal }>()
-    for (const { key: k, value, isConst } of obj.properties) {
-        let key: string
-        if (k.type !== NodeType.Identifier) {
-            const evalKey = evaluate(k, env)
-            if (!evalKey.toKey) {
-                return error("TypeError: Object key can't be of type", valueName[evalKey.type])
-            }
-            key = evalKey.toKey()
-        } else {
-            key = (k as Identifier).symbol
-        }
-        const evalValue = value === undefined ? env.getVar(key) : evaluate(value, env)
-        if (!(evalValue.isConst ?? true)) evalValue.isConst = isConst
-        prop.set(key, {
-            isConst: isConst,
-            value: evalValue,
-        })
+        // make sure we can inex
+        if (!indexable.indexable) return error("TypeError: Cannot index type", valueName[indexable.type])
+        if (!indexable.length) return error("XperBug: Length is not implemented on type", valueName[indexable.type])
+        if (!isValueTypes(indexValue, ValueType.Number))
+            return error("TypeError: Cannot index type", ValueType[indexable.type], "with type", valueName[value.type])
+
+        // calculate relative index
+        let index = (indexValue as NumberVal).value
+        if (index < 0) index = index + indexable.length()
+        index = clamp(index, 0, indexable.length())
+
+        indexable.value[index] = value
+        return value
     }
-    return new ObjectVal(prop)
+    return error("SyntaxError: Invalid left-hand of assignment")
 }
 
 export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
@@ -192,13 +179,18 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
             return error("Expected", fn.parameter.length, "argument but given", args.length)
         }
 
-        // make param var
+        // assign all the param var using the scope
+        // this is so variable do not bleed out of the function scope
         for (const i in fn.parameter) {
             scope.assingVar(fn.parameter[i], args[i], false)
         }
 
+        // actually evaluating the function body and return the output
         return evalBlock(fn.value, scope)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
+    // ^^ comment for line above ^^
+    // pass args and the env to native fucntion
+    // native function don't need scope they only use the raw value
     else return error("TypeError:", func.value, "is not a Function")
 }
 
@@ -206,35 +198,6 @@ function evalFuncExpr(func: FunctionExpr, env: Enviroment): RuntimeVal {
     return new FunctionVal(func.parameter, func.body, env)
 }
 
-export function parseMemberKey(left: RuntimeVal, expr: MemberExpr, env: Enviroment): string {
-    // get the key for accessing if it computed compute the value else it is a identifier and get the symbol
-    let key = (expr.member as Identifier).symbol
-    if (expr.isComputed) {
-        const evalKey = evaluate(expr.member, env)
-        if (!evalKey.toKey)
-            return error(
-                "TypeError: Cannot access or index type",
-                valueName[left.type],
-                "with type",
-                valueName[evalKey.type]
-            )
-        key = evalKey.toKey()
-    }
-    return key
-}
-function evalMemberExpr(expr: MemberExpr, env: Enviroment): RuntimeVal {
-    const left = evaluate(expr.object, env)
-    // if the evaluated value have a method return the method value
-    if (left.method) {
-        const name = (expr.member as Identifier).symbol // get the method name
-        return left.method[name] ?? error(`TypeError: Type ${valueName[left.type]} does not have method "${name}"`)
-    }
-    // if the value have a define access trait access it
-    if (left.access) {
-        return left.access(parseMemberKey(left, expr, env))
-    }
-    return error("TypeError: Cannot access type", valueName[left.type])
-}
 function evalListExpr(list: ListLiteral, env: Enviroment): RuntimeVal {
     return new ListVal(list.items.map((e) => evaluate(e, env)))
 }
@@ -247,29 +210,20 @@ function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
 }
 
 function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
-    if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.MemberExpr)) {
-        return error("TypeError: Cannot shift value into non-identifier")
+    if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.IndexExpr))
+        return error("SyntaxError: Cannot shift value")
+    toggleScream(false)
+    let oldVal: RuntimeVal
+    try {
+        oldVal = evaluate(expr.rightHand, env.clone())
+    } catch {
+        oldVal = NULLVAL
     }
-    let oldVal: RuntimeVal = NULLVAL
-    if (isNodeType(expr.rightHand, NodeType.Identifier)) {
-        if (env.resolve((expr.rightHand as Identifier).symbol)) {
-            oldVal = env.getVar((expr.rightHand as Identifier).symbol)
-        }
-    } else if (isNodeType(expr.rightHand, NodeType.MemberExpr)) {
-        oldVal = evaluate(expr.rightHand, env)
-    }
+    toggleScream(true)
     evalAssignmentExpr(
-        new AssignmentExpr(
-            expr.rightHand,
-            expr.leftHand,
-            undefined,
-            env.isConstant((expr.rightHand as Identifier).symbol),
-            expr.isParent
-        ),
+        new AssignmentExpr(expr.rightHand, new PreUnaryExpr(expr.leftHand, "*"), undefined, false, expr.isParent),
         env
     )
-    if (isNodeType(expr.leftHand, NodeType.Identifier, NodeType.MemberExpr))
-        return evaluate(new PreUnaryExpr(expr.rightHand, "*"), env)
     return oldVal
 }
 
@@ -326,4 +280,24 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
         env.unsignVar(expr.identifier)
         return new NumberVal(enumerable.length)
     }
+}
+
+function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
+    // get the value being index
+    const value = evaluate(expr.expr, env)
+    if (!value.indexable) return error("TypeError: Cannot index type", valueName[value.type])
+
+    // evaluate the index
+    let indexValue = evaluate(expr.index, env)
+    if (!isValueTypes(indexValue, ValueType.Number))
+        return error("TypeError: Cannot index type", valueName[value.type], "with type", valueName[value.type])
+    let index = (indexValue as NumberVal).value
+
+    if (!value.length) return error("XperBug: Length is not implmented")
+
+    //checking if index is validd
+    if (index < 0) index = index + value.length()
+    if (index > value.length()) return error("RangeError: Index out of bound")
+
+    return value.value[index]
 }

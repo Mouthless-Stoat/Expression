@@ -22,16 +22,17 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [ ] More method
 [ ] More native helper like type checking
 [X] Boolean operator
-[X] Computed access for object
 [ ] Code formatting
 [ ] Syntax highlight when in repl
 [X] Repl improvement (Don't crash when error)
 [X] More type for object key (most primary litetral)
-[X] Computed key when making object
 [X] Pre Unary Expr
 [ ] Post Unary Expr
 [ ] Expression literal
 [ ] Unsign Expr (Unsign a variable and return it value)
 [X] Break Expr (idk how to make this make sense)
 [ ] Math Build-in
+[ ] Index for list
+[ ] Index assigment
+[ ] Somekind of Object replacement
 ```

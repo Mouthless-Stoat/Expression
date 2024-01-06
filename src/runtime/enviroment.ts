@@ -1,6 +1,6 @@
-import { RuntimeVal, NativeFunctionVal, ObjectVal } from "./value"
+import { RuntimeVal, NativeFunctionVal } from "./value"
 import { error } from "../utils"
-import { NATIVEFUNC, NATIVEGLOBAL, NATIVENAMESPACE } from "./native"
+import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 
 export default class Enviroment {
     parent?: Enviroment
@@ -17,13 +17,6 @@ export default class Enviroment {
             }
             for (const [name, func] of Object.entries(NATIVEFUNC)) {
                 this.assingVar(name, new NativeFunctionVal(func), true)
-            }
-            for (const [namespace, prop] of Object.entries(NATIVENAMESPACE)) {
-                const obj = new ObjectVal(new Map())
-                for (const [name, func] of Object.entries(prop)) {
-                    obj.value.set(name, { isConst: true, value: func })
-                }
-                this.assingVar(namespace, obj, true)
             }
         }
         this.startVar = this.variables.size
@@ -74,5 +67,9 @@ export default class Enviroment {
         this.variables.delete(name)
         if (this.isConstant(name)) this.constances.delete(name)
         return oldVal
+    }
+
+    public clone(): Enviroment {
+        return Object.assign(Object.create(Object.getPrototypeOf(this)), this) // clone the env to redo some cal
     }
 }

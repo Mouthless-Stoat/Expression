@@ -211,7 +211,7 @@ export function tokenize(source: string): Token[] {
                     continue
                 } catch {
                     return error(
-                        "InterpreterError: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
+                        "XperBug: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
                     )
                 }
             } else if (char === "@") {
@@ -228,7 +228,7 @@ export function tokenize(source: string): Token[] {
                     continue
                 } catch {
                     return error(
-                        "InterpreterError: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
+                        "XperBug: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
                     )
                 }
             }
