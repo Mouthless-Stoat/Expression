@@ -32,22 +32,20 @@ function MathProp(func: Function, amount: number): NativeFunctionVal {
     })
 }
 
-const mathFunc = {
-    abs: MathProp(Math.abs, 1),
-    sin: new NativeFunctionVal((args, env) => {
-        const value = expectArgs(args, 1)[0] as NumberVal
-        if (!isValueTypes(value, ValueType.Number))
-            return error("TypeError: Can't do math with type", valueName[value.type])
-        let x = value.value * (env.getVar("pi").value / 180)
-        return new NumberVal(Math.sin(x))
-    }),
-    cos: new NativeFunctionVal((args, env) => {
-        const value = expectArgs(args, 1)[0] as NumberVal
-        if (!isValueTypes(value, ValueType.Number))
-            return error("TypeError: Can't do math with type", valueName[value.type])
-        let x = value.value * (env.getVar("pi").value / 180)
-        return new NumberVal(Math.sin(x))
-    }),
+function genNamespace(name: string, namespace: Record<string, RuntimeVal>): FunctionCall {
+    return (args, env) => {
+        args = expectArgs(args, 1, false)
+        if (!args[0].toString)
+            return error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
+        //@ts-expect-error It should never be undefined cus the list length is at least 1
+        const propName = args.shift().toString() as keyof typeof namespace
+        if (!(propName in namespace)) return error(`RuntimeError: ${name} does not have function "${propName}"`)
+        if (args.length < 1) {
+            return namespace[propName]
+        } else if (isValueTypes(namespace[propName], ValueType.NativeFuntion)) {
+            return namespace[propName].value(args, env)
+        }
+    }
 }
 
 export const NATIVEFUNC: Record<string, FunctionCall> = {
@@ -55,19 +53,30 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         console.log(...args.map((v) => v.value))
         return NULLVAL
     },
-    math: (args, env) => {
-        args = expectArgs(args, 1, false)
-        if (!args[0].toString)
-            return error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
-        //@ts-expect-error It should never be undefined cus the list length is at least 1
-        const name = args.shift().toString() as keyof typeof mathFunc
-        if (!(name in mathFunc)) return error(`RuntimeError: Math does not have function "${args}"`)
-        if (args.length < 1) {
-            return mathFunc[name]
-        } else {
-            return mathFunc[name].value(args, env)
-        }
-    },
+    math: genNamespace("Math", {
+        abs: MathProp(Math.abs, 1),
+        sin: new NativeFunctionVal((args, env) => {
+            const value = expectArgs(args, 1)[0] as NumberVal
+            if (!isValueTypes(value, ValueType.Number))
+                return error("TypeError: Can't do math with type", valueName[value.type])
+            let x = value.value * (env.getVar("pi").value / 180)
+            return new NumberVal(Math.sin(x))
+        }),
+        cos: new NativeFunctionVal((args, env) => {
+            const value = expectArgs(args, 1)[0] as NumberVal
+            if (!isValueTypes(value, ValueType.Number))
+                return error("TypeError: Can't do math with type", valueName[value.type])
+            let x = value.value * (env.getVar("pi").value / 180)
+            return new NumberVal(Math.sin(x))
+        }),
+        sqrt: MathProp(Math.sqrt, 1),
+    }),
+    random: genNamespace("Random", {
+        random: MathProp(Math.random, 0),
+        randint: MathProp((min: number, max: number) => {
+            return Math.random() * (max - min) + min
+        }, 2),
+    }),
     map: (args, _) => {
         args = expectArgs(args, 2)
         if (args.some((v) => !isValueTypes(v, ValueType.List)))
