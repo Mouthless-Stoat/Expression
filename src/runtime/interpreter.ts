@@ -98,11 +98,10 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     }
 }
 
-export function evalBlock(block: BlockLiteral, env: Enviroment, isGlobal = false): RuntimeVal {
+export function evalBlock(block: BlockLiteral, env: Enviroment): RuntimeVal {
     let out: RuntimeVal = NULLVAL
-    const blockEnv = isGlobal ? env : new Enviroment(env)
     for (const expr of block.value) {
-        out = blockEnv.pushStack(evaluate(expr, blockEnv))
+        out = env.pushStack(evaluate(expr, env))
         if (isValueTypes(out, ValueType.Control)) {
             let control = out as ControlVal
             if (control.carryCount > 0) {
@@ -173,7 +172,6 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
     if (isValueTypes(func, ValueType.Function)) {
         const fn = func as FunctionVal
-        const scope = new Enviroment(env)
 
         if (args.length != fn.parameter.length) {
             return error("Expected", fn.parameter.length, "argument but given", args.length)
@@ -182,11 +180,11 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
         // assign all the param var using the scope
         // this is so variable do not bleed out of the function scope
         for (const i in fn.parameter) {
-            scope.assingVar(fn.parameter[i], args[i], false)
+            env.assingVar(fn.parameter[i], args[i], false)
         }
 
         // actually evaluating the function body and return the output
-        return evalBlock(fn.value, scope)
+        return evalBlock(fn.value, env)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
     // ^^ comment for line above ^^
     // pass args and the env to native fucntion
@@ -212,6 +210,9 @@ function evalIfExpr(expr: IfExpr, env: Enviroment): RuntimeVal {
 function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
     if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.IndexExpr))
         return error("SyntaxError: Cannot shift value")
+
+    // this code abuse that error aren;t actually error and are just log
+    // use this fact to simmlify the value retrival
     toggleScream(false)
     let oldVal: RuntimeVal
     try {
@@ -220,10 +221,7 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
         oldVal = NULLVAL
     }
     toggleScream(true)
-    evalAssignmentExpr(
-        new AssignmentExpr(expr.rightHand, new PreUnaryExpr(expr.leftHand, "*"), undefined, false, expr.isParent),
-        env
-    )
+    evalAssignmentExpr(new AssignmentExpr(expr.rightHand, new PreUnaryExpr(expr.leftHand, "*"), undefined, false), env)
     return oldVal
 }
 

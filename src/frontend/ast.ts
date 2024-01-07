@@ -75,14 +75,12 @@ export class AssignmentExpr implements Expr {
     rightHand: Expr
     operator: BinaryOpType | undefined
     isConst: boolean
-    isParent: boolean
 
-    constructor(left: Expr, right: Expr, op: BinaryOpType | undefined, isConst: boolean, isParent: boolean) {
+    constructor(left: Expr, right: Expr, op: BinaryOpType | undefined, isConst: boolean) {
         this.lefthand = left
         this.rightHand = right
         this.operator = op
         this.isConst = isConst
-        this.isParent = isParent
     }
 }
 

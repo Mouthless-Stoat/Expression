@@ -3,51 +3,39 @@ import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 
 export default class Enviroment {
-    parent?: Enviroment
     private variables: Map<string, RuntimeVal> = new Map()
     private constances: Set<string> = new Set()
     private startVar: number
+    private varLimt: number = 10
     evalStack: RuntimeVal[] = []
 
-    constructor(parentEnv?: Enviroment) {
-        this.parent = parentEnv
-        if (parentEnv ? false : true) {
-            for (const [name, val] of Object.entries(NATIVEGLOBAL)) {
-                this.assingVar(name, val, false)
-            }
-            for (const [name, func] of Object.entries(NATIVEFUNC)) {
-                this.assingVar(name, new NativeFunctionVal(func), true)
-            }
+    constructor() {
+        for (const [name, val] of Object.entries(NATIVEGLOBAL)) {
+            this.assingVar(name, val, false)
+        }
+        for (const [name, func] of Object.entries(NATIVEFUNC)) {
+            this.assingVar(name, new NativeFunctionVal(func), true)
         }
         this.startVar = this.variables.size
     }
 
     // assign a var, change variable value is it doesn;t exit make it
     // lower scope should not breed out
-    public assingVar(name: string, value: RuntimeVal, isConst: boolean, local: boolean = false): RuntimeVal {
-        const env = local ? this.resolve(name) ?? this : this
-        if (env.variables.size - this.startVar >= 5)
-            return error("Xper: Due to memory concern you cannot have more than 5 variables")
+    public assingVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
+        if (this.variables.size - this.startVar >= this.varLimt)
+            return error("Xper: Due to memory concern you cannot have more than", this.varLimt, "variables")
 
-        if (env.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
-        if (isConst) env.constances.add(name)
-        env.variables.set(name, value)
+        if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
+        if (isConst) this.constances.add(name)
+        this.variables.set(name, value)
         return value
     }
 
     public getVar(name: string): RuntimeVal {
-        const env = this.resolve(name)
-        if (env === undefined) {
+        if (!this.hasVar(name)) {
             return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
-        return env.variables.get(name) as RuntimeVal
-    }
-
-    // resolve a variable, find a variable scope, if it does nt exist error and die
-    public resolve(name: string): Enviroment | undefined {
-        if (this.variables.has(name)) return this
-        if (!this.parent) return undefined
-        return this.parent.resolve(name)
+        return this.variables.get(name) as RuntimeVal
     }
 
     public pushStack(value: RuntimeVal): RuntimeVal {
@@ -56,9 +44,7 @@ export default class Enviroment {
     }
 
     public isConstant(name: string): boolean {
-        const env = this.resolve(name)
-        if (!env) return false
-        return env.constances.has(name)
+        return this.constances.has(name)
     }
 
     public unsignVar(name: string): RuntimeVal {
@@ -72,7 +58,7 @@ export default class Enviroment {
         return Object.assign(Object.create(Object.getPrototypeOf(this)), this) // clone the env to redo some cal
     }
 
-    public hasVar(name: string, local: boolean = false): boolean {
-        return local ? this.variables.has(name) : !!this.resolve(name)
+    public hasVar(name: string): boolean {
+        return this.variables.has(name)
     }
 }

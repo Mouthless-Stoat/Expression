@@ -231,13 +231,8 @@ export default class Parser {
             let operator
             if (this.isTypes(...BinaryOpToken)) operator = this.next().value as BinaryOpType
             const isConst = this.next().isTypes(TokenType.DoubleColon)
-            let isParent = true
-            if (this.isTypes(TokenType.Ampersand)) {
-                isParent = false
-                this.next() // discard &
-            }
             const rightHand = this.parseExpr()
-            return new AssignmentExpr(leftHand, rightHand, operator, isConst, isParent)
+            return new AssignmentExpr(leftHand, rightHand, operator, isConst)
         }
         return leftHand
     }
