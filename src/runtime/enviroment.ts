@@ -24,15 +24,14 @@ export default class Enviroment {
 
     // assign a var, change variable value is it doesn;t exit make it
     // lower scope should not breed out
-    public assingVar(name: string, value: RuntimeVal, isConst: boolean, isParent: boolean = false): RuntimeVal {
-        const env = isParent ? this.resolve(name) ?? this : this
+    public assingVar(name: string, value: RuntimeVal, isConst: boolean, local: boolean = false): RuntimeVal {
+        const env = local ? this.resolve(name) ?? this : this
+        if (env.variables.size - this.startVar >= 5)
+            return error("Xper: Due to memory concern you cannot have more than 5 variables")
+
         if (env.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) env.constances.add(name)
         env.variables.set(name, value)
-        if (env.variables.size - this.startVar > 5) {
-            this.unsignVar(name)
-            return error("Xper: Due to memory concern you cannot have more than 5 variables")
-        }
         return value
     }
 
@@ -71,5 +70,9 @@ export default class Enviroment {
 
     public clone(): Enviroment {
         return Object.assign(Object.create(Object.getPrototypeOf(this)), this) // clone the env to redo some cal
+    }
+
+    public hasVar(name: string, local: boolean = false): boolean {
+        return local ? this.variables.has(name) : !!this.resolve(name)
     }
 }
