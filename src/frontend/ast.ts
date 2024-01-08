@@ -1,3 +1,4 @@
+import exp from "constants"
 import { PreUnaryOpType } from "../runtime/UnaryOp"
 import { BinaryOpType } from "../runtime/binaryOp"
 
@@ -23,6 +24,7 @@ export enum NodeType {
     ForInExpr,
     ForOfExpr,
     BinaryAssignment,
+    MethodExpr,
 
     // literal
     NumberLiteral,
@@ -258,5 +260,18 @@ export class ControlLiteral implements Expr {
     constructor(control: string, carryCount: number) {
         this.control = control
         this.carryCount = carryCount
+    }
+}
+
+export class MethodExpr implements Expr {
+    type = NodeType.MethodExpr
+    expr: Expr
+    method: string
+    args: Expr[]
+
+    constructor(expr: Expr, meth: string, args: Expr[]) {
+        this.expr = expr
+        this.method = meth
+        this.args = args
     }
 }

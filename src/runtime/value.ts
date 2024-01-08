@@ -43,7 +43,7 @@ export interface RuntimeVal {
     value: any
     isConst?: boolean
     indexable?: boolean
-    method?: Record<string, NativeFunctionVal | FunctionVal>
+    method?: Record<string, FunctionCall>
     toString?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
@@ -81,14 +81,14 @@ export const NULLVAL: NullVal = {
 export class NumberVal implements RuntimeVal {
     type = ValueType.Number
     value: number
-    method: Record<string, NativeFunctionVal | FunctionVal> = {
-        toFixed: new NativeFunctionVal((args: RuntimeVal[]) => {
+    method: Record<string, FunctionCall> = {
+        toFixed: (args: RuntimeVal[]) => {
             if (args.length > 1) {
                 return error("Expected 1 argument but given", args.length)
             }
             this.value = parseFloat(this.value.toFixed(args[0] === undefined ? 1 : args[0].value))
             return this as NumberVal
-        }),
+        },
     }
     constructor(value: number) {
         this.value = value

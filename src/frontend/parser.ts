@@ -24,6 +24,7 @@ import {
     ControlLiteral,
     CharacterLiteral,
     IndexExpr,
+    MethodExpr,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
@@ -131,16 +132,17 @@ export default class Parser {
 
     // expression order
     // 1. Primary (Literal)
-    // 2. Indexing List
-    // 3. Call
-    // 4. Prefix Unary Operator
-    // 5. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
+    // 2. Method
+    // 3. Indexing List
+    // 4. Call
+    // 5. Prefix Unary Operator
+    // 6. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // ------ Statment ------ these order mean nothing
-    // 6. Assignment
-    // 7. If
-    // 8. Shift
-    // 9. Loop
-    // 10. Function Construction
+    // 7. Assignment
+    // 8. If
+    // 9. Shift
+    // 10. Loop
+    // 11. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -293,12 +295,23 @@ export default class Parser {
     }
 
     private parseIndexExpr(): Expr {
-        let expr = this.parsePrimaryExpr()
+        let expr = this.parseMethod()
         while (this.isTypes(TokenType.OpenBracket)) {
             this.next() // discard [
             const index = this.parseExpr()
             this.expect(TokenType.CloseBracket, 'SyntaxError: Expected "]"')
             expr = new IndexExpr(expr, index)
+        }
+        return expr
+    }
+
+    private parseMethod(): Expr {
+        let expr = this.parsePrimaryExpr()
+        while (this.isTypes(TokenType.Dot)) {
+            this.next()
+            const method = this.parsePrimaryExpr()
+            if (!isNodeType(method, NodeType.Identifier)) return error("SyntaxError: Expected Identifier")
+            expr = new MethodExpr(expr, (method as Identifier).symbol, this.parseArgs())
         }
         return expr
     }

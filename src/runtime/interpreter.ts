@@ -21,6 +21,7 @@ import {
     ControlLiteral,
     CharacterLiteral,
     IndexExpr,
+    MethodExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -93,6 +94,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalIndexExpr(astNode as IndexExpr, env)
         case NodeType.ShiftExpr:
             return evalShiftExpr(astNode as ShiftExpr, env)
+        case NodeType.MethodExpr:
+            return evalMethodExpr(astNode as MethodExpr, env)
         default:
             return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
@@ -298,4 +301,14 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
     if (index > value.length()) return error("RangeError: Index out of bound")
 
     return value.value[index]
+}
+
+function evalMethodExpr(expr: MethodExpr, env: Enviroment): RuntimeVal {
+    const value = evaluate(expr.expr, env)
+
+    if (!value.method) return error("TypeError: Type", valueName[value.type], "does not have any method")
+    if (!(expr.method in value.method))
+        return error("RuntimeError: Type", valueName[value.type], `does not have "${expr.method}"`)
+    const args = expr.args.map((v) => evaluate(v, env))
+    return value.method[expr.method](args, env)
 }
