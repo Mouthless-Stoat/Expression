@@ -18,7 +18,6 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] While Loop Expr
 [X] For of Loop Expr (track item)
 [X] For in Loop Expr (track loop count)
-[I] Enviroment Stack (each enviroment have a stack that carry from parent)
 [ ] More method
 [ ] More native helper like type checking
 [X] Boolean operator
@@ -29,10 +28,10 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] Pre Unary Expr
 [ ] Post Unary Expr
 [ ] Expression literal
-[ ] Unsign Expr (Unsign a variable and return it value)
+[X] Unsign Expr (Unsign a variable and return it value)
 [X] Break Expr (idk how to make this make sense)
-[ ] Math Build-in
-[ ] Index for list
-[ ] Index assigment
-[ ] Somekind of Object replacement
+[X] Math Build-in
+[X] Index for list
+[X] Index assigment
+[X] Somekind of Object replacement
 ```

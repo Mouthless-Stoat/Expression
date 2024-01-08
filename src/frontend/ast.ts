@@ -1,7 +1,7 @@
 import { PreUnaryOpType } from "../runtime/UnaryOp"
 import { BinaryOpType } from "../runtime/binaryOp"
 
-// this file contant definition for the ast
+// this file contain definition for the ast
 
 // type of ast node
 export enum NodeType {
