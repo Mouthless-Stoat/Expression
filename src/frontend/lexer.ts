@@ -243,7 +243,8 @@ export function tokenize(source: string): Token[] {
             if (isNumber) {
                 push(TokenType.Number, acc)
             } else {
-                if (keyword[acc as keyof typeof keyword]) push(keyword[acc as keyof typeof keyword], acc)
+                if (typeof keyword[acc as keyof typeof keyword] === "number")
+                    push(keyword[acc as keyof typeof keyword], acc)
                 else push(TokenType.Identifier, acc)
             }
         }
