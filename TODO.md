@@ -35,4 +35,6 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] Index for list
 [X] Index assigment
 [X] Somekind of Object replacement
+[ ] Float input
+[ ] Scientific notation
 ```
