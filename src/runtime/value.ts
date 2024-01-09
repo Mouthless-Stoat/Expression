@@ -49,6 +49,7 @@ export interface RuntimeVal {
     indexable?: boolean
     method?: Record<string, FunctionCall>
     toString?(): string
+    toPrint?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
     iterate?(): RuntimeVal[]
@@ -92,6 +93,12 @@ export class NumberVal implements RuntimeVal {
             }
             this.value = parseFloat(this.value.toFixed(args[0] === undefined ? 1 : args[0].value))
             return this as NumberVal
+        },
+        toString: (args: RuntimeVal[]) => {
+            if (args.length > 0) {
+                return error("Expected 1 argument but given", args.length)
+            }
+            return MKSTRING(this.toString())
         },
     }
     constructor(value: number) {
@@ -167,6 +174,43 @@ export class ListVal implements RuntimeVal {
     isConst: boolean = false
 
     value: RuntimeVal[]
+    method: Record<string, FunctionCall> = {
+        replace: (args: RuntimeVal[]) => {
+            args = expectArgs(args, 2)
+            if (!isValueTypes(args[0], ValueType.List)) {
+                args[0] = new ListVal([args[0]])
+            }
+            if (!isValueTypes(args[1], ValueType.List)) {
+                args[1] = new ListVal([args[1]])
+            }
+
+            const search = (args[0] as ListVal).value
+            const replace = (args[1] as ListVal).value
+
+            // https://stackoverflow.com/q/29425820/17055233
+            // small changes to improve performent slightly
+            const index = (() => {
+                var found, j
+                for (var i = 0; i < 1 + (this.value.length - search.length); ++i) {
+                    found = true
+                    for (j = 0; j < search.length; ++j) {
+                        if (this.value[i + j].value !== search[j].value) {
+                            found = false
+                            break
+                        }
+                    }
+                    if (found) return i
+                }
+                return -1
+            })()
+
+            return new ListVal(this.value.slice(0, index).concat(replace, this.value.slice(index + search.length)))
+        },
+        toString: (args: RuntimeVal[]) => {
+            expectArgs(args, 0)
+            return MKSTRING(this.toString())
+        },
+    }
 
     constructor(items: RuntimeVal[]) {
         this.value = items
@@ -179,6 +223,10 @@ export class ListVal implements RuntimeVal {
                     : error("TypeError: Cannot convert type", valueName[v.type], "to Character List")
             )
             .join("")
+    }
+
+    toPrint(): string {
+        return `[${this.value.map((v) => checkString(v)).join(", ")}]`
     }
     length(): number {
         return this.value.length
