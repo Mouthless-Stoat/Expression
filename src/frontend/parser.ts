@@ -202,7 +202,7 @@ export default class Parser {
                 isParent = false
                 this.next() // discard &
             }
-            const rightHand = this.parseAssignmentExpr() // function below shift so you can shift function into var
+            const rightHand = this.parseAssignmentExpr()
             leftHand = new ShiftExpr(leftHand, rightHand, isParent)
         }
         return leftHand
@@ -321,9 +321,15 @@ export default class Parser {
             case TokenType.Identifier:
                 return new Identifier(this.next().value)
             case TokenType.Number:
-                const num = parseFloat(this.next().value)
+                let num = parseInt(this.next().value)
                 if (this.current().isTypes(TokenType.Identifier, TokenType.Pi, TokenType.Omega, TokenType.Avagadro))
                     return new BinaryExpr(new NumberLiteral(num), this.parseExpr(), "*")
+                else if (this.isTypes(TokenType.Comma)) {
+                    this.next()
+                    if (!this.isTypes(TokenType.Number)) return error("SyntaxError: Expected Number")
+                    const decimal = this.next().value
+                    num = num + parseInt(decimal) / Math.pow(10, decimal.length)
+                }
                 return new NumberLiteral(num)
             case TokenType.Null:
                 this.next()
