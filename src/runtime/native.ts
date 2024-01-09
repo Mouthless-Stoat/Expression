@@ -18,6 +18,16 @@ export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
     e: new NumberVal(Math.E),
     NaN: new NumberVal(NaN),
     avogadro: new NumberVal(6.02214076e-23),
+    zero: new NumberVal(0),
+    one: new NumberVal(1),
+    two: new NumberVal(2),
+    three: new NumberVal(3),
+    four: new NumberVal(4),
+    five: new NumberVal(5),
+    six: new NumberVal(6),
+    seven: new NumberVal(7),
+    eight: new NumberVal(8),
+    nine: new NumberVal(9),
 }
 
 function MathProp(func: Function, amount: number): NativeFunctionVal {
