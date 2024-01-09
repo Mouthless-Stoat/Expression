@@ -21,6 +21,10 @@ export function isValueTypes(value: RuntimeVal, ...valueType: ValueType[]): bool
     return valueType.some((t) => value.type === t)
 }
 
+export function checkString(value: RuntimeVal): string {
+    return value.toPrint ? value.toPrint() : value.toString ? value.toString() : value.value
+}
+
 export const valueName: Record<ValueType, string> = {
     [ValueType.Null]: "Null",
     [ValueType.Number]: "Number",

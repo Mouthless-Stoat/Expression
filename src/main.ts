@@ -5,6 +5,7 @@ import { evalBlock } from "./runtime/interpreter"
 import Enviroment from "./runtime/enviroment"
 import readline from "readline"
 import fs from "fs"
+import { checkString } from "./runtime/value"
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -35,7 +36,7 @@ function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser,
     }
     const result = evalBlock(program, env)
     if (stack) console.log("Eval Stack:", env.evalStack)
-    console.log("Program Return:", result.value)
+    console.log("Program Return:", checkString(result.value))
 }
 
 async function repl(debug: boolean, stack: boolean) {
