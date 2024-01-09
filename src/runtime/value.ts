@@ -89,16 +89,22 @@ export class NumberVal implements RuntimeVal {
     method: Record<string, FunctionCall> = {
         toFixed: (args: RuntimeVal[]) => {
             if (args.length > 1) {
-                return error("Expected 1 argument but given", args.length)
+                return error("Expected at most 1 arguments but given", args.length)
             }
             this.value = parseFloat(this.value.toFixed(args[0] === undefined ? 1 : args[0].value))
             return this as NumberVal
         },
         toString: (args: RuntimeVal[]) => {
-            if (args.length > 0) {
-                return error("Expected 1 argument but given", args.length)
-            }
+            args = expectArgs(args, 0)
             return MKSTRING(this.toString())
+        },
+        ceil: (args: RuntimeVal[]) => {
+            args = expectArgs(args, 0)
+            return new NumberVal(Math.ceil(this.value))
+        },
+        floor: (args: RuntimeVal[]) => {
+            args = expectArgs(args, 0)
+            return new NumberVal(Math.floor(this.value))
         },
     }
     constructor(value: number) {

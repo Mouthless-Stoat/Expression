@@ -18,7 +18,7 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] While Loop Expr
 [X] For of Loop Expr (track item)
 [X] For in Loop Expr (track loop count)
-[ ] More method for Number Type
+[X] More method for Number Type
 [ ] More method for List Type
 [ ] More native helper like type checking
 [X] Boolean operator
