@@ -207,24 +207,27 @@ export class ListVal implements RuntimeVal {
             }
             // https://stackoverflow.com/q/29425820/17055233
             // small changes to improve performent slightly
-            const index = (() => {
-                var found, j
-                for (var i = 0; i < 1 + (this.value.length - search.value.length); ++i) {
-                    found = true
-                    for (j = 0; j < search.value.length; ++j) {
-                        if (this.value[i + j].value !== search.value[j].value) {
-                            found = false
-                            break
-                        }
-                    }
-                    if (found) return i
-                }
-                return -1
-            })()
-
+            const index = (this.method.find(search.value, _) as NumberVal).value
+            if (index === -1) return this
             return new ListVal(
                 this.value.slice(0, index).concat(replace.value, this.value.slice(index + search.value.length))
             )
+        },
+        find: (args: RuntimeVal[], _) => {
+            let value = expectArgs(args, 1, false)[0] as RuntimeVal
+            if (!isValueTypes(value, ValueType.List)) value = new ListVal([value])
+            var found, j
+            for (var i = 0; i < 1 + (this.value.length - value.value.length); ++i) {
+                found = true
+                for (j = 0; j < value.value.length; ++j) {
+                    if (JSON.stringify(this.value[i + j]) !== JSON.stringify(value.value[j])) {
+                        found = false
+                        break
+                    }
+                }
+                if (found) return new NumberVal(i)
+            }
+            return new NumberVal(-1)
         },
         toString: (args: RuntimeVal[]) => {
             expectArgs(args, 0)
