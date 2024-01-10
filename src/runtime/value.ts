@@ -190,17 +190,29 @@ export class ListVal implements RuntimeVal {
                 args[1] = new ListVal([args[1]])
             }
 
-            const search = (args[0] as ListVal).value
-            const replace = (args[1] as ListVal).value
+            const search = args[0] as ListVal
+            const replace = args[1] as ListVal
 
+            if (
+                this.value.every((v) => isValueTypes(v, ValueType.Character)) &&
+                search.value.every((v) => isValueTypes(v, ValueType.Character)) &&
+                replace.value.every((v) => isValueTypes(v, ValueType.Character))
+            ) {
+                return new ListVal(
+                    this.toString()
+                        .replace(search.toString(), replace.toString())
+                        .split("")
+                        .map((c) => new CharacterVal(c))
+                )
+            }
             // https://stackoverflow.com/q/29425820/17055233
             // small changes to improve performent slightly
             const index = (() => {
                 var found, j
-                for (var i = 0; i < 1 + (this.value.length - search.length); ++i) {
+                for (var i = 0; i < 1 + (this.value.length - search.value.length); ++i) {
                     found = true
-                    for (j = 0; j < search.length; ++j) {
-                        if (this.value[i + j].value !== search[j].value) {
+                    for (j = 0; j < search.value.length; ++j) {
+                        if (this.value[i + j].value !== search.value[j].value) {
                             found = false
                             break
                         }
@@ -210,7 +222,9 @@ export class ListVal implements RuntimeVal {
                 return -1
             })()
 
-            return new ListVal(this.value.slice(0, index).concat(replace, this.value.slice(index + search.length)))
+            return new ListVal(
+                this.value.slice(0, index).concat(replace.value, this.value.slice(index + search.value.length))
+            )
         },
         toString: (args: RuntimeVal[]) => {
             expectArgs(args, 0)
