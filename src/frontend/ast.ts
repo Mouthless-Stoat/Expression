@@ -5,9 +5,6 @@ import { BinaryOpType } from "../runtime/binaryOp"
 
 // type of ast node
 export enum NodeType {
-    // stmt
-    Program,
-
     // expr
     Identifier,
     BinaryExpr,
