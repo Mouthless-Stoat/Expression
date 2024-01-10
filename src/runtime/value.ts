@@ -181,7 +181,7 @@ export class ListVal implements RuntimeVal {
 
     value: RuntimeVal[]
     method: Record<string, FunctionCall> = {
-        replace: (args: RuntimeVal[]) => {
+        replace: (args: RuntimeVal[], _: Enviroment) => {
             args = expectArgs(args, 2)
             if (!isValueTypes(args[0], ValueType.List)) {
                 args[0] = new ListVal([args[0]])
