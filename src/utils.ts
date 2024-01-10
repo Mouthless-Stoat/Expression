@@ -2,9 +2,16 @@ let scream = true
 
 export const toggleScream = (state?: boolean) => (scream = state ?? !scream)
 
+class XperError extends Error {
+    constructor(msg: string) {
+        super(msg)
+        this.name = "XperError"
+    }
+}
+
 export function error(...message: any[]): any {
     if (scream) console.log(...message)
-    throw new Error("Error")
+    throw new XperError(message.join(" "))
 }
 
 export function clamp(num: number, min: number, max: number): number {

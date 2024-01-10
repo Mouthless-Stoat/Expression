@@ -51,8 +51,12 @@ async function repl(debug: boolean, stack: boolean) {
 
         try {
             evalXper(input, debug, stack, parser, env)
-        } catch {
-            continue
+        } catch (err) {
+            //@ts-expect-error
+            if (err.name !== "XperError") {
+                console.log("Oh no you encounter a Wild Xper Bug. Please report this")
+                console.log(err)
+            }
         }
         console.log("=".repeat(50))
     }
