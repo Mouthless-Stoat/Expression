@@ -36,7 +36,7 @@ function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser,
     }
     const result = evalBlock(program, env)
     if (stack) console.log("Eval Stack:", env.evalStack)
-    console.log("Program Return:", checkString(result.value))
+    console.log("Program Return:", checkString(result))
 }
 
 async function repl(debug: boolean, stack: boolean) {
