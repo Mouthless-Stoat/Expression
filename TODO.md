@@ -36,4 +36,7 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] Index assigment
 [X] Somekind of Object replacement
 [X] Float input
+[ ] Range Expr
+[ ] List Pop Notation
+[ ] List Push Notation
 ```
