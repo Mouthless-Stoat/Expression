@@ -30,6 +30,7 @@ export enum TokenType {
     // symbol
     Comma,
     Colon,
+    SemiColon,
     Equal,
     Dot,
     Plus,
@@ -104,7 +105,7 @@ const charToken: Record<string, TokenType> = {
     "[": TokenType.OpenBracket,
     "]": TokenType.CloseBracket,
     ":": TokenType.Colon,
-    ";": TokenType.Null,
+    ";": TokenType.SemiColon,
     ".": TokenType.Dot,
     "=": TokenType.Equal,
     ",": TokenType.Comma,

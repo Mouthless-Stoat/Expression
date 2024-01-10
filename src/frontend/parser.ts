@@ -69,7 +69,7 @@ export default class Parser {
         // if not a empty function call keep parsing arg
         if (!this.isTypes(TokenType.CloseParen)) {
             args = [this.parseAssignmentExpr()]
-            while (this.isTypes(TokenType.Comma) && this.next()) {
+            while (this.isTypes(TokenType.SemiColon) && this.next()) {
                 args.push(this.parseAssignmentExpr())
             }
         }
@@ -78,10 +78,10 @@ export default class Parser {
     }
 
     private parseTradFor(init?: Expr): Expr {
-        this.next() // discard , cus both case start with comman
+        this.next() // discard ; cus both case start with semi colon
         if (!init) init = EMPTYBLOCK
         let condition: Expr
-        if (!this.isTypes(TokenType.Comma)) {
+        if (!this.isTypes(TokenType.SemiColon)) {
             condition = this.parseExpr()
         } else condition = TRUELITERAL
         this.next() // discard second ,
@@ -179,16 +179,16 @@ export default class Parser {
             return new WhileExpr(condition, this.parseBlockExpr() as BlockLiteral)
         } else {
             this.expect(TokenType.OpenParen, 'SyntaxError: Expected "("')
-            if (this.isTypes(TokenType.Comma)) {
+            if (this.isTypes(TokenType.SemiColon)) {
                 return this.parseTradFor()
             }
             let first = this.parseExpr()
             if (this.isTypes(TokenType.In, TokenType.Of)) {
                 return this.parseNonTradFor(first)
-            } else if (this.isTypes(TokenType.Comma)) {
+            } else if (this.isTypes(TokenType.SemiColon)) {
                 return this.parseTradFor(first)
             } else {
-                return error('SyntaxError: Expected ","')
+                return error('SyntaxError: Expected ";"')
             }
         }
     }
@@ -331,6 +331,7 @@ export default class Parser {
                 }
                 return new NumberLiteral(num)
             case TokenType.Null:
+            case TokenType.SemiColon:
                 this.next()
                 return NULLLITERAL
             case TokenType.Boolean:
@@ -383,10 +384,10 @@ export default class Parser {
         let items: Expr[] = []
         while (this.notEOF() && !this.isTypes(TokenType.CloseBracket)) {
             const item = this.parseExpr()
-            if (this.isTypes(TokenType.Comma)) {
+            if (this.isTypes(TokenType.SemiColon)) {
                 this.next()
             } else if (!this.isTypes(TokenType.CloseBracket)) {
-                return error('SyntaxError: Expected "," or "]"')
+                return error('SyntaxError: Expected ";" or "]"')
             }
 
             items.push(item)
