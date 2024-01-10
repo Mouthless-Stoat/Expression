@@ -326,8 +326,7 @@ export default class Parser {
                     return new BinaryExpr(new NumberLiteral(num), this.parseExpr(), "*")
                 else if (this.isTypes(TokenType.Comma)) {
                     this.next()
-                    this.expect(TokenType.Comma, "SyntaxError: Expected Number")
-                    const decimal = this.next().value
+                    const decimal = this.expect(TokenType.Number, "SyntaxError: Expected Number").value
                     num = num + parseInt(decimal) / Math.pow(10, decimal.length)
                 }
                 return new NumberLiteral(num)
