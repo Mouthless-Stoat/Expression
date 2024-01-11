@@ -5,7 +5,7 @@ import { Expr, Identifier, IndexExpr, NodeType, isNodeType } from "../frontend/a
 import { evaluate } from "./interpreter"
 import { error } from "../utils"
 
-export const PreUnaryOpTokens = [
+export const PreUnaryTokens = [
     TokenType.Minus,
     TokenType.Exclamation,
     TokenType.Increment,
@@ -14,10 +14,10 @@ export const PreUnaryOpTokens = [
 ]
 
 // binary operation type
-export type PreUnaryOpType = "-" | "!" | "++" | "--" | "*"
+export type PreUnaryType = "-" | "!" | "++" | "--" | "*"
 
 // implementation for all binary operator between every run time value
-export const PreUnaryOp: Record<PreUnaryOpType, (expr: Expr, env: Enviroment) => RuntimeVal> = {
+export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => RuntimeVal> = {
     "-": (expr, env) => {
         const value = evaluate(expr, env)
         if (isValueTypes(value, ValueType.Number)) {
@@ -66,5 +66,26 @@ export const PreUnaryOp: Record<PreUnaryOpType, (expr: Expr, env: Enviroment) =>
             return oldVal
         }
         return error("TypeError: Cannot unsign")
+    },
+}
+
+export const PostUnaryToken = [TokenType.Increment, TokenType.Decrement]
+
+export type PostUnaryType = "--" | "++"
+
+export const PostUnaryOp: Record<PostUnaryType, (expr: Expr, env: Enviroment) => RuntimeVal> = {
+    "--": (expr, env) => {
+        const value = evaluate(expr, env)
+        if (isValueTypes(value, ValueType.Number)) {
+            return new NumberVal(value.value--)
+        }
+        return NULLVAL
+    },
+    "++": (expr, env) => {
+        const value = evaluate(expr, env)
+        if (isValueTypes(value, ValueType.Number)) {
+            return new NumberVal(value.value++)
+        }
+        return NULLVAL
     },
 }

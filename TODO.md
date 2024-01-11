@@ -27,7 +27,7 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] Repl improvement (Don't crash when error)
 [X] More type for object key (most primary litetral)
 [X] Pre Unary Expr
-[ ] Post Unary Expr
+[X] Post Unary Expr
 [ ] Expression literal
 [X] Unsign Expr (Unsign a variable and return it value)
 [X] Break Expr (idk how to make this make sense)

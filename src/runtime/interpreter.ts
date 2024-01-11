@@ -22,6 +22,7 @@ import {
     CharacterLiteral,
     IndexExpr,
     MethodExpr,
+    PostUnaryExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -44,7 +45,7 @@ import {
 import Enviroment from "./enviroment"
 import { clamp, error, toggleScream } from "../utils"
 import { BinaryOp } from "./binaryOp"
-import { PreUnaryOp } from "./UnaryOp"
+import { PostUnaryOp, PreUnaryOp } from "./UnaryOp"
 
 //main eval function
 
@@ -83,7 +84,9 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
         case NodeType.FunctionExpr:
             return evalFuncExpr(astNode as FunctionExpr, env)
         case NodeType.PreUnaryExpr:
-            return evalUnaryExpr(astNode as PreUnaryExpr, env)
+            return evalPreUnaryExpr(astNode as PreUnaryExpr, env)
+        case NodeType.PostUnaryExpr:
+            return evalPostUnaryExpr(astNode as PostUnaryExpr, env)
         case NodeType.IfExpr:
             return evalIfExpr(astNode as IfExpr, env)
         case NodeType.WhileExpr:
@@ -128,8 +131,12 @@ function evalBinExpr(expr: BinaryExpr, env: Enviroment): RuntimeVal {
     return BinaryOp[expr.operator](evaluate(expr.leftHand, env), evaluate(expr.rightHand, env), env)
 }
 
-function evalUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
+function evalPreUnaryExpr(expr: PreUnaryExpr, env: Enviroment): RuntimeVal {
     return PreUnaryOp[expr.operator](expr.expr, env)
+}
+
+function evalPostUnaryExpr(expr: PostUnaryExpr, env: Enviroment): RuntimeVal {
+    return PostUnaryOp[expr.operator](expr.expr, env)
 }
 
 function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {

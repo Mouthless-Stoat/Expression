@@ -1,4 +1,4 @@
-import { PreUnaryOpType } from "../runtime/UnaryOp"
+import { PostUnaryType, PreUnaryType } from "../runtime/UnaryOp"
 import { BinaryOpType } from "../runtime/binaryOp"
 
 // this file contain definition for the ast
@@ -12,6 +12,7 @@ export enum NodeType {
     IndexExpr,
     CallExpr,
     PreUnaryExpr,
+    PostUnaryExpr,
     FunctionExpr,
     IfExpr,
     ShiftExpr,
@@ -59,9 +60,20 @@ export class BinaryExpr implements Expr {
 export class PreUnaryExpr implements Expr {
     type = NodeType.PreUnaryExpr
     expr: Expr
-    operator: PreUnaryOpType
+    operator: PreUnaryType
 
-    constructor(expr: Expr, op: PreUnaryOpType) {
+    constructor(expr: Expr, op: PreUnaryType) {
+        this.expr = expr
+        this.operator = op
+    }
+}
+
+export class PostUnaryExpr {
+    type = NodeType.PostUnaryExpr
+    expr: Expr
+    operator: PostUnaryType
+
+    constructor(expr: Expr, op: PostUnaryType) {
         this.expr = expr
         this.operator = op
     }

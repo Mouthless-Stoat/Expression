@@ -25,9 +25,10 @@ import {
     CharacterLiteral,
     IndexExpr,
     MethodExpr,
+    PostUnaryExpr,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
-import { PreUnaryOpTokens, PreUnaryOpType } from "../runtime/UnaryOp"
+import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
 
@@ -136,13 +137,14 @@ export default class Parser {
     // 3. Indexing List
     // 4. Call
     // 5. Prefix Unary Operator
-    // 6. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
+    // 6. Postfix Unary Operator
+    // 7. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // ------ Statment ------ these order mean nothing
-    // 7. Assignment
-    // 8. If
-    // 9. Shift
-    // 10. Loop
-    // 11. Function Construction
+    // 8. Assignment
+    // 9. If
+    // 10. Shift
+    // 11. Loop
+    // 12. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -259,24 +261,33 @@ export default class Parser {
     }
 
     private parseMultiplicativeExpr(): Expr {
-        let leftHand = this.parsePreUnaryExpr()
+        let leftHand = this.parsePostUnaryExpr()
 
         while (this.isTypes(...MultiOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
-            const rightHand = this.parsePreUnaryExpr()
+            const rightHand = this.parsePostUnaryExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
         }
 
         return leftHand
     }
 
+    private parsePostUnaryExpr(): Expr {
+        let expr = this.parsePreUnaryExpr()
+        while (this.isTypes(...PostUnaryToken)) {
+            const op = this.next().value as PostUnaryType
+            expr = new PostUnaryExpr(expr, op)
+        }
+        return expr
+    }
+
     private parsePreUnaryExpr(): Expr {
-        if (!this.isTypes(...PreUnaryOpTokens)) {
+        if (!this.isTypes(...PreUnaryTokens)) {
             return this.parseCallExpr()
         }
-        const op = this.next().value
+        const op = this.next().value as PreUnaryType
         const expr = this.parsePreUnaryExpr()
-        return new PreUnaryExpr(expr, op as PreUnaryOpType)
+        return new PreUnaryExpr(expr, op)
     }
 
     private parseCallExpr(): Expr {
