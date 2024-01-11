@@ -1,4 +1,4 @@
-import { RuntimeVal, NativeFunctionVal } from "./value"
+import { RuntimeVal, NativeFunctionVal, cloneValue } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 
@@ -39,7 +39,7 @@ export default class Enviroment {
 
         if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) this.constances.add(name)
-        this.variables.set(name, value)
+        this.variables.set(name, cloneValue(value))
         return value
     }
 

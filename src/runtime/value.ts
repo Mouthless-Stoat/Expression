@@ -67,6 +67,10 @@ export interface RuntimeVal {
     or?(rhs: RuntimeVal): RuntimeVal | undefined
 }
 
+export function cloneValue(value: RuntimeVal) {
+    return Object.assign(Object.create(Object.getPrototypeOf(value)), value)
+}
+
 // missing value
 export interface NullVal extends RuntimeVal {
     type: ValueType.Null
