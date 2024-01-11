@@ -47,13 +47,13 @@ export enum TokenType {
     Pi,
     Avagadro,
     Question,
+    Exclamation,
+    Octothorp,
 
     /// not use
     Quote,
     Dollar,
     Ampersand,
-    Octothorp,
-    Exclamation,
 
     // long symbol
     /// in use
