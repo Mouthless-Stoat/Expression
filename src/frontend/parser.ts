@@ -197,13 +197,8 @@ export default class Parser {
         let leftHand = this.parseIfExpr()
         while (this.isTypes(TokenType.Arrow)) {
             this.next()
-            let isParent = true
-            if (this.isTypes(TokenType.Ampersand)) {
-                isParent = false
-                this.next() // discard &
-            }
             const rightHand = this.parseAssignmentExpr()
-            leftHand = new ShiftExpr(leftHand, rightHand, isParent)
+            leftHand = new ShiftExpr(leftHand, rightHand)
         }
         return leftHand
     }

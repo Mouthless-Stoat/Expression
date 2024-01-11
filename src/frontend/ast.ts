@@ -198,11 +198,9 @@ export class ShiftExpr implements Expr {
     type = NodeType.ShiftExpr
     leftHand: Expr
     rightHand: Expr
-    isParent: boolean
-    constructor(left: Expr, right: Expr, isParent: boolean) {
+    constructor(left: Expr, right: Expr) {
         this.leftHand = left
         this.rightHand = right
-        this.isParent = isParent
     }
 }
 
