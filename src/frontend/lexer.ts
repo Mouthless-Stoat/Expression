@@ -28,6 +28,7 @@ export enum TokenType {
     CloseDoubleAngle,
 
     // symbol
+    /// In use
     Comma,
     Colon,
     SemiColon,
@@ -39,20 +40,23 @@ export enum TokenType {
     Slash,
     Percent,
     Pipe,
-    Quote,
-    Dollar,
-    Ampersand,
-    Octothorp,
-    Exclamation,
     Omega,
-    Question,
     Greater,
     Lesser,
     Tilde,
     Pi,
     Avagadro,
+    Question,
+
+    /// not use
+    Quote,
+    Dollar,
+    Ampersand,
+    Octothorp,
+    Exclamation,
 
     // long symbol
+    /// in use
     Increment, // ++
     Decrement, // --
     Bunny, // =:
@@ -62,10 +66,12 @@ export enum TokenType {
     Arrow, // ->
     GreaterEqual, // >=
     LesserEqual, // <=
-    Spaceship, // <=>
     Equality, // ==
     And, // &&
     Or, // ||
+
+    // not use
+    Spaceship, // <=>
 
     // special for handling
     EOF,
