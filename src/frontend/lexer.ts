@@ -39,11 +39,9 @@ export enum TokenType {
     Star,
     Slash,
     Percent,
-    Pipe,
     Omega,
     Greater,
     Lesser,
-    Tilde,
     Pi,
     Avagadro,
     Question,
@@ -54,6 +52,11 @@ export enum TokenType {
     Quote,
     Dollar,
     Ampersand,
+    Tilde,
+    Pipe,
+    Caret,
+    BackwardSlash,
+    Backtick,
 
     // long symbol
     /// in use
@@ -133,6 +136,9 @@ const charToken: Record<string, TokenType> = {
     "?": TokenType.Question,
     ">": TokenType.Greater,
     "<": TokenType.Lesser,
+    "^": TokenType.Caret,
+    "`": TokenType.Backtick,
+    "\\": TokenType.BackwardSlash,
 }
 
 // multichar token
