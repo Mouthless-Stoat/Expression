@@ -1,8 +1,0 @@
-{
-    "commands": [
-        ["repl", "npm run repl"],
-        ["replDebug", "ts-node \"src/main.ts\" repl -d"],
-        ["run", "npm run run \"test/test.xpr\" --debug"],
-        ["build", "npm run build"]
-    ]
-}
