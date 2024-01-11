@@ -14,10 +14,10 @@ export default class Enviroment {
 
     constructor() {
         for (const [name, val] of Object.entries(NATIVEGLOBAL)) {
-            this.assingVar(name, val, false)
+            this.assignVar(name, val, false)
         }
         for (const [name, func] of Object.entries(NATIVEFUNC)) {
-            this.assingVar(name, new NativeFunctionVal(func), true)
+            this.assignVar(name, new NativeFunctionVal(func), true)
         }
         this.startVar = this.variables.size
     }
@@ -32,7 +32,7 @@ export default class Enviroment {
      *
      * @returns the value the variable
      * */
-    public assingVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
+    public assignVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
         // if this run before startVar is define the value will be NaN and will return false
         if (this.variables.size - this.startVar >= this.varLimt)
             return error("Xper: Due to memory concern you cannot have more than", this.varLimt, "variables")

@@ -224,14 +224,20 @@ export default class Parser {
     private parseAssignmentExpr(): Expr {
         const leftHand = this.parseLogicalExpr()
         if (
-            (this.isTypes(...BinaryOpToken) && this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+            (this.isTypes(...BinaryOpToken, TokenType.Ampersand) &&
+                this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
             this.isTypes(TokenType.Equal, TokenType.DoubleColon)
         ) {
             let operator
+            let isRef = false
             if (this.isTypes(...BinaryOpToken)) operator = this.next().value as BinaryOpType
+            if (this.isTypes(TokenType.Ampersand)) {
+                this.next()
+                isRef = true
+            }
             const isConst = this.next().isTypes(TokenType.DoubleColon)
             const rightHand = this.parseExpr()
-            return new AssignmentExpr(leftHand, rightHand, operator, isConst)
+            return new AssignmentExpr(leftHand, rightHand, operator, isRef, isConst)
         }
         return leftHand
     }

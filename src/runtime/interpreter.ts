@@ -152,7 +152,7 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     if (value.isConst) value.isConst = expr.isConst
 
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
-        return env.assingVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
+        return env.assignVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
     } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
         // get the important stuff
         const indexExpr = expr.lefthand as IndexExpr
@@ -190,7 +190,7 @@ export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
         // assign all the param var using the scope
         // this is so variable do not bleed out of the function scope
         for (const i in fn.parameter) {
-            env.assingVar(fn.parameter[i], args[i], false)
+            env.assignVar(fn.parameter[i], args[i], false)
         }
 
         // actually evaluating the function body and return the output
@@ -221,17 +221,30 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
     if (!isNodeType(expr.rightHand, NodeType.Identifier, NodeType.IndexExpr))
         return error("SyntaxError: Cannot shift value")
 
-    // this code abuse that error aren;t actually error and are just log
+    // this code abuse that error aren't actually error and are just log
     // use this fact to simmlify the value retrival
     toggleScream(false)
     let oldVal: RuntimeVal
     try {
         oldVal = evaluate(expr.rightHand, env.clone())
-    } catch {
+    } catch (err) {
+        //@ts-expect-error
+        if (err.name !== "XperError") throw err
         oldVal = NULLVAL
     }
     toggleScream(true)
-    evalAssignmentExpr(new AssignmentExpr(expr.rightHand, new PreUnaryExpr(expr.leftHand, "*"), undefined, false), env)
+    evalAssignmentExpr(
+        new AssignmentExpr(
+            expr.rightHand,
+            isNodeType(expr.leftHand, NodeType.Identifier, NodeType.IndexExpr)
+                ? new PreUnaryExpr(expr.leftHand, "*")
+                : expr.leftHand,
+            undefined,
+            false,
+            false
+        ),
+        env
+    )
     return oldVal
 }
 
@@ -281,7 +294,7 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
         //@ts-expect-error Tell ts to stfu cus we already check for undefined
         let enumerable: RuntimeVal[] = isIn ? evalEnumerable.enumerate() : evalEnumerable.iterate()
         for (const i of enumerable) {
-            env.assingVar(expr.identifier, i, false)
+            env.assignVar(expr.identifier, i, false)
             const bodyVal = evaluate(expr.body, env)
             if (bodyVal === NULLVAL) break
         }
