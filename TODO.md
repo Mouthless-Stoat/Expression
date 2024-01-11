@@ -7,7 +7,7 @@
 `[-]` are Maybe feature (added but remove and is now considering)
 `[ ]` are Not Completed feature
 
-Tag like `[|]`, `[I]` an `[-]` are only note for later use
+Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 
 ```
 [X] String Type
@@ -28,7 +28,7 @@ Tag like `[|]`, `[I]` an `[-]` are only note for later use
 [X] More type for object key (most primary litetral)
 [X] Pre Unary Expr
 [X] Post Unary Expr
-[ ] Expression literal
+[I] Expression literal
 [X] Unsign Expr (Unsign a variable and return it value)
 [X] Break Expr (idk how to make this make sense)
 [X] Math Build-in
