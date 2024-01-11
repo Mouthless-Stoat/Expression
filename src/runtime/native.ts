@@ -7,6 +7,7 @@ import {
     NumberVal,
     RuntimeVal,
     ValueType,
+    checkString,
     isValueTypes,
     valueName,
 } from "./value"
@@ -60,7 +61,7 @@ function genNamespace(name: string, namespace: Record<string, RuntimeVal>): Func
 
 export const NATIVEFUNC: Record<string, FunctionCall> = {
     print: (args, _) => {
-        console.log(...args.map((v) => v.value))
+        console.log(...args.map((v) => checkString(v)))
         return NULLVAL
     },
     math: genNamespace("Math", {

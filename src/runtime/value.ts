@@ -249,7 +249,7 @@ export class ListVal implements RuntimeVal {
     }
 
     toPrint(): string {
-        return `[${this.value.map((v) => checkString(v)).join(", ")}]`
+        return `[${this.value.map((v) => checkString(v)).join("; ")}]`
     }
     length(): number {
         return this.value.length
@@ -269,7 +269,7 @@ export class CharacterVal implements RuntimeVal {
         this.value = str
     }
     toString(): string {
-        return this.value
+        return `@${this.value}`
     }
 }
 
