@@ -125,7 +125,7 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
         return MKSTRING(value.toString())
     },
-    eval: (args: RuntimeVal[], _: Enviroment) => {
+    eval: (args: RuntimeVal[], env: Enviroment) => {
         const value = expectArgs(args, 1)[0] as ListVal
         if (!isValueTypes(value, ValueType.List) || !isString(value))
             return error(
@@ -137,7 +137,6 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
 
         if (!value.toString) return error("XperBug: Cannot convert to string")
         const parser = new Parser()
-        const env = new Enviroment()
 
         const program = parser.produceAST(value.value.map((v) => v.value).join(""))
         return evalBlock(program, env)
