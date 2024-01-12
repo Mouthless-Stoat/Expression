@@ -3,6 +3,7 @@
 import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error, expectArgs } from "../utils"
+import { TokenType } from "../frontend/lexer"
 
 // type of value at run time
 export enum ValueType {
@@ -268,6 +269,8 @@ export class CharacterVal implements RuntimeVal {
         return `@${this.value}`
     }
 }
+
+export const isString = (value: ListVal) => value.value.every((v) => isValueTypes(v, ValueType.Character))
 
 export const MKSTRING = (str: string) => new ListVal(str.split("").map((c) => new CharacterVal(c)))
 

@@ -9,11 +9,14 @@ import {
     RuntimeVal,
     ValueType,
     checkString,
+    isString,
     isValueTypes,
     valueName,
 } from "./value"
 import { error, expectArgs } from "../utils"
 import Enviroment from "./enviroment"
+import { evalBlock } from "./interpreter"
+import Parser from "../frontend/parser"
 
 export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
     omega: new NumberVal(0),
@@ -121,5 +124,22 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         const value = expectArgs(args, 1)[0]
         if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
         return MKSTRING(value.toString())
+    },
+    eval: (args: RuntimeVal[], _: Enviroment) => {
+        const value = expectArgs(args, 1)[0] as ListVal
+        if (!isValueTypes(value, ValueType.List) || !isString(value))
+            return error(
+                "TypeError: Eval argument must be type",
+                valueName[value.type],
+                "but it is type",
+                valueName[value.type]
+            )
+
+        if (!value.toString) return error("XperBug: Cannot convert to string")
+        const parser = new Parser()
+        const env = new Enviroment()
+
+        const program = parser.produceAST(value.value.map((v) => v.value).join(""))
+        return evalBlock(program, env)
     },
 }
