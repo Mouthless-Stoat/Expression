@@ -20,7 +20,7 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] For in Loop Expr (track loop count)
 [X] More method for Number Type
 [ ] More method for List Type
-[ ] More native helper like type checking
+[X] More native helper like type checking
 [X] Boolean operator
 [ ] Code formatting
 [ ] Syntax highlight when in repl
