@@ -39,4 +39,5 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [ ] Range Expr
 [ ] List Pop Notation
 [ ] List Push Notation
+[ ] Remove Commander dependency and make a custom solution
 ```
