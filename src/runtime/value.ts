@@ -3,7 +3,6 @@
 import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error, expectArgs } from "../utils"
-import { TokenType } from "../frontend/lexer"
 
 // type of value at run time
 export enum ValueType {
@@ -265,8 +264,11 @@ export class CharacterVal implements RuntimeVal {
     constructor(str: string) {
         this.value = str
     }
-    toString(): string {
+    toPrint(): string {
         return `@${this.value}`
+    }
+    toString(): string {
+        return this.value
     }
 }
 
