@@ -20,7 +20,6 @@ export enum NodeType {
     ForExpr,
     ForInExpr,
     ForOfExpr,
-    BinaryAssignment,
     MethodExpr,
 
     // literal
