@@ -1,6 +1,7 @@
 import {
     FunctionCall,
     ListVal,
+    MKSTRING,
     NULLVAL,
     NativeFunctionVal,
     NativeObjectVal,
@@ -12,6 +13,7 @@ import {
     valueName,
 } from "./value"
 import { error, expectArgs } from "../utils"
+import Enviroment from "./enviroment"
 
 export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
     omega: new NumberVal(0),
@@ -110,5 +112,14 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
             obj.set(keys[i], values[i])
         }
         return new NativeObjectVal(obj)
+    },
+    type: (args, _) => {
+        const value = expectArgs(args, 1)[0]
+        return MKSTRING(valueName[value.type])
+    },
+    str: (args: RuntimeVal[], _: Enviroment) => {
+        const value = expectArgs(args, 1)[0]
+        if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
+        return MKSTRING(value.toString())
     },
 }

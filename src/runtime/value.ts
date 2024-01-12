@@ -98,10 +98,6 @@ export class NumberVal implements RuntimeVal {
             this.value = parseFloat(this.value.toFixed(args[0] === undefined ? 1 : args[0].value))
             return this as NumberVal
         },
-        toString: (args: RuntimeVal[]) => {
-            args = expectArgs(args, 0)
-            return MKSTRING(this.toString())
-        },
         ceil: (args: RuntimeVal[]) => {
             args = expectArgs(args, 0)
             return new NumberVal(Math.ceil(this.value))
@@ -232,10 +228,6 @@ export class ListVal implements RuntimeVal {
                 if (found) return new NumberVal(i)
             }
             return new NumberVal(-1)
-        },
-        toString: (args: RuntimeVal[]) => {
-            expectArgs(args, 0)
-            return MKSTRING(this.toString())
         },
     }
 
