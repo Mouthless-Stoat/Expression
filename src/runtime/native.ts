@@ -1,4 +1,6 @@
 import {
+    BooleanVal,
+    FALSEVAL,
     FunctionCall,
     ListVal,
     MKSTRING,
@@ -51,8 +53,12 @@ function MathProp(func: Function, amount: number): NativeFunctionVal {
 function genNamespace(name: string, namespace: Record<string, RuntimeVal>): FunctionCall {
     return (args, env) => {
         args = expectArgs(args, 1, false)
-        if (!args[0].toString)
-            return error("TypeError: Cannot convert type", ValueType[args[0].type], "to Character List")
+        if (!isValueTypes(args[0], ValueType.List) || !isString(args[0] as ListVal))
+            return error(
+                "TypeError: Namespace's argument must be type Character List but it is type",
+                valueName[args[0].type]
+            )
+
         //@ts-expect-error It should never be undefined cus the list length is at least 1
         const propName = args.shift().toString() as keyof typeof namespace
         if (!(propName in namespace)) return error(`RuntimeError: ${name} does not have function "${propName}"`)
@@ -120,25 +126,44 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         const value = expectArgs(args, 1)[0]
         return MKSTRING(valueName[value.type])
     },
-    str: (args: RuntimeVal[], _: Enviroment) => {
+    str: (args, _) => {
         const value = expectArgs(args, 1)[0]
         if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
         return MKSTRING(value.toString())
     },
-    eval: (args: RuntimeVal[], env: Enviroment) => {
+    eval: (args, env) => {
         const value = expectArgs(args, 1)[0] as ListVal
         if (!isValueTypes(value, ValueType.List) || !isString(value))
-            return error(
-                "TypeError: Eval argument must be type",
-                valueName[value.type],
-                "but it is type",
-                valueName[value.type]
-            )
+            return error("TypeError: Eval's argument must be type Character List but it is type", valueName[value.type])
 
         if (!value.toString) return error("XperBug: Cannot convert to string")
         const parser = new Parser()
 
         const program = parser.produceAST(value.value.map((v) => v.value).join(""))
         return evalBlock(program, env)
+    },
+    get: (args, env) => {
+        const value = expectArgs(args, 1)[0] as ListVal
+        if (!isValueTypes(value, ValueType.List) || !isString(value))
+            return error("TypeError: Get's argument must be type Character List but it is type", valueName[value.type])
+        return env.getVar(value.toString())
+    },
+    set: (args, env) => {
+        args = expectArgs(args, 2)
+        if (args.length > 3) return error("RuntimeError: Expected at most 3 arguments but given", args.length)
+        const name = args.shift() as ListVal
+        if (!isValueTypes(name, ValueType.List) || !isString(name))
+            return error(
+                "TypeError: Get's first argument must be type Character List but it is type",
+                valueName[name.type]
+            )
+        const value = args.shift() as RuntimeVal
+        const isConst = (args.shift() as BooleanVal) ?? FALSEVAL
+        if (!isValueTypes(isConst, ValueType.Boolean))
+            return error(
+                "TypeError: Get's second argument must be type Boolean but it is type",
+                ValueType[isConst.type]
+            )
+        return env.assignVar(name.toString(), value, isConst.value)
     },
 }
