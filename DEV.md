@@ -69,7 +69,7 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] Index assigment
 [X] Somekind of Object replacement
 [X] Float input
-[ ] Range Expr
+[X] Range Expr
 [ ] List Pop Notation
 [ ] List Push Notation
 [ ] Remove Commander dependency and make a custom solution
