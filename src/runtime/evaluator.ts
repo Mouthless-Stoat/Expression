@@ -177,12 +177,12 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
             )
 
         // clean the index lsit to only be number
-        const indexs: number[] = []
+        const indexes: number[] = []
 
         if (indexValue.length > 1)
             for (const i of indexValue) {
                 // get the number
-                let indexNum = (i as NumberVal).value
+                let indexNum = Math.round((i as NumberVal).value)
 
                 if (!indexable.length)
                     return error("XperBug: Length is not implmented on type", valueName[indexable.type])
@@ -192,28 +192,28 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
 
                 indexNum = clamp(indexNum, 0, indexable.length()) // clamp the index in case out of bound
 
-                indexs.push(indexNum)
+                indexes.push(indexNum)
             }
-        else indexs.push((indexValue[0] as NumberVal).value)
+        else indexes.push(Math.round((indexValue[0] as NumberVal).value))
 
         // multi assign
-        if (indexs.length > 1) {
+        if (indexes.length > 1) {
             // make sure we have enough item
             if (!isValueTypes(value, ValueType.List))
                 return error("RuntimeError: Expected right hand to be a List when assigning with multiple index")
-            if ((value as ListVal).value.length !== indexs.length)
+            if ((value as ListVal).value.length !== indexes.length)
                 return error(
                     "RuntimeError: Length mismatch when assigning with multiple index. Expected",
-                    indexs.length,
+                    indexes.length,
                     "item but given",
                     (value as ListVal).value.length
                 )
-            for (const i in indexs) {
-                indexable.value[indexs[i]] = (value as ListVal).value[i]
+            for (const i in indexes) {
+                indexable.value[indexes[i]] = (value as ListVal).value[i]
             }
         } else {
             // single assign
-            indexable.value[indexs[0]] = value
+            indexable.value[indexes[0]] = value
         }
         return value
     }
@@ -369,7 +369,7 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
     const out: RuntimeVal[] = []
 
     for (const index of indexValue) {
-        let indexNum = (index as NumberVal).value
+        let indexNum = Math.round((index as NumberVal).value)
 
         if (!value.length) return error("XperBug: Length is not implmented")
 
