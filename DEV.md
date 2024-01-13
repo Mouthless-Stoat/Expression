@@ -4,11 +4,6 @@
 
 you found it you foudn my dev file welcome to my madness this is where all the note live
 
--   Range Expr
-    -   Syntax: x..y
-        -   x can be omitted and is default to 0
-        -   y can be omitted when use in indexing
-    -   Basically generate a list of interval [x, y)
 -   Code formatting and Syntax
     -   prop gonna just use the ast then format the thing base on the ast
 -   Push Notation
@@ -73,6 +68,11 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [ ] List Pop Notation
 [ ] List Push Notation
 [ ] Remove Commander dependency and make a custom solution
-[ ] Documentation for classes
 [ ] Comment code cus what were you cooking
+[ ] Organise AST code
+[ ] Doc for AST
+[ ] Organise Value code
+[ ] Doc for Value
+[ ] Language tour for the language
+[ ] Doc for the language in wiki
 ```
