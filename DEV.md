@@ -27,6 +27,10 @@ you found it you foudn my dev file welcome to my madness this is where all the n
     -   `list[index] >> list[index]` will count as push notation
     -   `list[index] >>>> list[index]` will cycle/rotate a list
 
+## Maybe
+
+-   `<<` reverse of `>>` to push back an pop front
+
 ## Todo
 
 `[X]` are Completed feature (done and can be use) <br/>
