@@ -40,4 +40,6 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [ ] List Pop Notation
 [ ] List Push Notation
 [ ] Remove Commander dependency and make a custom solution
+[ ] Documentation for classes
+[ ] Comment code cus what were you cooking
 ```
