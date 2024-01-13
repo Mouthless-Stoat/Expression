@@ -318,14 +318,32 @@ export default class Parser {
     }
 
     private parseMethod(): Expr {
-        let expr = this.parsePrimaryExpr()
+        let expr = this.parseJuxtaposition()
         while (this.isTypes(TokenType.Dot)) {
             this.next()
-            const method = this.parsePrimaryExpr()
+            const method = this.parseJuxtaposition()
             if (!isNodeType(method, NodeType.Identifier)) return error("SyntaxError: Expected Identifier")
             expr = new MethodExpr(expr, (method as Identifier).symbol, this.parseArgs())
         }
         return expr
+    }
+
+    private parseJuxtaposition(): Expr {
+        let num = this.parseFloat()
+        if (this.isTypes(TokenType.Identifier)) {
+            return new BinaryExpr(num, this.parsePrimaryExpr(), "*")
+        }
+        return num
+    }
+
+    private parseFloat(): Expr {
+        let whole = this.parsePrimaryExpr()
+        if (isNodeType(whole, NodeType.NumberLiteral) && this.isTypes(TokenType.Comma)) {
+            this.next()
+            const decimal = this.expect(TokenType.Number, "SyntaxError: Expected Number").value
+            return new NumberLiteral((whole as NumberLiteral).number + parseInt(decimal) / Math.pow(10, decimal.length))
+        }
+        return whole
     }
 
     private parsePrimaryExpr(): Expr {
@@ -333,15 +351,7 @@ export default class Parser {
             case TokenType.Identifier:
                 return new Identifier(this.next().value)
             case TokenType.Number:
-                let num = parseInt(this.next().value)
-                if (this.current().isTypes(TokenType.Identifier, TokenType.Pi, TokenType.Omega, TokenType.Avagadro))
-                    return new BinaryExpr(new NumberLiteral(num), this.parseExpr(), "*")
-                else if (this.isTypes(TokenType.Comma)) {
-                    this.next()
-                    const decimal = this.expect(TokenType.Number, "SyntaxError: Expected Number").value
-                    num = num + parseInt(decimal) / Math.pow(10, decimal.length)
-                }
-                return new NumberLiteral(num)
+                return new NumberLiteral(parseInt(this.next().value))
             case TokenType.Null:
             case TokenType.SemiColon:
                 this.next()
