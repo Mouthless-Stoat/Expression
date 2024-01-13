@@ -14,7 +14,7 @@ you found it you foudn my dev file welcome to my madness this is where all the n
 -   Push Notation
     -   Syntax: `val >> list[index]`
         -   `index` is optional and can be omitted
-        -   Push `val` in the end of the list if index is not given
+        -   Push `val` to the front of the list if index not given
         -   Provide index to push to a specific location.
             -   `8 >> a[1]` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
 -   Pop Notation
@@ -23,6 +23,9 @@ you found it you foudn my dev file welcome to my madness this is where all the n
         -   Pop the last element if `index` is not given
         -   Provide `index` to pop at a specific location
             -   `a[3] >>` pop the element at position `3` and shift everything up `[1;2;3;4;5] -> [1;2;3;5]`
+-   Variation of Pop and Push
+    -   `list[index] >> list[index]` will count as push notation
+    -   `list[index] >>>> list[index]` will cycle/rotate a list
 
 ## Todo
 
