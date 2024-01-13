@@ -157,20 +157,64 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         // get the important stuff
         const indexExpr = expr.lefthand as IndexExpr
         const indexable = evaluate(indexExpr.expr, env)
-        const indexValue = evaluate(indexExpr.index, env)
+        let indexValue = [evaluate(indexExpr.index, env)]
 
-        // make sure we can inex
+        // make sure we can index
         if (!indexable.indexable) return error("TypeError: Cannot index type", valueName[indexable.type])
         if (!indexable.length) return error("XperBug: Length is not implemented on type", valueName[indexable.type])
-        if (!isValueTypes(indexValue, ValueType.Number))
-            return error("TypeError: Cannot index type", ValueType[indexable.type], "with type", valueName[value.type])
 
-        // calculate relative index
-        let index = (indexValue as NumberVal).value
-        if (index < 0) index = index + indexable.length()
-        index = clamp(index, 0, indexable.length())
+        // make sure all the index are number
+        if (isValueTypes(indexValue[0], ValueType.List)) indexValue = (indexValue[0] as ListVal).value
+        if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
+            return error(
+                "TypeError: Cannot index type",
+                valueName[indexable.type],
+                "with type",
+                valueName[
+                    (indexValue.find((v) => !isValueTypes(v, ValueType.Number)) ?? error("XperBug: Cannot find item"))
+                        .type as keyof typeof valueName
+                ]
+            )
 
-        indexable.value[index] = value
+        // clean the index lsit to only be number
+        const indexs: number[] = []
+
+        if (indexValue.length > 1)
+            for (const i of indexValue) {
+                // get the number
+                let indexNum = (i as NumberVal).value
+
+                if (!indexable.length)
+                    return error("XperBug: Length is not implmented on type", valueName[indexable.type])
+
+                //checking if index is valid
+                if (indexNum < 0) indexNum = indexNum + indexable.length()
+
+                indexNum = clamp(indexNum, 0, indexable.length()) // clamp the index in case out of bound
+
+                indexs.push(indexNum)
+            }
+        else indexs.push((indexValue[0] as NumberVal).value)
+
+        // multi assign
+        if (indexs.length > 1) {
+            // make sure we have enough item
+            if (!isValueTypes(value, ValueType.List))
+                return error("RuntimeError: Expected right hand to be a List when assigning with multiple index")
+            if ((value as ListVal).value.length !== indexs.length)
+                return error(
+                    "RuntimeError: Length mismatch when assigning with multiple index. Expected",
+                    indexs.length,
+                    "item but given",
+                    (value as ListVal).value.length
+                )
+            for (const i in indexs) {
+                indexable.value[indexs[i]] = (value as ListVal).value[i]
+            }
+        } else {
+            // single assign
+            indexable.value[indexs[0]] = value
+        }
         return value
     }
     return error("SyntaxError: Invalid left-hand of assignment")
@@ -312,7 +356,15 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
     let indexValue = [evaluate(expr.index, env)]
     if (isValueTypes(indexValue[0], ValueType.List)) indexValue = (indexValue[0] as ListVal).value
     if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
-        return error("TypeError: Cannot index type", valueName[value.type], "with type", valueName[indexValue[0].type])
+        return error(
+            "TypeError: Cannot index type",
+            valueName[value.type],
+            "with type",
+            valueName[
+                (indexValue.find((v) => !isValueTypes(v, ValueType.Number)) ?? error("XperBug: Cannot find item"))
+                    .type as keyof typeof valueName
+            ]
+        )
 
     const out: RuntimeVal[] = []
 
@@ -321,7 +373,7 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
 
         if (!value.length) return error("XperBug: Length is not implmented")
 
-        //checking if index is validd
+        //checking if index is valid
         if (indexNum < 0) indexNum = indexNum + value.length()
         if (indexNum > value.length()) return error("RangeError: IndexNum out of bound")
 
