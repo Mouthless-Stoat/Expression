@@ -2,7 +2,7 @@ import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
 import { MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
 import { Expr, Identifier, IndexExpr, NodeType, isNodeType } from "../frontend/ast"
-import { evaluate } from "./interpreter"
+import { evaluate } from "./evaluator"
 import { error } from "../utils"
 
 export const PreUnaryTokens = [

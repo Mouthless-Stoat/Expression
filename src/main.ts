@@ -1,7 +1,7 @@
 import { program } from "commander"
 import { tokenize } from "./frontend/lexer"
 import Parser from "./frontend/parser"
-import { evalBlock } from "./runtime/interpreter"
+import { evalBlock } from "./runtime/evaluator"
 import Enviroment from "./runtime/enviroment"
 import readline from "readline"
 import fs from "fs"

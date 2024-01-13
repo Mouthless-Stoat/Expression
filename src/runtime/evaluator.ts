@@ -309,18 +309,26 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
     if (!value.indexable) return error("TypeError: Cannot index type", valueName[value.type])
 
     // evaluate the index
-    let indexValue = evaluate(expr.index, env)
-    if (!isValueTypes(indexValue, ValueType.Number))
-        return error("TypeError: Cannot index type", valueName[value.type], "with type", valueName[value.type])
-    let index = (indexValue as NumberVal).value
+    let indexValue = [evaluate(expr.index, env)]
+    if (isValueTypes(indexValue[0], ValueType.List)) indexValue = (indexValue[0] as ListVal).value
+    if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
+        return error("TypeError: Cannot index type", valueName[value.type], "with type", valueName[indexValue[0].type])
 
-    if (!value.length) return error("XperBug: Length is not implmented")
+    const out: RuntimeVal[] = []
 
-    //checking if index is validd
-    if (index < 0) index = index + value.length()
-    if (index > value.length()) return error("RangeError: Index out of bound")
+    for (const index of indexValue) {
+        let indexNum = (index as NumberVal).value
 
-    return value.value[index]
+        if (!value.length) return error("XperBug: Length is not implmented")
+
+        //checking if index is validd
+        if (indexNum < 0) indexNum = indexNum + value.length()
+        if (indexNum > value.length()) return error("RangeError: IndexNum out of bound")
+
+        out.push(value.value[indexNum])
+    }
+
+    return out.length > 1 ? new ListVal(out) : out[0]
 }
 
 function evalMethodExpr(expr: MethodExpr, env: Enviroment): RuntimeVal {

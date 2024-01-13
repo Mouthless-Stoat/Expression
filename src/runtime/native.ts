@@ -17,7 +17,7 @@ import {
 } from "./value"
 import { error, expectArgs } from "../utils"
 import Enviroment from "./enviroment"
-import { evalBlock } from "./interpreter"
+import { evalBlock } from "./evaluator"
 import Parser from "../frontend/parser"
 
 export const NATIVEGLOBAL: Record<string, RuntimeVal> = {
