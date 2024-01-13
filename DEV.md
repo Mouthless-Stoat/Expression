@@ -1,4 +1,30 @@
-# Todo
+# Dev File
+
+## Note
+
+you found it you foudn my dev file welcome to my madness this is where all the note live
+
+-   Range Expr
+    -   Syntax: x..y
+        -   x can be omitted and is default to 0
+        -   y can be omitted when use in indexing
+    -   Basically generate a list of interval [x, y)
+-   Code formatting and Syntax
+    -   prop gonna just use the ast then format the thing base on the ast
+-   Push Notation
+    -   Syntax: `val >> list[index]`
+        -   `index` is optional and can be omitted
+        -   Push `val` in the end of the list if index is not given
+        -   Provide index to push to a specific location.
+            -   `8 >> a[1]` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
+-   Pop Notation
+    -   Syntax: `list[index] >>`
+        -   `index` is optional and can be omitted
+        -   Pop the last element if `index` is not given
+        -   Provide `index` to pop at a specific location
+            -   `a[3] >>` pop the element at position `3` and shift everything up `[1;2;3;4;5] -> [1;2;3;5]`
+
+## Todo
 
 `[X]` are Completed feature (done and can be use) <br/>
 `[V]` are Almost Completed feature (mostly for in between commit) <br/>
@@ -19,7 +45,7 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] For of Loop Expr (track item)
 [X] For in Loop Expr (track loop count)
 [X] More method for Number Type
-[ ] More method for List Type
+[X] More method for List Type
 [X] More native helper like type checking
 [X] Boolean operator
 [ ] Code formatting
