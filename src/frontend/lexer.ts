@@ -72,6 +72,7 @@ export enum TokenType {
     Equality, // ==
     And, // &&
     Or, // ||
+    DoubleDot, // ..
 
     // not use
     Spaceship, // <=>
@@ -160,6 +161,7 @@ const multiToken: Map<string, TokenType> = (() => {
                 "&&": TokenType.And,
                 "||": TokenType.Or,
                 Nₐ: TokenType.Avagadro,
+                "..": TokenType.DoubleDot,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )

@@ -23,6 +23,7 @@ import {
     IndexExpr,
     MethodExpr,
     PostUnaryExpr,
+    RangeExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -99,6 +100,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalShiftExpr(astNode as ShiftExpr, env)
         case NodeType.MethodExpr:
             return evalMethodExpr(astNode as MethodExpr, env)
+        case NodeType.RangeExpr:
+            return evalRangeExpr(astNode as RangeExpr, env)
         default:
             return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
@@ -391,4 +394,24 @@ function evalMethodExpr(expr: MethodExpr, env: Enviroment): RuntimeVal {
         return error("RuntimeError: Type", valueName[value.type], `does not have "${expr.method}"`)
     const args = expr.args.map((v) => evaluate(v, env))
     return value.method[expr.method](args, env)
+}
+
+function evalRangeExpr(range: RangeExpr, env: Enviroment): RuntimeVal {
+    const value = [evaluate(range.start, env), evaluate(range.end, env), evaluate(range.step, env)]
+
+    if (!value.every((v) => isValueTypes(v, ValueType.Number)))
+        return error(
+            "TypeError: All Range Expr value must be number but given",
+            value.map((v) => valueName[v.type]).join(", ")
+        )
+
+    const [start, end, step] = (value as NumberVal[]).map((v) => v.value)
+    const out = []
+    let v = start
+    while (range.inclusive ? v <= end : v < end) {
+        out.push(new NumberVal(v))
+        v += step
+    }
+
+    return new ListVal(out)
 }

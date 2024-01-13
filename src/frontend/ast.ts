@@ -21,6 +21,7 @@ export enum NodeType {
     ForInExpr,
     ForOfExpr,
     MethodExpr,
+    RangeExpr,
 
     // literal
     NumberLiteral,
@@ -280,5 +281,20 @@ export class MethodExpr implements Expr {
         this.expr = expr
         this.method = meth
         this.args = args
+    }
+}
+
+export class RangeExpr implements Expr {
+    type = NodeType.RangeExpr
+    start: Expr
+    end: Expr
+    step: Expr
+    inclusive: boolean
+
+    constructor(start: Expr, end: Expr, inclusive: boolean, step: Expr) {
+        this.start = start
+        this.end = end
+        this.inclusive = inclusive
+        this.step = step
     }
 }

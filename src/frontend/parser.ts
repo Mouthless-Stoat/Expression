@@ -26,6 +26,7 @@ import {
     IndexExpr,
     MethodExpr,
     PostUnaryExpr,
+    RangeExpr,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
@@ -138,7 +139,8 @@ export default class Parser {
     // 4. Call
     // 5. Prefix Unary Operator
     // 6. Postfix Unary Operator
-    // 7. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
+    // 7. Range Expr
+    // 8. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
     // ------ Statment ------ these order mean nothing
     // 8. Assignment
     // 9. If
@@ -222,7 +224,7 @@ export default class Parser {
     }
 
     private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseLogicalExpr()
+        const leftHand = this.parseRangeExpr()
         if (
             (this.isTypes(...BinaryOpToken, TokenType.Ampersand) &&
                 this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
@@ -242,6 +244,31 @@ export default class Parser {
         return leftHand
     }
 
+    private parseRangeExpr(): Expr {
+        let start
+
+        if (this.isTypes(TokenType.DoubleDot)) start = new NumberLiteral(0)
+        else start = this.parseLogicalExpr()
+
+        if (this.isTypes(TokenType.DoubleDot)) {
+            this.next()
+            let inclusive = false
+            if (this.isTypes(TokenType.Equal)) {
+                this.next()
+                inclusive = true
+            }
+            let end = this.parseLogicalExpr()
+            let step
+            if (this.isTypes(TokenType.DoubleDot)) {
+                this.next()
+                step = this.parseLogicalExpr()
+            }
+            return new RangeExpr(start, end, inclusive, step ?? new NumberLiteral(1))
+        }
+        return start
+    }
+
+    // binnary expr
     private parseLogicalExpr(): Expr {
         let leftHand = this.parseAdditiveExpr()
 
@@ -277,6 +304,7 @@ export default class Parser {
 
         return leftHand
     }
+    // end binary expr
 
     private parsePostUnaryExpr(): Expr {
         let expr = this.parsePreUnaryExpr()
