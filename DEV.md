@@ -13,7 +13,7 @@ you found it you foudn my dev file welcome to my madness this is where all the n
         -   Provide index to push to a specific location.
             -   `8 >> a[1]` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
 -   Pop Notation
-    -   Syntax: `list[index] >>`
+    -   Syntax: `<< list[index]`
         -   `index` is optional and can be omitted
         -   Pop the last element if `index` is not given
         -   Provide `index` to pop at a specific location
