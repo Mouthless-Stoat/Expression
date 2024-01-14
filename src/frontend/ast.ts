@@ -88,13 +88,15 @@ export class AssignmentExpr implements Expr {
     operator: BinaryOpType | undefined
     isConst: boolean
     isRef: boolean
+    limit: Expr
 
-    constructor(left: Expr, right: Expr, op: BinaryOpType | undefined, isRef: boolean, isConst: boolean) {
+    constructor(left: Expr, right: Expr, op: BinaryOpType | undefined, isRef: boolean, isConst: boolean, limit: Expr) {
         this.lefthand = left
         this.rightHand = right
         this.operator = op
         this.isConst = isConst
         this.isRef = isRef
+        this.limit = limit
     }
 }
 
@@ -156,6 +158,7 @@ export const SIX = new Identifier("six")
 export const SEVEN = new Identifier("seven")
 export const EIGHT = new Identifier("eight")
 export const NINE = new Identifier("nine")
+export const NEG = (expr: Expr) => new PreUnaryExpr(expr, "-")
 
 export interface BooleanLiteral extends Expr {
     type: NodeType.BooleanLiteral

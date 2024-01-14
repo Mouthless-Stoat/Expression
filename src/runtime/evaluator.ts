@@ -26,6 +26,8 @@ import {
     RangeExpr,
     PopExpr,
     PushExpr,
+    ONE,
+    NEG,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -160,8 +162,18 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     const value = evaluate(expr.rightHand, env)
     if (value.isConst) value.isConst = expr.isConst
 
+    const limit = evaluate(expr.limit, env)
+    if (!isValueTypes(limit, ValueType.Number))
+        return error("TypeError: Variable limit must be type Number but given", valueName[limit.type])
+
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
-        return env.assignVar((expr.lefthand as Identifier).symbol, value, expr.isConst, expr.isRef)
+        return env.assignVar(
+            (expr.lefthand as Identifier).symbol,
+            value,
+            expr.isConst,
+            expr.isRef,
+            (limit as NumberVal).value
+        )
     } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
         // get the important stuff
         const indexExpr = expr.lefthand as IndexExpr
@@ -294,7 +306,8 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
                 : expr.leftHand,
             undefined,
             false,
-            false
+            false,
+            NEG(ONE)
         ),
         env
     )

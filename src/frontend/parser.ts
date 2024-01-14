@@ -31,11 +31,13 @@ import {
     PushExpr,
     ZERO,
     ONE,
+    NEG,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
+import { constrainedMemory } from "process"
 
 // class to parse and store stuff
 export default class Parser {
@@ -246,12 +248,30 @@ export default class Parser {
     private parseAssignmentExpr(): Expr {
         const leftHand = this.parsePushExpr()
         if (
+            // a<1> = 10
+            (this.isTypes(TokenType.OpenBrace) &&
+                this.token[1].isTypes(TokenType.Number) &&
+                this.token[2].isTypes(TokenType.CloseBrace) &&
+                this.token[3].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+            // a<1> *= 10
+            (this.isTypes(TokenType.Lesser) &&
+                this.token[1].isTypes(TokenType.Number) &&
+                this.token[2].isTypes(TokenType.Greater) &&
+                this.token[3].isTypes(...BinaryOpToken, TokenType.Ampersand) &&
+                this.token[4].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+            // a *= 10
             (this.isTypes(...BinaryOpToken, TokenType.Ampersand) &&
                 this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+            // a = 10
             this.isTypes(TokenType.Equal, TokenType.DoubleColon)
         ) {
-            let operator
+            let operator, limit
             let isRef = false
+            if (this.isTypes(TokenType.OpenBrace)) {
+                this.next()
+                limit = new NumberLiteral(parseInt(this.next().value))
+                this.next() //discard }
+            }
             if (this.isTypes(...BinaryOpToken)) operator = this.next().value as BinaryOpType
             if (this.isTypes(TokenType.Ampersand)) {
                 this.next()
@@ -259,7 +279,7 @@ export default class Parser {
             }
             const isConst = this.next().isTypes(TokenType.DoubleColon)
             const rightHand = this.parseExpr()
-            return new AssignmentExpr(leftHand, rightHand, operator, isRef, isConst)
+            return new AssignmentExpr(leftHand, rightHand, operator, isRef, isConst, limit ?? NEG(ONE))
         }
         return leftHand
     }
@@ -277,7 +297,7 @@ export default class Parser {
             }
 
             const list = this.parseRangeExpr()
-            value = new PushExpr(value, list, index ?? new PreUnaryExpr(ONE, "-"))
+            value = new PushExpr(value, list, index ?? NEG(ONE))
         }
         return value
     }
@@ -396,7 +416,7 @@ export default class Parser {
 
     private parseJuxtaposition(): Expr {
         let num = this.parseFloat()
-        if (this.isTypes(TokenType.Identifier)) {
+        if (isNodeType(num, NodeType.NumberLiteral) && this.isTypes(TokenType.Identifier)) {
             return new BinaryExpr(num, this.parsePrimaryExpr(), "*")
         }
         return num

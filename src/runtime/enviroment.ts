@@ -2,11 +2,16 @@ import { RuntimeVal, NativeFunctionVal, cloneValue } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 
+interface Variable {
+    value: RuntimeVal
+    accessLimit: number
+}
+
 /**
  * A enviroment to store variable and other identifier
  * */
 export default class Enviroment {
-    private variables: Map<string, RuntimeVal> = new Map()
+    private variables: Map<string, Variable> = new Map()
     private constances: Set<string> = new Set()
     private startVar: number
     private varLimt: number = 10
@@ -32,14 +37,14 @@ export default class Enviroment {
      *
      * @returns the value the variable
      * */
-    public assignVar(name: string, value: RuntimeVal, isConst: boolean, ref = false): RuntimeVal {
+    public assignVar(name: string, value: RuntimeVal, isConst: boolean, ref = false, limit = -1): RuntimeVal {
         // if this run before startVar is define the value will be NaN and will return false
         if (this.variables.size - this.startVar >= this.varLimt)
             return error("Xper: Due to memory concern you cannot have more than", this.varLimt, "variables")
 
         if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) this.constances.add(name)
-        this.variables.set(name, ref ? value : cloneValue(value))
+        this.variables.set(name, { accessLimit: limit, value: ref ? value : cloneValue(value) })
         return value
     }
 
@@ -54,7 +59,14 @@ export default class Enviroment {
         if (!this.hasVar(name)) {
             return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
-        return this.variables.get(name) as RuntimeVal
+        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
+
+        variable.accessLimit -= 1
+        if (variable.accessLimit == 0) {
+            this.variables.delete(name)
+            if (this.isConstant(name)) this.constances.delete(name)
+        }
+        return variable.value as RuntimeVal
     }
 
     /**
