@@ -155,7 +155,7 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     if (value.isConst) value.isConst = expr.isConst
 
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
-        return env.assignVar((expr.lefthand as Identifier).symbol, value, expr.isConst)
+        return env.assignVar((expr.lefthand as Identifier).symbol, value, expr.isConst, expr.isRef)
     } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
         // get the important stuff
         const indexExpr = expr.lefthand as IndexExpr
