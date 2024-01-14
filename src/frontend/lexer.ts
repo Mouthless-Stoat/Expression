@@ -24,8 +24,6 @@ export enum TokenType {
     CloseBrace,
     OpenBracket,
     CloseBracket,
-    OpenDoubleAngle,
-    CloseDoubleAngle,
 
     // symbol
     /// In use
@@ -47,6 +45,8 @@ export enum TokenType {
     Question,
     Exclamation,
     Octothorp,
+    LeftDoubleAngle,
+    RightDoubleAngle,
 
     /// not use
     Quote,
@@ -147,8 +147,8 @@ const multiToken: Map<string, TokenType> = (() => {
     return new Map<string, TokenType>(
         [
             ...Object.entries({
-                "<<": TokenType.OpenDoubleAngle,
-                ">>": TokenType.CloseDoubleAngle,
+                "<<": TokenType.LeftDoubleAngle,
+                ">>": TokenType.RightDoubleAngle,
                 "++": TokenType.Increment,
                 "--": TokenType.Decrement,
                 "::": TokenType.DoubleColon,

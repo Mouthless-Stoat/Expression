@@ -24,6 +24,7 @@ import {
     MethodExpr,
     PostUnaryExpr,
     RangeExpr,
+    PopExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -102,6 +103,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalMethodExpr(astNode as MethodExpr, env)
         case NodeType.RangeExpr:
             return evalRangeExpr(astNode as RangeExpr, env)
+        case NodeType.PopExpr:
+            return evalPopExpr(astNode as PopExpr, env)
         default:
             return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
@@ -378,7 +381,7 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
 
         //checking if index is valid
         if (indexNum < 0) indexNum = indexNum + value.length()
-        if (indexNum > value.length()) return error("RangeError: IndexNum out of bound")
+        if (indexNum > value.length()) return error("RangeError: Index out of bound")
 
         out.push(value.value[indexNum])
     }
@@ -414,4 +417,37 @@ function evalRangeExpr(range: RangeExpr, env: Enviroment): RuntimeVal {
     }
 
     return new ListVal(out)
+}
+
+function evalPopExpr(expr: PopExpr, env: Enviroment): RuntimeVal {
+    const value = evaluate(expr.list, env)
+    if (!isValueTypes(value, ValueType.List)) {
+        return value
+    } else {
+        const listValue = value as ListVal
+        let indexValue = [evaluate(expr.index, env)]
+        if (isValueTypes(indexValue[0], ValueType.List)) indexValue = (indexValue[0] as ListVal).value
+        if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
+            return error(
+                "TypeError: Cannot index type",
+                valueName[value.type],
+                "with type",
+                valueName[
+                    (indexValue.find((v) => !isValueTypes(v, ValueType.Number)) ?? error("XperBug: Cannot find item"))
+                        .type as keyof typeof valueName
+                ]
+            )
+
+        if (!(indexValue as NumberVal[]).every((v) => v.value <= listValue.value.length)) {
+            return error("RangeError: Index out of bound")
+        }
+
+        const indexNum = indexValue.map((v) => v.value)
+
+        const out: RuntimeVal[] = []
+        for (const index of indexNum) {
+            out.push(...listValue.value.splice(index, 1))
+        }
+        return out.length > 1 ? new ListVal(out) : out[0]
+    }
 }

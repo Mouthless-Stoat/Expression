@@ -22,6 +22,7 @@ export enum NodeType {
     ForOfExpr,
     MethodExpr,
     RangeExpr,
+    PopExpr,
 
     // literal
     NumberLiteral,
@@ -143,6 +144,17 @@ export class Identifier implements Expr {
         this.symbol = symbol
     }
 }
+
+export const ZERO = new Identifier("zero")
+export const ONE = new Identifier("one")
+export const TWO = new Identifier("two")
+export const THREE = new Identifier("three")
+export const FOUR = new Identifier("four")
+export const FIVE = new Identifier("five")
+export const SIX = new Identifier("six")
+export const SEVEN = new Identifier("seven")
+export const EIGHT = new Identifier("eight")
+export const NINE = new Identifier("nine")
 
 export interface BooleanLiteral extends Expr {
     type: NodeType.BooleanLiteral
@@ -296,5 +308,16 @@ export class RangeExpr implements Expr {
         this.end = end
         this.inclusive = inclusive
         this.step = step
+    }
+}
+
+export class PopExpr implements Expr {
+    type = NodeType.PopExpr
+    list: Expr
+    index: Expr
+
+    constructor(list: Expr, index: Expr) {
+        this.list = list
+        this.index = index
     }
 }

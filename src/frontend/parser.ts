@@ -27,6 +27,9 @@ import {
     MethodExpr,
     PostUnaryExpr,
     RangeExpr,
+    PopExpr,
+    ZERO,
+    ONE,
 } from "./ast"
 import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
 import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
@@ -141,12 +144,14 @@ export default class Parser {
     // 6. Postfix Unary Operator
     // 7. Range Expr
     // 8. Binary Operator (Multi then Add then logical) NOTE flow from add to mul to logical
-    // ------ Statment ------ these order mean nothing
-    // 8. Assignment
-    // 9. If
-    // 10. Shift
-    // 11. Loop
-    // 12. Function Construction
+    // 9. Push Notation
+    // ------ Statment ------ mostly statement
+    // 10. Assignment
+    // 11. Pop Notaion NOTE Not a stament here so assignment is a valid pop expr
+    // 12. If
+    // 13. Shift
+    // 14. Loop
+    // 15. Function Construction
     //
     // Highest priority will be parse last so it can be chain
     // Lower priority can't be use for higher without grouping
@@ -208,7 +213,7 @@ export default class Parser {
     }
 
     private parseIfExpr(): Expr {
-        let condition = this.parseAssignmentExpr()
+        let condition = this.parsePopExpr()
         if (this.isTypes(TokenType.Question)) {
             this.next() // discard the ?
             const trueBlock = this.parseBlockExpr() as BlockLiteral
@@ -221,6 +226,20 @@ export default class Parser {
             condition = new IfExpr(condition, trueBlock, falseBlock)
         }
         return condition
+    }
+
+    private parsePopExpr(): Expr {
+        if (!this.isTypes(TokenType.LeftDoubleAngle)) return this.parseAssignmentExpr()
+
+        this.next()
+        let index
+        if (this.isTypes(TokenType.OpenParen)) {
+            this.next()
+            index = this.parseExpr()
+            this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
+        }
+        const list = this.parseExpr()
+        return new PopExpr(list, index ?? ZERO)
     }
 
     private parseAssignmentExpr(): Expr {
@@ -247,7 +266,7 @@ export default class Parser {
     private parseRangeExpr(): Expr {
         let start
 
-        if (this.isTypes(TokenType.DoubleDot)) start = new NumberLiteral(0)
+        if (this.isTypes(TokenType.DoubleDot)) start = ZERO
         else start = this.parseLogicalExpr()
 
         if (this.isTypes(TokenType.DoubleDot)) {
@@ -263,7 +282,7 @@ export default class Parser {
                 this.next()
                 step = this.parseLogicalExpr()
             }
-            return new RangeExpr(start, end, inclusive, step ?? new NumberLiteral(1))
+            return new RangeExpr(start, end, inclusive, step ?? ONE)
         }
         return start
     }
