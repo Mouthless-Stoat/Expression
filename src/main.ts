@@ -6,6 +6,8 @@ import Enviroment from "./runtime/enviroment"
 import readline from "readline"
 import fs from "fs"
 import { checkString } from "./runtime/value"
+import { XperError } from "./utils"
+import { error } from "console"
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -52,10 +54,14 @@ async function repl(debug: boolean, stack: boolean) {
         try {
             evalXper(input, debug, stack, parser, env)
         } catch (err) {
-            //@ts-expect-error
-            if (err.name !== "XperError") {
-                console.log("Oh no you encounter a Wild Xper Bug. Please report this")
-                console.log(err)
+            if (err instanceof Error && !(err instanceof XperError)) {
+                if (err.message === "Maximum call stack size exceeded") {
+                    console.log("Oh no recursion detected maybe don't do that.")
+                    console.log("If you are in the repl try unsigning whatever you were doing.")
+                } else {
+                    console.log("Oh no you encounter a Wild Xper Bug. Please report this:")
+                    console.log(err)
+                }
             }
         }
         console.log("=".repeat(50))

@@ -4,7 +4,7 @@ let scream = true
 
 export const toggleScream = (state?: boolean) => (scream = state ?? !scream)
 
-class XperError extends Error {
+export class XperError extends Error {
     constructor(msg: string) {
         super(msg)
         this.name = "XperError"
