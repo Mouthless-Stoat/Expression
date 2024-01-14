@@ -11,16 +11,15 @@ you found it you foudn my dev file welcome to my madness this is where all the n
         -   `index` is optional and can be omitted
         -   Push `val` to the back of the list if index not given
         -   Provide index to push to a specific location.
-            -   `8 >> a[1]` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
+            -   `8 >>(1) a` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
 -   Pop Notation
     -   Syntax: `<<(index) list`
         -   `index` is optional and can be omitted
-        -   Pop the last element if `index` is not given
+        -   Pop the first element if `index` is not given
         -   Provide `index` to pop at a specific location
-            -   `a[3] >>` pop the element at position `3` and shift everything up `[1;2;3;4;5] -> [1;2;3;5]`
--   Variation of Pop and Push
-    -   `list[index] >> list[index]` will count as push notation
-    -   `list[index] >>>> list[index]` will cycle/rotate a list
+            -   `<<(3) a` pop the element at position `3` and shift everything up `[1;2;3;4;5] -> [1;2;3;5]`
+        -   If the list is not a List type it will be enclose in a list to work
+            -   `1 >> 2` will make `[2;1]`
 
 ## Maybe
 
