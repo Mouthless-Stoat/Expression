@@ -167,13 +167,7 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         return error("TypeError: Variable limit must be type Number but given", valueName[limit.type])
 
     if (isNodeType(expr.lefthand, NodeType.Identifier)) {
-        return env.assignVar(
-            (expr.lefthand as Identifier).symbol,
-            value,
-            expr.isConst,
-            expr.isRef,
-            (limit as NumberVal).value
-        )
+        return env.assignVar((expr.lefthand as Identifier).symbol, value, expr.isConst, expr.isRef, limit as NumberVal)
     } else if (isNodeType(expr.lefthand, NodeType.IndexExpr)) {
         // get the important stuff
         const indexExpr = expr.lefthand as IndexExpr

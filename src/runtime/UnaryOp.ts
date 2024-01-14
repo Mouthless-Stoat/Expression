@@ -11,10 +11,11 @@ export const PreUnaryTokens = [
     TokenType.Increment,
     TokenType.Decrement,
     TokenType.Star,
+    TokenType.Ampersand,
 ]
 
 // binary operation type
-export type PreUnaryType = "-" | "!" | "++" | "--" | "*"
+export type PreUnaryType = "-" | "!" | "++" | "--" | "*" | "&"
 
 // implementation for all binary operator between every run time value
 export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => RuntimeVal> = {
@@ -68,6 +69,10 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
             return oldVal
         }
         return error("TypeError: Cannot unsign")
+    },
+    "&": (expr, env) => {
+        if (!isNodeType(expr, NodeType.Identifier)) return error("TypeError: Cannot access lifetime of non-Identifier")
+        return env.trueGetVar((expr as Identifier).symbol).accessLimit
     },
 }
 

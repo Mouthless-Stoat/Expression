@@ -1,10 +1,12 @@
-import { RuntimeVal, NativeFunctionVal, cloneValue } from "./value"
+import { RuntimeVal, NativeFunctionVal, cloneValue, NumberVal } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
+import { NEG, ONE } from "../frontend/ast"
+import { evaluate } from "./evaluator"
 
 interface Variable {
     value: RuntimeVal
-    accessLimit: number
+    accessLimit: NumberVal
 }
 
 /**
@@ -37,8 +39,15 @@ export default class Enviroment {
      *
      * @returns the value the variable
      * */
-    public assignVar(name: string, value: RuntimeVal, isConst: boolean, ref = false, limit = -1): RuntimeVal {
+    public assignVar(
+        name: string,
+        value: RuntimeVal,
+        isConst: boolean,
+        ref = false,
+        limit = new NumberVal(-1)
+    ): RuntimeVal {
         // if this run before startVar is define the value will be NaN and will return false
+        if (limit.value === 0) return value
         if (this.variables.size - this.startVar >= this.varLimt)
             return error("Xper: Due to memory concern you cannot have more than", this.varLimt, "variables")
 
@@ -61,11 +70,27 @@ export default class Enviroment {
         }
         let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
 
-        if (--variable.accessLimit == 0) {
+        if (--variable.accessLimit.value === 0) {
             this.variables.delete(name)
             if (this.isConstant(name)) this.constances.delete(name)
         }
         return variable.value as RuntimeVal
+    }
+
+    /**
+     * Get the variable
+     * Error if the variable does not exist
+     * @param name The name of the variable
+     *
+     * @returns The variable
+     * */
+    public trueGetVar(name: string): Variable {
+        if (!this.hasVar(name)) {
+            return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
+        }
+        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
+
+        return variable
     }
 
     /**
