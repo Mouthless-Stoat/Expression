@@ -61,8 +61,7 @@ export default class Enviroment {
         }
         let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
 
-        variable.accessLimit -= 1
-        if (variable.accessLimit == 0) {
+        if (--variable.accessLimit == 0) {
             this.variables.delete(name)
             if (this.isConstant(name)) this.constances.delete(name)
         }
