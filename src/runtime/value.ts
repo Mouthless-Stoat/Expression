@@ -185,6 +185,24 @@ export class ListVal implements RuntimeVal {
 
     value: RuntimeVal[]
     method: Record<string, FunctionCall> = {
+        find: (args: RuntimeVal[], _) => {
+            let value = expectArgs(args, 1, false)[0] as RuntimeVal
+            if (!isValueTypes(value, ValueType.List)) value = new ListVal([value])
+            // https://stackoverflow.com/q/29425820/17055233
+            // small changes to improve performent slightly
+            var found, j
+            for (var i = 0; i < 1 + (this.value.length - value.value.length); ++i) {
+                found = true
+                for (j = 0; j < value.value.length; ++j) {
+                    if (JSON.stringify(this.value[i + j]) !== JSON.stringify(value.value[j])) {
+                        found = false
+                        break
+                    }
+                }
+                if (found) return new NumberVal(i)
+            }
+            return new NumberVal(-1)
+        },
         replace: (args: RuntimeVal[], _: Enviroment) => {
             args = expectArgs(args, 2)
             if (!isValueTypes(args[0], ValueType.List)) {
@@ -209,18 +227,19 @@ export class ListVal implements RuntimeVal {
                         .map((c) => new CharacterVal(c))
                 )
             }
-            // https://stackoverflow.com/q/29425820/17055233
-            // small changes to improve performent slightly
             const index = (this.method.find(search.value, _) as NumberVal).value
             if (index === -1) return this
             return new ListVal(
                 this.value.slice(0, index).concat(replace.value, this.value.slice(index + search.value.length))
             )
         },
-        find: (args: RuntimeVal[], _) => {
+        findAll: (args: RuntimeVal[], _) => {
             let value = expectArgs(args, 1, false)[0] as RuntimeVal
             if (!isValueTypes(value, ValueType.List)) value = new ListVal([value])
+            // https://stackoverflow.com/q/29425820/17055233
+            // small changes to make find all
             var found, j
+            var foundIndex = []
             for (var i = 0; i < 1 + (this.value.length - value.value.length); ++i) {
                 found = true
                 for (j = 0; j < value.value.length; ++j) {
@@ -229,9 +248,43 @@ export class ListVal implements RuntimeVal {
                         break
                     }
                 }
-                if (found) return new NumberVal(i)
+                if (found) foundIndex.push(new NumberVal(i))
             }
-            return new NumberVal(-1)
+            return new ListVal(foundIndex)
+        },
+        replaceAll: (args: RuntimeVal[], _: Enviroment) => {
+            args = expectArgs(args, 2)
+            if (!isValueTypes(args[0], ValueType.List)) {
+                args[0] = new ListVal([args[0]])
+            }
+            if (!isValueTypes(args[1], ValueType.List)) {
+                args[1] = new ListVal([args[1]])
+            }
+
+            const search = args[0] as ListVal
+            const replace = args[1] as ListVal
+
+            if (
+                this.value.every((v) => isValueTypes(v, ValueType.Character)) &&
+                search.value.every((v) => isValueTypes(v, ValueType.Character)) &&
+                replace.value.every((v) => isValueTypes(v, ValueType.Character))
+            ) {
+                return new ListVal(
+                    this.toString()
+                        .replaceAll(search.toString(), replace.toString())
+                        .split("")
+                        .map((c) => new CharacterVal(c))
+                )
+            }
+            const indexs = (this.method.findAll(search.value, _) as ListVal).value.map((v) => (v as NumberVal).value)
+            if (indexs.length < 1) return this
+            const copy = cloneValue(this)
+            for (const index of indexs) {
+                copy.value = copy.value
+                    .slice(0, index)
+                    .concat(replace.value, this.value.slice(index + search.value.length))
+            }
+            return copy
         },
     }
 
