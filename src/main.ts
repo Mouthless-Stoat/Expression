@@ -3,18 +3,9 @@ import { tokenize } from "./frontend/lexer"
 import Parser from "./frontend/parser"
 import { evalBlock } from "./runtime/evaluator"
 import Enviroment from "./runtime/enviroment"
-import readline from "readline"
 import fs from "fs"
 import { checkString } from "./runtime/value"
-import { XperError } from "./utils"
-import { error } from "console"
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-})
-
-// Create a promise based version of rl.question so we can use it in async functions
-const question = (str: string) => new Promise((resolve) => rl.question(str, resolve))
+import { XperError, input } from "./utils"
 
 function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser, env?: Enviroment) {
     parser = parser ?? new Parser()
@@ -46,13 +37,13 @@ async function repl(debug: boolean, stack: boolean) {
     const parser = new Parser()
     const env = new Enviroment()
     while (true) {
-        let input = (await question("> ")) as string
-        if (!input || input === "exit") {
+        let inp = (await input("> ")) as string
+        if (!inp || inp === "exit") {
             throw new Error("Exit")
         }
 
         try {
-            evalXper(input, debug, stack, parser, env)
+            evalXper(inp, debug, stack, parser, env)
         } catch (err) {
             if (err instanceof Error && !(err instanceof XperError)) {
                 if (err.message === "Maximum call stack size exceeded") {

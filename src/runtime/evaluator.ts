@@ -235,7 +235,7 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
     return error("SyntaxError: Invalid left-hand of assignment")
 }
 
-export function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
+function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
     const args = caller.args.map((arg) => evaluate(arg, env))
     const func = evaluate(caller.caller, env)
 

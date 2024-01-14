@@ -49,6 +49,7 @@ export interface RuntimeVal {
     indexable?: boolean
     method?: Record<string, FunctionCall>
     toString?(): string
+    toNumber?(): number
     toPrint?(): string
     length?(): number
     enumerate?(): RuntimeVal[]
@@ -112,6 +113,9 @@ export class NumberVal implements RuntimeVal {
     }
     toString(): string {
         return this.value.toString()
+    }
+    toNumber(): number {
+        return this.value
     }
     add(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value + rhs.value)
@@ -243,6 +247,15 @@ export class ListVal implements RuntimeVal {
             )
             .join("")
     }
+    toNumber(): number {
+        const num = this.value
+            .map((v) =>
+                v.toNumber ? v.toNumber() : error("TypeError: Cannot convert type", valueName[v.type], "to Number")
+            )
+            .join("")
+
+        return parseFloat(num)
+    }
 
     toPrint(): string {
         return `[${this.value.map((v) => checkString(v)).join("; ")}]`
@@ -269,6 +282,10 @@ export class CharacterVal implements RuntimeVal {
     }
     toString(): string {
         return this.value
+    }
+    toNumber(): number {
+        const num = parseFloat(this.value)
+        return isNaN(num) ? error(`TypeError: Cannot convert Character "${this.value}" to Number`) : num
     }
 }
 

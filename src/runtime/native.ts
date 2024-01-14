@@ -16,7 +16,6 @@ import {
     valueName,
 } from "./value"
 import { error, expectArgs } from "../utils"
-import Enviroment from "./enviroment"
 import { evalBlock } from "./evaluator"
 import Parser from "../frontend/parser"
 
@@ -71,8 +70,12 @@ function genNamespace(name: string, namespace: Record<string, RuntimeVal>): Func
 }
 
 export const NATIVEFUNC: Record<string, FunctionCall> = {
-    print: (args, _) => {
+    log: (args, _) => {
         console.log(...args.map((v) => checkString(v)))
+        return NULLVAL
+    },
+    print: (args, _) => {
+        console.log(...args.map((v) => (v.toString ? v.toString() : 0)))
         return NULLVAL
     },
     math: genNamespace("Math", {
@@ -130,6 +133,11 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         const value = expectArgs(args, 1)[0]
         if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
         return MKSTRING(value.toString())
+    },
+    num: (args, _) => {
+        const value = expectArgs(args, 1)[0]
+        if (!value.toNumber) return error("TypeError: Cannot convert type", valueName[value.type], "to Number")
+        return new NumberVal(value.toNumber())
     },
     eval: (args, env) => {
         const value = expectArgs(args, 1)[0] as ListVal

@@ -1,4 +1,5 @@
 import { RuntimeVal } from "./runtime/value"
+import readline from "readline"
 
 let scream = true
 
@@ -25,3 +26,10 @@ export function expectArgs(args: RuntimeVal[], amount: number, isExact = true): 
         return error(`Expected${isExact ? "" : " at least"}`, amount, "argument but given", args.length)
     return args
 }
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+})
+
+// Create a promise based version of rl.question so we can use it in async functions
+export const input = (str: string): Promise<string> => new Promise((resolve) => rl.question(str, resolve))
