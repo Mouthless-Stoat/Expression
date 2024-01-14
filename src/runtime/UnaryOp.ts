@@ -1,6 +1,6 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
+import { ListVal, MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
 import { Expr, Identifier, IndexExpr, NodeType, isNodeType } from "../frontend/ast"
 import { evaluate } from "./evaluator"
 import { error } from "../utils"
@@ -22,6 +22,8 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
         const value = evaluate(expr, env)
         if (isValueTypes(value, ValueType.Number)) {
             return new NumberVal(-value.value)
+        } else if (isValueTypes(value, ValueType.List)) {
+            return new ListVal((value as ListVal).value.reverse())
         }
         return NULLVAL
     },
