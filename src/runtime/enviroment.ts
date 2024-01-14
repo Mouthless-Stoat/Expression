@@ -32,14 +32,14 @@ export default class Enviroment {
      *
      * @returns the value the variable
      * */
-    public assignVar(name: string, value: RuntimeVal, isConst: boolean): RuntimeVal {
+    public assignVar(name: string, value: RuntimeVal, isConst: boolean, ref = false): RuntimeVal {
         // if this run before startVar is define the value will be NaN and will return false
         if (this.variables.size - this.startVar >= this.varLimt)
             return error("Xper: Due to memory concern you cannot have more than", this.varLimt, "variables")
 
         if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) this.constances.add(name)
-        this.variables.set(name, cloneValue(value))
+        this.variables.set(name, ref ? value : cloneValue(value))
         return value
     }
 

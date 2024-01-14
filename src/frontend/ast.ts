@@ -22,6 +22,7 @@ export enum NodeType {
     ForOfExpr,
     MethodExpr,
     RangeExpr,
+    PushExpr,
     PopExpr,
 
     // literal
@@ -308,6 +309,19 @@ export class RangeExpr implements Expr {
         this.end = end
         this.inclusive = inclusive
         this.step = step
+    }
+}
+
+export class PushExpr implements Expr {
+    type = NodeType.PushExpr
+    value: Expr
+    list: Expr
+    index: Expr
+
+    constructor(val: Expr, list: Expr, index: Expr) {
+        this.value = val
+        this.list = list
+        this.index = index
     }
 }
 

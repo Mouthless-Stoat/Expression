@@ -25,6 +25,7 @@ import {
     PostUnaryExpr,
     RangeExpr,
     PopExpr,
+    PushExpr,
 } from "../frontend/ast"
 import {
     NULLVAL,
@@ -105,6 +106,8 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
             return evalRangeExpr(astNode as RangeExpr, env)
         case NodeType.PopExpr:
             return evalPopExpr(astNode as PopExpr, env)
+        case NodeType.PushExpr:
+            return evalPushExpr(astNode as PushExpr, env)
         default:
             return error(`XperBug: This AST Node is not implemented in the interpreter:`, astNode)
     }
@@ -206,7 +209,7 @@ function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
         if (indexes.length > 1) {
             // make sure we have enough item
             if (!isValueTypes(value, ValueType.List))
-                return error("RuntimeError: Expected right hand to be a List when assigning with multiple index")
+                return error("TypeError: Expected right hand to be a List when assigning with multiple index")
             if ((value as ListVal).value.length !== indexes.length)
                 return error(
                     "RuntimeError: Length mismatch when assigning with multiple index. Expected",
@@ -449,5 +452,50 @@ function evalPopExpr(expr: PopExpr, env: Enviroment): RuntimeVal {
             out.push(...listValue.value.splice(index, 1))
         }
         return out.length > 1 ? new ListVal(out) : out[0]
+    }
+}
+
+function evalPushExpr(expr: PushExpr, env: Enviroment): RuntimeVal {
+    let list = evaluate(expr.list, env) as ListVal
+    if (!isValueTypes(list, ValueType.List)) list = new ListVal([list])
+
+    let indexValue = [evaluate(expr.index, env)]
+    if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
+        return error(
+            "TypeError: Cannot index type",
+            valueName[list.type],
+            "with type",
+            valueName[
+                (indexValue.find((v) => !isValueTypes(v, ValueType.Number)) ?? error("XperBug: Cannot find item"))
+                    .type as keyof typeof valueName
+            ]
+        )
+
+    const indexNum = (indexValue as NumberVal[]).map((v) =>
+        clamp(
+            Math.round(v.value) < 0 ? Math.round(v.value) + list.value.length + 1 : Math.round(v.value),
+            0,
+            list.value.length
+        )
+    )
+    const value = evaluate(expr.value, env)
+
+    if (indexNum.length > 1) {
+        if (!isValueTypes(value, ValueType.List))
+            return error("TypeError: Expected right hand to be a List when pushing with multiple index")
+        if (value.value.length !== indexNum.length)
+            return error(
+                "RuntimeError: Length mismatch when assigning with multiple index. Expected",
+                indexNum.length,
+                "item but given",
+                (value as ListVal).value.length
+            )
+        for (const index in indexNum) {
+            list.value.splice(indexNum[index], 0, value.value[index])
+        }
+        return list
+    } else {
+        list.value.splice(indexNum[0], 0, value)
+        return list
     }
 }

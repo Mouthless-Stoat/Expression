@@ -28,6 +28,7 @@ import {
     PostUnaryExpr,
     RangeExpr,
     PopExpr,
+    PushExpr,
     ZERO,
     ONE,
 } from "./ast"
@@ -243,7 +244,7 @@ export default class Parser {
     }
 
     private parseAssignmentExpr(): Expr {
-        const leftHand = this.parseRangeExpr()
+        const leftHand = this.parsePushExpr()
         if (
             (this.isTypes(...BinaryOpToken, TokenType.Ampersand) &&
                 this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
@@ -261,6 +262,24 @@ export default class Parser {
             return new AssignmentExpr(leftHand, rightHand, operator, isRef, isConst)
         }
         return leftHand
+    }
+
+    private parsePushExpr(): Expr {
+        let value = this.parseRangeExpr()
+        while (this.isTypes(TokenType.RightDoubleAngle)) {
+            this.next()
+
+            let index
+            if (this.isTypes(TokenType.OpenParen)) {
+                this.next()
+                index = this.parseExpr()
+                this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
+            }
+
+            const list = this.parseRangeExpr()
+            value = new PushExpr(value, list, index ?? new PreUnaryExpr(ONE, "-"))
+        }
+        return value
     }
 
     private parseRangeExpr(): Expr {
