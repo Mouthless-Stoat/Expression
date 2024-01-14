@@ -74,4 +74,5 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [ ] Doc for Value
 [ ] Language tour for the language
 [ ] Doc for the language in wiki
+[ ] Reference Operator
 ```
