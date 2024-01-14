@@ -9,7 +9,7 @@ you found it you foudn my dev file welcome to my madness this is where all the n
 -   Push Notation
     -   Syntax: `val >>(index) list`
         -   `index` is optional and can be omitted
-        -   Push `val` to the front of the list if index not given
+        -   Push `val` to the back of the list if index not given
         -   Provide index to push to a specific location.
             -   `8 >> a[1]` push `8` into the `1` postition and shift everything back `[1;2;3] -> [1;8;2;3]`
 -   Pop Notation
