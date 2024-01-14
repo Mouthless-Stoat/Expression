@@ -37,7 +37,6 @@ import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } f
 import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
-import { constrainedMemory } from "process"
 
 // class to parse and store stuff
 export default class Parser {
@@ -285,7 +284,7 @@ export default class Parser {
     }
 
     private parsePushExpr(): Expr {
-        let value = this.parseRangeExpr()
+        let value = this.parseLogicalExpr()
         while (this.isTypes(TokenType.RightDoubleAngle)) {
             this.next()
 
@@ -296,34 +295,10 @@ export default class Parser {
                 this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
             }
 
-            const list = this.parseRangeExpr()
+            const list = this.parseLogicalExpr()
             value = new PushExpr(value, list, index ?? NEG(ONE))
         }
         return value
-    }
-
-    private parseRangeExpr(): Expr {
-        let start
-
-        if (this.isTypes(TokenType.DoubleDot)) start = ZERO
-        else start = this.parseLogicalExpr()
-
-        if (this.isTypes(TokenType.DoubleDot)) {
-            this.next()
-            let inclusive = false
-            if (this.isTypes(TokenType.Equal)) {
-                this.next()
-                inclusive = true
-            }
-            let end = this.parseLogicalExpr()
-            let step
-            if (this.isTypes(TokenType.DoubleDot)) {
-                this.next()
-                step = this.parseLogicalExpr()
-            }
-            return new RangeExpr(start, end, inclusive, step ?? ONE)
-        }
-        return start
     }
 
     // binnary expr
@@ -352,17 +327,41 @@ export default class Parser {
     }
 
     private parseMultiplicativeExpr(): Expr {
-        let leftHand = this.parsePostUnaryExpr()
+        let leftHand = this.parseRangeExpr()
 
         while (this.isTypes(...MultiOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
-            const rightHand = this.parsePostUnaryExpr()
+            const rightHand = this.parseRangeExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
         }
 
         return leftHand
     }
     // end binary expr
+
+    private parseRangeExpr(): Expr {
+        let start
+
+        if (this.isTypes(TokenType.DoubleDot)) start = ZERO
+        else start = this.parsePostUnaryExpr()
+
+        if (this.isTypes(TokenType.DoubleDot)) {
+            this.next()
+            let inclusive = false
+            if (this.isTypes(TokenType.Equal)) {
+                this.next()
+                inclusive = true
+            }
+            let end = this.parsePostUnaryExpr()
+            let step
+            if (this.isTypes(TokenType.DoubleDot)) {
+                this.next()
+                step = this.parsePostUnaryExpr()
+            }
+            return new RangeExpr(start, end, inclusive, step ?? ONE)
+        }
+        return start
+    }
 
     private parsePostUnaryExpr(): Expr {
         let expr = this.parsePreUnaryExpr()
