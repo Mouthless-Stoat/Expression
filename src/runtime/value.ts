@@ -286,6 +286,27 @@ export class ListVal implements RuntimeVal {
             }
             return copy
         },
+        split: (args: RuntimeVal[], env: Enviroment) => {
+            let value = expectArgs(args, 1)[0] as ListVal
+            if (!isValueTypes(value, ValueType.List)) value = new ListVal([value])
+
+            if (
+                this.value.every((v) => isValueTypes(v, ValueType.Character)) &&
+                value.value.every((v) => isValueTypes(v, ValueType.Character))
+            ) {
+                return new ListVal(
+                    this.toString()
+                        .split(value.toString())
+                        .map((s) => MKSTRING(s))
+                )
+            }
+            const indexs = (this.method.findAll(args, env) as ListVal).value.map((v) => (v as NumberVal).value)
+            const out: ListVal[] = []
+            for (const i in indexs) {
+                out.push(new ListVal(this.value.slice(indexs[parseInt(i)] + 1, indexs[parseInt(i) + 1])))
+            }
+            return new ListVal(out)
+        },
     }
 
     constructor(items: RuntimeVal[]) {
