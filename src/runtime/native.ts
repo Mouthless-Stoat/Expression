@@ -134,7 +134,7 @@ export const NATIVEFUNC: Record<string, FunctionCall> = {
         if (!value.toString) return error("TypeError: Cannot convert type", valueName[value.type], "to Character List")
         return MKSTRING(value.toString())
     },
-    num: (args, _) => {
+    parse: (args, _) => {
         const value = expectArgs(args, 1)[0]
         if (!value.toNumber) return error("TypeError: Cannot convert type", valueName[value.type], "to Number")
         return new NumberVal(value.toNumber())
