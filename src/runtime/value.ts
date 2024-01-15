@@ -346,7 +346,7 @@ export class ListVal implements RuntimeVal {
 
     mul(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) {
-            return new ListVal(new Array((rhs as NumberVal).value).fill(this.value).flat())
+            return new ListVal(new Array(Math.round((rhs as NumberVal).value)).fill(this.value).flat())
         } else if (isValueTypes(rhs, ValueType.List)) {
             let curr: ListVal = this
             for (const val of (rhs as ListVal).value) {
