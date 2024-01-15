@@ -419,6 +419,17 @@ export class ListVal implements RuntimeVal {
         return this.value
     }
 
+    equal(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.List)) {
+            const value = this.value
+            const rightVal = (rhs as ListVal).value
+            if (value.length !== rightVal.length) {
+                return FALSEVAL
+            }
+            return MKBOOL(JSON.stringify(value) === JSON.stringify(rightVal))
+        }
+    }
+
     add(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.List)) {
             return new ListVal(this.value.concat(rhs.value))
