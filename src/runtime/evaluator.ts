@@ -48,7 +48,7 @@ import {
     MKSTRING,
 } from "./value"
 import Enviroment from "./enviroment"
-import { clamp, error, toggleScream } from "../utils"
+import { CloneObj, clamp, error, toggleScream } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PostUnaryOp, PreUnaryOp } from "./UnaryOp"
 
@@ -156,9 +156,15 @@ function evalIdentifier(iden: Identifier, env: Enviroment): RuntimeVal {
 }
 
 function evalAssignmentExpr(expr: AssignmentExpr, env: Enviroment): RuntimeVal {
+    // duplicate the expr so we don't mess with the ast when changing it
+    // expr = CloneObj(expr)
     if (!isNodeType(expr.lefthand, NodeType.Identifier, NodeType.IndexExpr))
         return error("SyntaxError: Invalid left-hand of assignment")
-    if (expr.operator) expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
+    if (expr.operator) {
+        // this is a shallow copy and will modify the ast
+        expr.rightHand = new BinaryExpr(expr.lefthand, expr.rightHand, expr.operator)
+        delete expr.operator // delete the operator so the next time we encounter we don't fuck it
+    }
 
     const value = evaluate(expr.rightHand, env)
     if (value.isConst) value.isConst = expr.isConst
