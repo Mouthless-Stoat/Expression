@@ -247,22 +247,22 @@ export default class Parser {
     private parseAssignmentExpr(): Expr {
         const leftHand = this.parsePushExpr()
         if (
-            // a<1> = 10
+            // a{1} = 10
             (this.isTypes(TokenType.OpenBrace) &&
                 this.token[1].isTypes(TokenType.Number) &&
                 this.token[2].isTypes(TokenType.CloseBrace) &&
-                this.token[3].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
-            // a<1> *= 10
+                this.token[3].isTypes(TokenType.Equal, TokenType.Walrus)) ||
+            // a{1} *= 10
             (this.isTypes(TokenType.Lesser) &&
                 this.token[1].isTypes(TokenType.Number) &&
                 this.token[2].isTypes(TokenType.Greater) &&
                 this.token[3].isTypes(...BinaryOpToken, TokenType.Ampersand) &&
-                this.token[4].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+                this.token[4].isTypes(TokenType.Equal, TokenType.Walrus)) ||
             // a *= 10
             (this.isTypes(...BinaryOpToken, TokenType.Ampersand) &&
-                this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) ||
+                this.token[1].isTypes(TokenType.Equal, TokenType.Walrus)) ||
             // a = 10
-            this.isTypes(TokenType.Equal, TokenType.DoubleColon)
+            this.isTypes(TokenType.Equal, TokenType.Walrus)
         ) {
             let operator, limit
             let isRef = false
