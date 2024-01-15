@@ -119,18 +119,93 @@ export class NumberVal implements RuntimeVal {
     }
     add(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value + rhs.value)
+        else if (isValueTypes(rhs, ValueType.List)) {
+            const copy = cloneValue(rhs) as ListVal
+            return new ListVal(
+                copy.value.map(
+                    (v) =>
+                        this.add(v) ??
+                        error(
+                            "TypeError: Addition is not define between type",
+                            valueName[this.type],
+                            "and",
+                            valueName[v.type]
+                        )
+                )
+            )
+        }
     }
     sub(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value - rhs.value)
+        else if (isValueTypes(rhs, ValueType.List)) {
+            const copy = cloneValue(rhs) as ListVal
+            return new ListVal(
+                copy.value.map(
+                    (v) =>
+                        this.sub(v) ??
+                        error(
+                            "TypeError: Subtraction is not define between type",
+                            valueName[this.type],
+                            "and",
+                            valueName[v.type]
+                        )
+                )
+            )
+        }
     }
     mul(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value * rhs.value)
+        else if (isValueTypes(rhs, ValueType.List)) {
+            const copy = cloneValue(rhs) as ListVal
+            return new ListVal(
+                copy.value.map(
+                    (v) =>
+                        this.mul(v) ??
+                        error(
+                            "TypeError: Multiplication is not define between type",
+                            valueName[this.type],
+                            "and",
+                            valueName[v.type]
+                        )
+                )
+            )
+        }
     }
     div(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value / rhs.value)
+        else if (isValueTypes(rhs, ValueType.List)) {
+            const copy = cloneValue(rhs) as ListVal
+            return new ListVal(
+                copy.value.map(
+                    (v) =>
+                        this.div(v) ??
+                        error(
+                            "TypeError: Division is not define between type",
+                            valueName[this.type],
+                            "and",
+                            valueName[v.type]
+                        )
+                )
+            )
+        }
     }
     mod(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value % rhs.value)
+        else if (isValueTypes(rhs, ValueType.List)) {
+            const copy = cloneValue(rhs) as ListVal
+            return new ListVal(
+                copy.value.map(
+                    (v) =>
+                        this.mod(v) ??
+                        error(
+                            "TypeError: Modulus is not define between type",
+                            valueName[this.type],
+                            "and",
+                            valueName[v.type]
+                        )
+                )
+            )
+        }
     }
     greater(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value > rhs.value)
