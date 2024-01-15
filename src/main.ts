@@ -27,7 +27,7 @@ function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser,
 
         console.log("-".repeat(50))
     }
-    const result = evalBlock(program, env)
+    const result = evalBlock(program, env, stack)
     if (stack) console.log("Eval Stack:", env.evalStack)
     console.log("Program Return:", checkString(result))
 }

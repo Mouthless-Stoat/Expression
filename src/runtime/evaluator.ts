@@ -115,10 +115,11 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
     }
 }
 
-export function evalBlock(block: BlockLiteral, env: Enviroment): RuntimeVal {
+export function evalBlock(block: BlockLiteral, env: Enviroment, stack = false): RuntimeVal {
     let out: RuntimeVal = NULLVAL
     for (const expr of block.value) {
-        out = env.pushStack(evaluate(expr, env))
+        out = evaluate(expr, env)
+        if (stack) env.pushStack(out)
         if (isValueTypes(out, ValueType.Control)) {
             let control = out as ControlVal
             if (control.carryCount > 0) {
