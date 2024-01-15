@@ -468,6 +468,7 @@ function evalPushExpr(expr: PushExpr, env: Enviroment): RuntimeVal {
     if (!isValueTypes(list, ValueType.List)) list = new ListVal([list])
 
     let indexValue = [evaluate(expr.index, env)]
+    if (isValueTypes(indexValue[0], ValueType.List)) indexValue = (indexValue[0] as ListVal).value
     if (!indexValue.every((v) => isValueTypes(v, ValueType.Number)))
         return error(
             "TypeError: Cannot index type",
@@ -503,7 +504,10 @@ function evalPushExpr(expr: PushExpr, env: Enviroment): RuntimeVal {
         }
         return list
     } else {
-        list.value.splice(indexNum[0], 0, value)
+        if (list === value) {
+            const len = list.value.length
+            list.value.push(...list.value.splice(0, (-((indexValue[0] as NumberVal).value % len) + len) % len))
+        } else list.value.splice(indexNum[0], 0, value)
         return list
     }
 }
