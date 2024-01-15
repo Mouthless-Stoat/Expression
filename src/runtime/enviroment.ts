@@ -24,7 +24,7 @@ export default class Enviroment {
             this.assignVar(name, val, false)
         }
         for (const [name, func] of Object.entries(NATIVEFUNC)) {
-            this.assignVar(name, new NativeFunctionVal(func), true)
+            this.assignVar(name, new NativeFunctionVal(func), false)
         }
         this.startVar = this.variables.size
     }
