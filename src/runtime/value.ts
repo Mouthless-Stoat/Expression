@@ -344,6 +344,11 @@ export class ListVal implements RuntimeVal {
         return this.value
     }
 
+    add(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.List)) {
+            return new ListVal(this.value.concat(rhs.value))
+        }
+    }
     mul(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) {
             return new ListVal(new Array(Math.round((rhs as NumberVal).value)).fill(this.value).flat())
@@ -363,9 +368,27 @@ export class ListVal implements RuntimeVal {
             return curr.value[0]
         }
     }
-    add(rhs: RuntimeVal): RuntimeVal | undefined {
-        if (isValueTypes(rhs, ValueType.List)) {
-            return new ListVal(this.value.concat(rhs.value))
+    div(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) {
+            const out = []
+            const size = Math.round(this.value.length / (rhs as NumberVal).value)
+            for (let i = 0; i < this.value.length; i += size) {
+                out.push(new ListVal(this.value.slice(i, i + size)))
+            }
+            return new ListVal(out)
+        } else if (isValueTypes(rhs, ValueType.List)) {
+            let curr: ListVal = this
+            for (const val of (rhs as ListVal).value) {
+                curr =
+                    curr.div(val) ??
+                    error(
+                        "TypeError: Multiplication is not define between type",
+                        valueName[curr.type],
+                        "and",
+                        valueName[val.type]
+                    )
+            }
+            return curr
         }
     }
 }
