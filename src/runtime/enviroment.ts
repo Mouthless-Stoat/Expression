@@ -1,8 +1,7 @@
-import { RuntimeVal, NativeFunctionVal, cloneValue, NumberVal } from "./value"
+import { RuntimeVal, NativeFunctionVal, NumberVal } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
-import { NEG, ONE } from "../frontend/ast"
-import { evaluate } from "./evaluator"
+import deepClone from "lodash.clonedeep"
 
 interface Variable {
     value: RuntimeVal
@@ -53,7 +52,7 @@ export default class Enviroment {
 
         if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) this.constances.add(name)
-        this.variables.set(name, { accessLimit: limit, value: ref ? value : cloneValue(value) })
+        this.variables.set(name, { accessLimit: limit, value: ref ? value : deepClone(value) })
         return value
     }
 
@@ -135,7 +134,7 @@ export default class Enviroment {
      * */
 
     public clone(): Enviroment {
-        return Object.assign(Object.create(Object.getPrototypeOf(this)), this) // clone the env to redo some cal
+        return deepClone(this)
     }
 
     /**

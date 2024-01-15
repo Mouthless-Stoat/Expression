@@ -62,7 +62,9 @@ async function repl(debug: boolean, stack: boolean) {
 function run(path: string, debug: boolean, stack: boolean) {
     let input = fs.readFileSync(path, "utf8")
     process.stdout.write(input)
-    evalXper(input, debug, stack)
+    try {
+        evalXper(input, debug, stack)
+    } catch {}
 }
 
 program

@@ -33,7 +33,3 @@ const rl = readline.createInterface({
 
 // Create a promise based version of rl.question so we can use it in async functions
 export const input = (str: string): Promise<string> => new Promise((resolve) => rl.question(str, resolve))
-
-export function CloneObj(obj: any): any {
-    return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj)
-}

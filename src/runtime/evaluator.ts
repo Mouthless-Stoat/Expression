@@ -48,7 +48,7 @@ import {
     MKSTRING,
 } from "./value"
 import Enviroment from "./enviroment"
-import { CloneObj, clamp, error, toggleScream } from "../utils"
+import { clamp, error, toggleScream } from "../utils"
 import { BinaryOp } from "./binaryOp"
 import { PostUnaryOp, PreUnaryOp } from "./UnaryOp"
 
@@ -117,9 +117,10 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
 
 export function evalBlock(block: BlockLiteral, env: Enviroment, stack = false): RuntimeVal {
     let out: RuntimeVal = NULLVAL
+    const blockEnv = env
     for (const expr of block.value) {
-        out = evaluate(expr, env)
-        if (stack) env.pushStack(out)
+        out = evaluate(expr, blockEnv)
+        if (stack) blockEnv.pushStack(out)
         if (isValueTypes(out, ValueType.Control)) {
             let control = out as ControlVal
             if (control.carryCount > 0) {
@@ -248,6 +249,7 @@ function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
 
     if (isValueTypes(func, ValueType.Function)) {
         const fn = func as FunctionVal
+        const funcScope = env.clone()
 
         if (args.length != fn.parameter.length) {
             return error("Expected", fn.parameter.length, "argument but given", args.length)
@@ -256,11 +258,11 @@ function evalCallExpr(caller: CallExpr, env: Enviroment): RuntimeVal {
         // assign all the param var using the scope
         // this is so variable do not bleed out of the function scope
         for (const i in fn.parameter) {
-            env.assignVar(fn.parameter[i], args[i], false)
+            funcScope.assignVar(fn.parameter[i], args[i], false)
         }
 
         // actually evaluating the function body and return the output
-        return evalBlock(fn.value, env)
+        return evalBlock(fn.value, funcScope)
     } else if (isValueTypes(func, ValueType.NativeFuntion)) return (func as NativeFunctionVal).value(args, env)
     // ^^ comment for line above ^^
     // pass args and the env to native fucntion

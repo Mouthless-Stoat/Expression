@@ -162,6 +162,8 @@ const multiToken: Map<string, TokenType> = (() => {
                 "||": TokenType.Or,
                 Nₐ: TokenType.Avagadro,
                 "..": TokenType.DoubleDot,
+                ":=": TokenType.Walrus,
+                "=:": TokenType.Bunny,
             }),
         ].sort(([a, _], [b, __]) => a.length - b.length)
     )

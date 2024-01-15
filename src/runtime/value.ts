@@ -3,6 +3,7 @@
 import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error, expectArgs } from "../utils"
+import deepClone from "lodash.clonedeep"
 
 // type of value at run time
 export enum ValueType {
@@ -68,10 +69,6 @@ export interface RuntimeVal {
     or?(rhs: RuntimeVal): RuntimeVal | undefined
 }
 
-export function cloneValue(value: RuntimeVal): RuntimeVal {
-    return Object.assign(Object.create(Object.getPrototypeOf(value)), value)
-}
-
 // missing value
 export interface NullVal extends RuntimeVal {
     type: ValueType.Null
@@ -120,7 +117,7 @@ export class NumberVal implements RuntimeVal {
     add(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value + rhs.value)
         else if (isValueTypes(rhs, ValueType.List)) {
-            const copy = cloneValue(rhs) as ListVal
+            const copy = deepClone(rhs) as ListVal
             return new ListVal(
                 copy.value.map(
                     (v) =>
@@ -138,7 +135,7 @@ export class NumberVal implements RuntimeVal {
     sub(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value - rhs.value)
         else if (isValueTypes(rhs, ValueType.List)) {
-            const copy = cloneValue(rhs) as ListVal
+            const copy = deepClone(rhs) as ListVal
             return new ListVal(
                 copy.value.map(
                     (v) =>
@@ -156,7 +153,7 @@ export class NumberVal implements RuntimeVal {
     mul(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value * rhs.value)
         else if (isValueTypes(rhs, ValueType.List)) {
-            const copy = cloneValue(rhs) as ListVal
+            const copy = deepClone(rhs) as ListVal
             return new ListVal(
                 copy.value.map(
                     (v) =>
@@ -174,7 +171,7 @@ export class NumberVal implements RuntimeVal {
     div(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value / rhs.value)
         else if (isValueTypes(rhs, ValueType.List)) {
-            const copy = cloneValue(rhs) as ListVal
+            const copy = deepClone(rhs) as ListVal
             return new ListVal(
                 copy.value.map(
                     (v) =>
@@ -192,7 +189,7 @@ export class NumberVal implements RuntimeVal {
     mod(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return new NumberVal(this.value % rhs.value)
         else if (isValueTypes(rhs, ValueType.List)) {
-            const copy = cloneValue(rhs) as ListVal
+            const copy = deepClone(rhs) as ListVal
             return new ListVal(
                 copy.value.map(
                     (v) =>
@@ -353,7 +350,7 @@ export class ListVal implements RuntimeVal {
             }
             const indexs = (this.method.findAll(search.value, _) as ListVal).value.map((v) => (v as NumberVal).value)
             if (indexs.length < 1) return this
-            const copy = cloneValue(this)
+            const copy = deepClone(this)
             for (const index of indexs) {
                 copy.value = copy.value
                     .slice(0, index)
