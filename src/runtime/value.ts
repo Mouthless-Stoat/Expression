@@ -477,6 +477,29 @@ export class ListVal implements RuntimeVal {
             return curr
         }
     }
+    mod(rhs: RuntimeVal): RuntimeVal | undefined {
+        if (isValueTypes(rhs, ValueType.Number)) {
+            const out = []
+            const size = Math.round((rhs as NumberVal).value)
+            for (let i = 0; i < this.value.length; i += size) {
+                out.push(new ListVal(this.value.slice(i, i + size)))
+            }
+            return new ListVal(out)
+        } else if (isValueTypes(rhs, ValueType.List)) {
+            let curr: ListVal = this
+            for (const val of (rhs as ListVal).value) {
+                curr =
+                    curr.mod(val) ??
+                    error(
+                        "TypeError: Multiplication is not define between type",
+                        valueName[curr.type],
+                        "and",
+                        valueName[val.type]
+                    )
+            }
+            return curr
+        }
+    }
 }
 
 export class CharacterVal implements RuntimeVal {
