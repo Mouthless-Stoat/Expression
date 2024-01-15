@@ -75,9 +75,9 @@ export default class Parser {
         let args: Expr[] = []
         // if not a empty function call keep parsing arg
         if (!this.isTypes(TokenType.CloseParen)) {
-            args = [this.parseAssignmentExpr()]
+            args = [this.parseExpr()]
             while (this.isTypes(TokenType.SemiColon) && this.next()) {
-                args.push(this.parseAssignmentExpr())
+                args.push(this.parseExpr())
             }
         }
         this.expect(TokenType.CloseParen, 'SyntaxError: Expected ")"')
