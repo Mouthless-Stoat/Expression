@@ -461,8 +461,10 @@ export class ListVal implements RuntimeVal {
         if (isValueTypes(rhs, ValueType.Number)) {
             const out = []
             const size = Math.round(this.value.length / (rhs as NumberVal).value)
-            for (let i = 0; i < this.value.length; i += size) {
-                out.push(new ListVal(this.value.slice(i, i + size)))
+            for (let i = 0; i < this.value.length; i += Math.abs(size)) {
+                const list = this.value.slice(i, i + Math.abs(size))
+                if (size < 0) list.reverse()
+                out.push(new ListVal(list))
             }
             return new ListVal(out)
         } else if (isValueTypes(rhs, ValueType.List)) {
@@ -484,8 +486,10 @@ export class ListVal implements RuntimeVal {
         if (isValueTypes(rhs, ValueType.Number)) {
             const out = []
             const size = Math.round((rhs as NumberVal).value)
-            for (let i = 0; i < this.value.length; i += size) {
-                out.push(new ListVal(this.value.slice(i, i + size)))
+            for (let i = 0; i < this.value.length; i += Math.abs(size)) {
+                const list = this.value.slice(i, i + Math.abs(size))
+                if (size < 0) list.reverse()
+                out.push(new ListVal(list))
             }
             return new ListVal(out)
         } else if (isValueTypes(rhs, ValueType.List)) {
