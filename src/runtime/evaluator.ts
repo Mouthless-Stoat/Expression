@@ -490,17 +490,17 @@ function evalPushExpr(expr: PushExpr, env: Enviroment): RuntimeVal {
     const value = evaluate(expr.value, env)
 
     if (indexNum.length > 1) {
-        if (!isValueTypes(value, ValueType.List))
-            return error("TypeError: Expected right hand to be a List when pushing with multiple index")
-        if (value.value.length !== indexNum.length)
-            return error(
-                "RuntimeError: Length mismatch when assigning with multiple index. Expected",
-                indexNum.length,
-                "item but given",
-                (value as ListVal).value.length
-            )
+        const isList = isValueTypes(value, ValueType.List)
+        if (isValueTypes(value, ValueType.List))
+            if (value.value.length !== indexNum.length)
+                return error(
+                    "RuntimeError: Length mismatch when assigning with multiple index. Expected",
+                    indexNum.length,
+                    "item but given",
+                    (value as ListVal).value.length
+                )
         for (const index in indexNum) {
-            list.value.splice(indexNum[index], 0, value.value[index])
+            list.value.splice(indexNum[index], 0, isList ? value.value[index] : value)
         }
         return list
     } else {
