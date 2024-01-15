@@ -72,11 +72,11 @@ function genNamespace(name: string, namespace: Record<string, RuntimeVal>): Func
 export const NATIVEFUNC: Record<string, FunctionCall> = {
     log: (args, _) => {
         console.log(...args.map((v) => checkString(v)))
-        return NULLVAL
+        return new ListVal(args)
     },
     print: (args, _) => {
         console.log(...args.map((v) => (v.toString ? v.toString() : 0)))
-        return NULLVAL
+        return new ListVal(args)
     },
     math: genNamespace("Math", {
         abs: MathProp(Math.abs, 1),
