@@ -12,8 +12,9 @@ function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser,
     env = env ?? new Enviroment()
 
     const program = parser.produceAST(code)
+    const token = tokenize(code)
     if (debug) {
-        console.log("Tokens:", tokenize(code))
+        console.log("Tokens:", token)
         console.log(
             "AST:",
             (() => {

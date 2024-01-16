@@ -48,7 +48,6 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] Range Expr
 [X] List Pop Notation
 [X] List Push Notation
-[ ] Remove Commander dependency and make a custom solution
 [ ] Comment code cus what were you cooking
 [ ] Organise AST code
 [ ] Doc for AST
