@@ -73,6 +73,8 @@ export interface RuntimeVal {
 export interface NullVal extends RuntimeVal {
     type: ValueType.Null
     value: null
+    toString(): string
+    toPrint(): string
 }
 
 // constant so for ease of use
@@ -81,6 +83,9 @@ export const NULLVAL: NullVal = {
     value: null,
     toString() {
         return "null"
+    },
+    toPrint() {
+        return `\x1b[31m${this.toString()}\x1b[0m`
     },
 }
 
@@ -110,6 +115,9 @@ export class NumberVal implements RuntimeVal {
     }
     toString(): string {
         return this.value.toString()
+    }
+    toPrint(): string {
+        return `\x1b[33m${this.toString()}\x1b[0m`
     }
     toNumber(): number {
         return this.value
@@ -224,6 +232,10 @@ export class NumberVal implements RuntimeVal {
 export interface BooleanVal extends RuntimeVal {
     type: ValueType.Boolean
     value: boolean
+    and(rhs: RuntimeVal): RuntimeVal | undefined
+    or(rhs: RuntimeVal): RuntimeVal | undefined
+    toString(): string
+    toPrint(): string
 }
 
 export const TRUEVAL: BooleanVal = {
@@ -231,6 +243,9 @@ export const TRUEVAL: BooleanVal = {
     value: true,
     toString() {
         return "true"
+    },
+    toPrint() {
+        return `\x1b[34m${this.toString()}\x1b[0m`
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -244,6 +259,9 @@ export const FALSEVAL: BooleanVal = {
     value: false,
     toString() {
         return "false"
+    },
+    toPrint() {
+        return `\x1b[34m${this.toString()}\x1b[0m`
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -519,7 +537,7 @@ export class CharacterVal implements RuntimeVal {
         this.value = str
     }
     toPrint(): string {
-        return `@${this.value}`
+        return `\x1b[32m@${this.value}\x1b[0m`
     }
     toString(): string {
         return this.value
