@@ -225,9 +225,6 @@ export class NumberVal implements RuntimeVal {
     lesserEq(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value <= rhs.value)
     }
-    equal(rhs: RuntimeVal): RuntimeVal | undefined {
-        if (isValueTypes(rhs, ValueType.Number)) return MKBOOL(this.value == rhs.value)
-    }
 }
 
 export interface BooleanVal extends RuntimeVal {
@@ -533,12 +530,20 @@ export class ListVal implements RuntimeVal {
 
 export class CharacterVal implements RuntimeVal {
     type = ValueType.Character
-    value: string
+    value: string = ""
+    string: string
     constructor(str: string) {
-        this.value = str
+        this.string = str
+        try {
+            this.value = JSON.parse(`"${str}"`)
+        } catch {
+            return error(
+                "XperBug: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
+            )
+        }
     }
     toPrint(): string {
-        return `\x1b[32m@${this.value}\x1b[0m`
+        return Color.green("@" + this.string)
     }
     toString(): string {
         return this.value
@@ -549,9 +554,21 @@ export class CharacterVal implements RuntimeVal {
     }
 }
 
-export const isString = (value: ListVal) => value.value.every((v) => isValueTypes(v, ValueType.Character))
+export const isString = (value: ListVal): boolean => value.value.every((v) => isValueTypes(v, ValueType.Character))
 
-export const MKSTRING = (str: string) => new ListVal(str.split("").map((c) => new CharacterVal(c)))
+export const MKSTRING = (str: string): ListVal => {
+    const chars = str.split("")
+    const out: string[] = []
+
+    while (chars.length > 0) {
+        let char = chars.shift() ?? ""
+        if (char === "\\") {
+            char += chars.shift()
+        }
+        out.push(char)
+    }
+    return new ListVal(out.map((c) => new CharacterVal(c)))
+}
 
 export type FunctionCall = (args: RuntimeVal[], env: Enviroment) => RuntimeVal
 

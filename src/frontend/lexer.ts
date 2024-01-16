@@ -223,14 +223,8 @@ export function tokenize(source: string): Token[] {
                 if (src.shift() !== '"') {
                     return error("SyntaxError: Expected End of String")
                 }
-                try {
-                    push(TokenType.StringLiteral, JSON.parse(`"${acc}"`))
-                    continue
-                } catch {
-                    return error(
-                        "XperBug: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
-                    )
-                }
+                push(TokenType.StringLiteral, acc)
+                continue
             } else if (char === "@") {
                 src.shift()
                 let char = src.shift()
@@ -240,14 +234,8 @@ export function tokenize(source: string): Token[] {
                     src.shift()
                     char = "\\n"
                 }
-                try {
-                    push(TokenType.CharacterLiteral, JSON.parse(`"${char}"`))
-                    continue
-                } catch {
-                    return error(
-                        "XperBug: Unable to parse string. You should not be able to see this message, it is a interpreter bug"
-                    )
-                }
+                push(TokenType.CharacterLiteral, char)
+                continue
             }
 
             if (!isNumber && !isNamic(char) && !isString) {
