@@ -117,10 +117,9 @@ export function evaluate(astNode: Expr, env: Enviroment): RuntimeVal {
 
 export function evalBlock(block: BlockLiteral, env: Enviroment, stack = false): RuntimeVal {
     let out: RuntimeVal = NULLVAL
-    const blockEnv = env
     for (const expr of block.value) {
-        out = evaluate(expr, blockEnv)
-        if (stack) blockEnv.pushStack(out)
+        out = evaluate(expr, env)
+        if (stack) env.pushStack(out)
         if (isValueTypes(out, ValueType.Control)) {
             let control = out as ControlVal
             if (control.carryCount > 0) {
@@ -362,6 +361,7 @@ function evalForExpr(expr: ForExpr, env: Enviroment): RuntimeVal {
 
         //@ts-expect-error Tell ts to stfu cus we already check for undefined
         let enumerable: RuntimeVal[] = isIn ? evalEnumerable.enumerate() : evalEnumerable.iterate()
+        if (enumerable.length <= 0) return new NumberVal(0)
         for (const i of enumerable) {
             env.assignVar(expr.identifier, i, false)
             const bodyVal = evaluate(expr.body, env)
