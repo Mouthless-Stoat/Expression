@@ -75,11 +75,14 @@ export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
     ">": (lhs, rhs) => {
         let out: RuntimeVal | undefined
         if (lhs.greater) out = lhs.greater(rhs)
-        return error(
-            "TypeError: Greater than comparasion is not define between type",
-            valueName[lhs.type],
-            "and",
-            valueName[rhs.type]
+        return (
+            out ??
+            error(
+                "TypeError: Greater than comparasion is not define between type",
+                valueName[lhs.type],
+                "and",
+                valueName[rhs.type]
+            )
         )
     },
     "<": (lhs, rhs) => {
