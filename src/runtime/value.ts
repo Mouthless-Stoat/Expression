@@ -4,6 +4,7 @@ import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error, expectArgs } from "../utils"
 import deepClone from "lodash.clonedeep"
+import Color from "../color"
 
 // type of value at run time
 export enum ValueType {
@@ -85,7 +86,7 @@ export const NULLVAL: NullVal = {
         return "null"
     },
     toPrint() {
-        return `\x1b[31m${this.toString()}\x1b[0m`
+        return Color.magenta(this.toString())
     },
 }
 
@@ -117,7 +118,7 @@ export class NumberVal implements RuntimeVal {
         return this.value.toString()
     }
     toPrint(): string {
-        return `\x1b[33m${this.toString()}\x1b[0m`
+        return Color.yellow(this.toString())
     }
     toNumber(): number {
         return this.value
@@ -245,7 +246,7 @@ export const TRUEVAL: BooleanVal = {
         return "true"
     },
     toPrint() {
-        return `\x1b[34m${this.toString()}\x1b[0m`
+        return Color.red(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -261,7 +262,7 @@ export const FALSEVAL: BooleanVal = {
         return "false"
     },
     toPrint() {
-        return `\x1b[34m${this.toString()}\x1b[0m`
+        return Color.red(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
