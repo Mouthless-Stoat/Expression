@@ -584,3 +584,13 @@ export class ControlVal implements RuntimeVal {
         this.carryCount = carryCount
     }
 }
+
+interface NoneVal extends RuntimeVal {
+    type: ValueType.None
+    value: "none"
+}
+
+export const NONE: NoneVal = {
+    type: ValueType.None,
+    value: "none",
+}

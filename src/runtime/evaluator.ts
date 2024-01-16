@@ -135,7 +135,7 @@ export function evalBlock(block: BlockLiteral, env: Enviroment, stack = false): 
             }
         }
     }
-    return out
+    return env.getOut(out)
 }
 
 // other eval

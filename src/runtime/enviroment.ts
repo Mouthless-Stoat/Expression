@@ -1,4 +1,4 @@
-import { RuntimeVal, NativeFunctionVal, NumberVal } from "./value"
+import { RuntimeVal, NativeFunctionVal, NumberVal, NONE, isValueTypes, ValueType } from "./value"
 import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 import deepClone from "lodash.clonedeep"
@@ -25,6 +25,7 @@ export default class Enviroment {
         for (const [name, func] of Object.entries(NATIVEFUNC)) {
             this.assignVar(name, new NativeFunctionVal(func), false)
         }
+        this.assignVar("out", NONE, false)
         this.startVar = this.variables.size
     }
 
@@ -41,7 +42,7 @@ export default class Enviroment {
     public assignVar(
         name: string,
         value: RuntimeVal,
-        isConst: boolean,
+        isConst = false,
         ref = false,
         limit = new NumberVal(-1)
     ): RuntimeVal {
@@ -56,6 +57,11 @@ export default class Enviroment {
         return value
     }
 
+    public getOut(value: RuntimeVal): RuntimeVal {
+        const out = this.getVar("out", true)
+        return isValueTypes(out, ValueType.None) ? value : out
+    }
+
     /**
      * Get the value of a variable.
      * Error if the variable does not exist
@@ -63,11 +69,12 @@ export default class Enviroment {
      *
      * @returns The value of the variable
      * */
-    public getVar(name: string): RuntimeVal {
+    public getVar(name: string, force = false): RuntimeVal {
         if (!this.hasVar(name)) {
             return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
         let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
+        if (isValueTypes(variable.value, ValueType.None) && !force) return error("XperBug: Variable does not exist")
 
         if (--variable.accessLimit.value === 0) {
             this.variables.delete(name)
