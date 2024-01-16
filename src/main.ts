@@ -74,12 +74,11 @@ program
     .addHelpText(
         "after",
         `
-Example:
+Example:\x1b[32m
     $ xper -v # Print the installed Xper version
     $ xper run main.xpr # Run main.xpr in the current directory
     $ xper help eval # Print help for eval subcommand
-    $ xper repl -d # Run the Repl in Debug Mode
-    `
+    $ xper repl -d # Run the Repl in Debug Mode\x1b[0m`
     )
 
 program
@@ -93,10 +92,9 @@ program
     .addHelpText(
         "after",
         `
-Example:
+Example:\x1b[32m
     $ xper run main.xpr # Run main.xpr in the current directory
-    $ xper run debug.xpr -d # Run debug.expr with Debug Mode
-    `
+    $ xper run debug.xpr -d # Run debug.expr with Debug Mode\x1b[0m`
     )
 
 program
@@ -111,10 +109,9 @@ program
     .addHelpText(
         "after",
         `
-Example:
+Example:\x1b[32m
     $ xper repl -d # Run the Repl in Debug Mode
-    $ xper repl --stack # Run the Repl and print the Eval Stack
-    `
+    $ xper repl --stack # Run the Repl and print the Eval Stack\x1b[0m`
     )
 
 program
@@ -128,12 +125,22 @@ program
     .addHelpText(
         "after",
         `
-Example:
+Example:\x1b[32m
     $ xper eval 1+1 # Evaluate 1+1 in Xper
     $ xper eval -d a = 10 # evaluate a=10 in Xper with Debug Mode
-    $ xper eval --stack a = 10 # evaluate a=10 in Xper and print the Eval Stack
-    `
+    $ xper eval --stack a = 10 # evaluate a=10 in Xper and print the Eval Stack\x1b[0m`
     )
+
+program.configureHelp({
+    subcommandTerm: (cmd) => `\x1b[35m${cmd.name()} \x1b[33m${cmd.usage()}\x1b[0m`,
+    subcommandDescription: (cmd) => `\x1b[34;3m${cmd.description()}\x1b[0m`,
+    optionTerm: (cmd) => `\x1b[38;5;8m${cmd.flags}\x1b[0m`,
+    optionDescription: (cmd) => `\x1b[34;3m${cmd.description}\x1b[0m`,
+    commandUsage: (cmd) => `\x1b[35m${cmd.name()} \x1b[33m${cmd.usage()}\x1b[0m`,
+    commandDescription: (cmd) => `\x1b[34;1;4m${cmd.description()}\x1b[0m`,
+})
+
+// parse stuff
 ;(async () => {
     await program.parseAsync()
     process.exit(0)
