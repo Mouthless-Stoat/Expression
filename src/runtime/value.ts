@@ -245,6 +245,12 @@ export const FALSEVAL: BooleanVal = {
     toString() {
         return "false"
     },
+    and(rhs) {
+        if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
+    },
+    or(rhs) {
+        if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value || rhs.value)
+    },
 }
 
 export const MKBOOL = (bool: boolean): BooleanVal => (bool ? TRUEVAL : FALSEVAL)
