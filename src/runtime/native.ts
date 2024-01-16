@@ -4,7 +4,6 @@ import {
     FunctionCall,
     ListVal,
     MKSTRING,
-    NULLVAL,
     NativeFunctionVal,
     NativeObjectVal,
     NumberVal,
