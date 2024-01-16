@@ -127,6 +127,9 @@ export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
     "==": (lhs, rhs) => {
         let out: RuntimeVal | undefined
         if (lhs.equal) out = lhs.equal(rhs)
+        else if (isValueTypes(lhs, rhs.type)) {
+            return lhs.value === rhs.value // default equal implementation
+        }
         return (
             out ??
             error(
