@@ -34,7 +34,6 @@ Classic `Fibonacci` implemetation both iteratively and recursively.
 fib := (n) => {
     out = [0; 1]
     for (i of ..n) out[-1] + out[-2] >> out
-    out
 }
 fib(5)
 ```
