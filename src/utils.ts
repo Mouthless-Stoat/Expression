@@ -1,3 +1,4 @@
+import Color from "./color"
 import { RuntimeVal } from "./runtime/value"
 import readline from "readline"
 
@@ -13,7 +14,7 @@ export class XperError extends Error {
 }
 
 export function error(...message: any[]): any {
-    if (scream) console.log(...message)
+    if (scream) console.log(Color.red(message.join(" ")))
     throw new XperError(message.join(" "))
 }
 
