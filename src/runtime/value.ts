@@ -463,7 +463,10 @@ export class ListVal implements RuntimeVal {
     mul(rhs: RuntimeVal): RuntimeVal | undefined {
         if (isValueTypes(rhs, ValueType.Number)) {
             const num = Math.round((rhs as NumberVal).value)
-            const list = new Array(Math.abs(num)).fill(this.value).flat()
+            const list = new Array(Math.abs(num))
+                .fill(1)
+                .map((_) => deepClone(this.value))
+                .flat()
             if (num < 0) list.reverse()
             return new ListVal(list)
         } else if (isValueTypes(rhs, ValueType.List)) {
