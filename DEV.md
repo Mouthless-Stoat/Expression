@@ -49,8 +49,7 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] List Pop Notation
 [X] List Push Notation
 [ ] Comment code cus what were you cooking
-[ ] Organise AST code
-[ ] Doc for AST
+[X] Doc for AST
 [ ] Organise Value code
 [ ] Doc for Value
 [ ] Language tour for the language

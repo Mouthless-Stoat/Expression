@@ -475,12 +475,19 @@ export class RangeExpr implements Expr {
     }
 }
 
+/**
+ * A Push Expression
+ * */
 export class PushExpr implements Expr {
     type = NodeType.PushExpr
     value: Expr
     list: Expr
     index: Expr
-
+    /**
+     * @param val The value to push
+     * @param list The list to push valua into
+     * @param index The index to push into
+     * */
     constructor(val: Expr, list: Expr, index: Expr) {
         this.value = val
         this.list = list
@@ -488,11 +495,17 @@ export class PushExpr implements Expr {
     }
 }
 
+/**
+ * A Pop Expression
+ * */
 export class PopExpr implements Expr {
     type = NodeType.PopExpr
     list: Expr
     index: Expr
-
+    /**
+     * @param list The list to pop from
+     * @param index The index to pop from
+     * */
     constructor(list: Expr, index: Expr) {
         this.list = list
         this.index = index
