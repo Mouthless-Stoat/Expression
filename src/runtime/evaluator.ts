@@ -427,14 +427,24 @@ function evalRangeExpr(range: RangeExpr, env: Enviroment): RuntimeVal {
             value.map((v) => valueName[v.type]).join(", ")
         )
 
-    const [start, end, step] = (value as NumberVal[]).map((v) => v.value)
+    let [start, end, step] = (value as NumberVal[]).map((v) => v.value)
     const out = []
+    let reverse = false
+    if (end < start) {
+        reverse = true
+        ;[start, end] = [end, start]
+    }
+    if (step < 0) {
+        reverse = true
+        step *= -1
+    }
     let v = start
     while (range.inclusive ? v <= end : v < end) {
         out.push(new NumberVal(v))
         v += step
     }
 
+    if (reverse) out.reverse()
     return new ListVal(out)
 }
 
