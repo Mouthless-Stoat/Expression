@@ -6,7 +6,7 @@ import Enviroment from "./runtime/enviroment"
 import fs from "fs"
 import { checkString } from "./runtime/value"
 import { XperError, input } from "./utils"
-import c from "./color"
+import c, { rainColor, rainCurrColor } from "./color"
 
 function evalXper(code: string, debug: boolean, stack: boolean, time: boolean, parser?: Parser, env?: Enviroment) {
     parser = parser ?? new Parser()
@@ -42,8 +42,9 @@ async function repl(debug: boolean, stack: boolean, time: boolean) {
     const parser = new Parser()
     const env = new Enviroment()
     while (true) {
-        let inp = (await input("> ")) as string
-        if (!inp || inp === "exit") {
+        const color = rainCurrColor()
+        let inp = (await input(color("> "))) as string
+        if (inp === "exit") {
             throw new Error("Exit")
         }
 
@@ -52,15 +53,15 @@ async function repl(debug: boolean, stack: boolean, time: boolean) {
         } catch (err) {
             if (err instanceof Error && !(err instanceof XperError)) {
                 if (err.message === "Maximum call stack size exceeded") {
-                    console.log("Oh no recursion detected maybe don't do that. This may or may not be a bug.")
-                    console.log("If you are in the repl try unsigning whatever you were doing.")
+                    console.log(c.pur("Oh no recursion detected maybe don't do that. This may or may not be a bug."))
+                    console.log(c.pur("If you are in the repl try unsigning whatever you were doing."))
                 } else {
                     console.log(c.pur("Oh no you encounter a Wild Xper Bug. Please report this:"))
                     console.log(err)
                 }
             }
         }
-        console.log("=".repeat(50))
+        console.log(color("=".repeat(50)))
     }
 }
 
