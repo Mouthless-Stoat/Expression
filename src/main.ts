@@ -8,7 +8,15 @@ import { checkString } from "./runtime/value"
 import { XperError, input } from "./utils"
 import c, { rainCurrColor } from "./color"
 
-function evalXper(code: string, debug: boolean, stack: boolean, time: boolean, parser?: Parser, env?: Enviroment) {
+function evalXper(
+    code: string,
+    debug: boolean,
+    stack: boolean,
+    log: boolean,
+    time: boolean,
+    parser?: Parser,
+    env?: Enviroment
+) {
     parser = parser ?? new Parser()
     env = env ?? new Enviroment()
 
@@ -33,11 +41,11 @@ function evalXper(code: string, debug: boolean, stack: boolean, time: boolean, p
     const result = evalBlock(program, env, stack)
     if (stack) console.log("Eval Stack:", env.evalStack)
     const timeTaken = c.yel((performance.now() - start).toFixed(2).toString())
-    console.log("Program Return:", checkString(result))
+    if (log) console.log("Program Return:", checkString(result))
     if (time) console.log("Time Taken:", timeTaken, "ms")
 }
 
-async function repl(debug: boolean, stack: boolean, time: boolean) {
+async function repl(debug: boolean, stack: boolean, log: boolean, time: boolean) {
     console.log(c.blu("Xper repl v1.0.0"))
     const parser = new Parser()
     const env = new Enviroment()
@@ -49,7 +57,7 @@ async function repl(debug: boolean, stack: boolean, time: boolean) {
         }
 
         try {
-            evalXper(inp, debug, stack, time, parser, env)
+            evalXper(inp, debug, stack, log, time, parser, env)
         } catch (err) {
             if (err instanceof Error && !(err instanceof XperError)) {
                 if (err.message === "Maximum call stack size exceeded") {
@@ -65,11 +73,11 @@ async function repl(debug: boolean, stack: boolean, time: boolean) {
     }
 }
 
-function run(path: string, debug: boolean, stack: boolean, time: boolean) {
+function run(path: string, debug: boolean, stack: boolean, log: boolean, time: boolean) {
     let input = fs.readFileSync(path, "utf8")
     process.stdout.write(input)
     try {
-        evalXper(input, debug, stack, time)
+        evalXper(input, debug, stack, log, time)
     } catch {}
 }
 
@@ -93,8 +101,9 @@ program
     .option("-d, --debug", "Run the file and print out AST and Token")
     .option("-s, --stack", "Run the file and print out the Eval Stack")
     .option("-t, --time", "Run the file and time the program")
+    .option("-r, --no-return", "Run the file don't log the return")
     .action((file, flags) => {
-        run(file, flags.debug, flags.stack, flags.time)
+        run(file, flags.debug, flags.stack, flags["no-return"], flags.time)
     })
     .addHelpText(
         "after",
@@ -110,9 +119,10 @@ program
     .option("-d, --debug", "Run the repl with debug mode")
     .option("-s, --stack", "Run the repl and enable the stack")
     .option("-t, --time", "Run the repl and also time code")
+    .option("-r, --no-return", "Run the repl and don't log the return")
     .action(async function () {
         //@ts-expect-error this work
-        await repl(this.opts().debug, this.opts().stack, this.opts().time)
+        await repl(this.opts().debug, this.opts().stack, this.opts()["no-return"], this.opts().time)
     })
     .addHelpText(
         "after",
@@ -128,8 +138,9 @@ program
     .option("-d, --debug", "Run the code and print out AST and Token")
     .option("-s, --stack", "Run the code and print out the Eval Stack")
     .option("-t, --time", "Run the code and time it")
+    .option("-t, --no-return", "Run the code and don't log the return")
     .action((code, flags) => {
-        evalXper(code, flags.debug, flags.stack, flags.time)
+        evalXper(code, flags.debug, flags.stack, flags["no-return"], flags.time)
     })
     .addHelpText(
         "after",
