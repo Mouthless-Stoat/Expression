@@ -55,7 +55,7 @@ async function repl(debug: boolean, stack: boolean, time: boolean) {
                     console.log("Oh no recursion detected maybe don't do that. This may or may not be a bug.")
                     console.log("If you are in the repl try unsigning whatever you were doing.")
                 } else {
-                    console.log("Oh no you encounter a Wild Xper Bug. Please report this:")
+                    console.log(c.pur("Oh no you encounter a Wild Xper Bug. Please report this:"))
                     console.log(err)
                 }
             }
