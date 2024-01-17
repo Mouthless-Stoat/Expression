@@ -224,7 +224,7 @@ export default class Parser {
                       this.next()
                       return this.parseBlockExpr() as BlockLiteral
                   })()
-                : new BlockLiteral([NULLLITERAL])
+                : EMPTYBLOCK
             condition = new IfExpr(condition, trueBlock, falseBlock)
         }
         return condition

@@ -63,7 +63,7 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
             const indexable = evaluate(indexExpr.expr, cloneEnv).value
             const index = evaluate(indexExpr.index, cloneEnv).value
 
-            // remove the element from the list
+            // remove the item from the list
             indexable.splice(index, 1)
 
             return oldVal

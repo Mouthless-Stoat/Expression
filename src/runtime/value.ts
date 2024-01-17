@@ -86,7 +86,7 @@ export const NULLVAL: NullVal = {
         return "null"
     },
     toPrint() {
-        return Color.purple(this.toString())
+        return Color.pur(this.toString())
     },
 }
 
@@ -118,7 +118,7 @@ export class NumberVal implements RuntimeVal {
         return this.value.toString()
     }
     toPrint(): string {
-        return Color.yellow(this.toString())
+        return Color.yel(this.toString())
     }
     toNumber(): number {
         return this.value
@@ -243,7 +243,7 @@ export const TRUEVAL: BooleanVal = {
         return "true"
     },
     toPrint() {
-        return Color.orange(this.toString())
+        return Color.ora(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -259,7 +259,7 @@ export const FALSEVAL: BooleanVal = {
         return "false"
     },
     toPrint() {
-        return Color.orange(this.toString())
+        return Color.ora(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -543,7 +543,7 @@ export class CharacterVal implements RuntimeVal {
         }
     }
     toPrint(): string {
-        return Color.green("@" + this.string)
+        return Color.gre("@" + this.string)
     }
     toString(): string {
         return this.value

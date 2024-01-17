@@ -6,6 +6,7 @@ import Enviroment from "./runtime/enviroment"
 import fs from "fs"
 import { checkString } from "./runtime/value"
 import { XperError, input } from "./utils"
+import c from "./color"
 
 function evalXper(code: string, debug: boolean, stack: boolean, parser?: Parser, env?: Enviroment) {
     parser = parser ?? new Parser()
@@ -75,11 +76,11 @@ program
     .addHelpText(
         "after",
         `
-Example:\x1b[32m
+Example:${c.gre(`
     $ xper -v # Print the installed Xper version
     $ xper run main.xpr # Run main.xpr in the current directory
     $ xper help eval # Print help for eval subcommand
-    $ xper repl -d # Run the Repl in Debug Mode\x1b[0m`
+    $ xper repl -d # Run the Repl in Debug Mode`)}`
     )
 
 program
@@ -93,9 +94,9 @@ program
     .addHelpText(
         "after",
         `
-Example:\x1b[32m
+Example:${c.gre(`
     $ xper run main.xpr # Run main.xpr in the current directory
-    $ xper run debug.xpr -d # Run debug.expr with Debug Mode\x1b[0m`
+    $ xper run debug.xpr -d # Run debug.expr with Debug Mode`)}`
     )
 
 program
@@ -110,9 +111,9 @@ program
     .addHelpText(
         "after",
         `
-Example:\x1b[32m
+Example:${c.gre(`
     $ xper repl -d # Run the Repl in Debug Mode
-    $ xper repl --stack # Run the Repl and print the Eval Stack\x1b[0m`
+    $ xper repl --stack # Run the Repl and print the Eval Stack`)}`
     )
 
 program
@@ -126,19 +127,19 @@ program
     .addHelpText(
         "after",
         `
-Example:\x1b[32m
+Example:${c.gre(`
     $ xper eval 1+1 # Evaluate 1+1 in Xper
     $ xper eval -d a = 10 # evaluate a=10 in Xper with Debug Mode
-    $ xper eval --stack a = 10 # evaluate a=10 in Xper and print the Eval Stack\x1b[0m`
+    $ xper eval --stack a = 10 # evaluate a=10 in Xper and print the Eval Stack`)}`
     )
 
 program.configureHelp({
-    subcommandTerm: (cmd) => `\x1b[35m${cmd.name()} \x1b[33m${cmd.usage()}\x1b[0m`,
-    subcommandDescription: (cmd) => `\x1b[34;3m${cmd.description()}\x1b[0m`,
-    optionTerm: (cmd) => `\x1b[38;5;8m${cmd.flags}\x1b[0m`,
-    optionDescription: (cmd) => `\x1b[34;3m${cmd.description}\x1b[0m`,
-    commandUsage: (cmd) => `\x1b[35m${cmd.name()} \x1b[33m${cmd.usage()}\x1b[0m`,
-    commandDescription: (cmd) => `\x1b[34;1;4m${cmd.description()}\x1b[0m`,
+    subcommandTerm: (cmd) => `${c.mag(cmd.name())} ${c.yel(cmd.usage())}`,
+    subcommandDescription: (cmd) => c.ita(c.blu(cmd.description())),
+    optionTerm: (cmd) => c.gry(cmd.flags),
+    optionDescription: (cmd) => c.ita(c.blu(cmd.description)),
+    commandUsage: (cmd) => `${c.mag(cmd.name())} ${c.yel(cmd.usage())}`,
+    commandDescription: (cmd) => c.und(c.blu(cmd.description())),
 })
 
 // parse stuff

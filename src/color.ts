@@ -1,3 +1,4 @@
+// poor man chalk
 function formatter(open: string, close: string = Code.default) {
     return (string: string) => open + string + close
 }
@@ -42,8 +43,7 @@ export const Code = {
     strike: "\x1b[9m",
 
     //reset format
-    resetReset: "\x1b[20m",
-    resetBold: "\x1b[21m",
+    resetBold: "\x1b[22m",
     resetDim: "\x1b[22m",
     resetItalic: "\x1b[23m",
     resetUnderline: "\x1b[24m",
@@ -53,16 +53,20 @@ export const Code = {
     resetStrike: "\x1b[29m",
 }
 const Color = {
-    black: formatter(Code.black),
+    bla: formatter(Code.black),
     red: formatter(Code.red),
-    green: formatter(Code.green),
-    yellow: formatter(Code.yellow),
-    blue: formatter(Code.blue),
-    magenta: formatter(Code.magenta),
-    cyan: formatter(Code.cyan),
-    white: formatter(Code.white),
-    orange: formatter(Code.orange),
-    purple: formatter(Code.purple),
+    gre: formatter(Code.green),
+    yel: formatter(Code.yellow),
+    blu: formatter(Code.blue),
+    mag: formatter(Code.magenta),
+    cya: formatter(Code.cyan),
+    whi: formatter(Code.white),
+    ora: formatter(Code.orange),
+    pur: formatter(Code.purple),
+    gry: formatter(Code.grey),
+    bol: formatter(Code.bold, Code.resetBold),
+    ita: formatter(Code.italic, Code.resetItalic),
+    und: formatter(Code.underline, Code.resetUnderline),
 }
 
 export default Color
