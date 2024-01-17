@@ -469,7 +469,7 @@ export default class Parser {
                 }
                 return new ControlLiteral(type, carryCount)
             default:
-                return error(`SyntaxError: Unexpected Token:`, this.current())
+                return error(`SyntaxError: Unexpected Token:`, this.current().value)
         }
     }
 
