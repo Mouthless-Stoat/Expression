@@ -1,27 +1,33 @@
-function formatter(open: string, close: string) {
+function formatter(open: string, close: string = Code.default) {
     return (string: string) => open + string + close
 }
 
 export const Code = {
     // fg color
     black: "\x1b[30m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-    magenta: "\x1b[35m",
-    cyan: "\x1b[36m",
-    white: "\x1b[37m",
+    red: "\x1b[38;2;246;88;102m",
+    green: "\x1b[38;2;139;205;91m",
+    yellow: "\x1b[38;2;239;189;93m",
+    blue: "\x1b[38;2;65;167;252m",
+    magenta: "\x1b[38;2;255;128;213m",
+    cyan: "\x1b[38;2;52;191;208m",
+    purple: "\x1b[38;2;199;90;232m",
+    orange: "\x1b[38;2;221;144;70m",
+    grey: "\x1b[38;2;69;85;116m",
+    white: "\x1b[38m",
     default: "\x1b[39m",
 
     //bg color
     bgBlack: "\x1b[40m",
-    bgRed: "\x1b[41m",
-    bgGreen: "\x1b[42m",
-    bgYellow: "\x1b[43m",
-    bgBlue: "\x1b[44m",
-    bgMagenta: "\x1b[45m",
-    bgCyan: "\x1b[46m",
+    bgRed: "\x1b[48;2;246;88;102m",
+    bgGreen: "\x1b[48;2;139;205;91m",
+    bgYellow: "\x1b[48;2;239;189;93m",
+    bgBlue: "\x1b[48;2;65;167;252m",
+    bgMagenta: "\x1b[48;2;255;128;213m",
+    bgCyan: "\x1b[48;2;52;191;208m",
+    bgPurple: "\x1b[48;2;199;90;232m",
+    bgOrange: "\x1b[48;2;221;144;70m",
+    bgGrey: "\x1b[48;2;69;85;116m",
     bgWhite: "\x1b[47m",
     bgDefault: "\x1b[49m",
 
@@ -47,14 +53,16 @@ export const Code = {
     resetStrike: "\x1b[29m",
 }
 const Color = {
-    black: formatter(Code.black, Code.default),
-    red: formatter(Code.red, Code.default),
-    green: formatter(Code.green, Code.default),
-    yellow: formatter(Code.yellow, Code.default),
-    blue: formatter(Code.blue, Code.default),
-    magenta: formatter(Code.magenta, Code.default),
-    cyan: formatter(Code.cyan, Code.default),
-    white: formatter(Code.white, Code.default),
+    black: formatter(Code.black),
+    red: formatter(Code.red),
+    green: formatter(Code.green),
+    yellow: formatter(Code.yellow),
+    blue: formatter(Code.blue),
+    magenta: formatter(Code.magenta),
+    cyan: formatter(Code.cyan),
+    white: formatter(Code.white),
+    orange: formatter(Code.orange),
+    purple: formatter(Code.purple),
 }
 
 export default Color

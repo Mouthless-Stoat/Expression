@@ -86,7 +86,7 @@ export const NULLVAL: NullVal = {
         return "null"
     },
     toPrint() {
-        return Color.magenta(this.toString())
+        return Color.purple(this.toString())
     },
 }
 
@@ -243,7 +243,7 @@ export const TRUEVAL: BooleanVal = {
         return "true"
     },
     toPrint() {
-        return Color.red(this.toString())
+        return Color.orange(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
@@ -259,7 +259,7 @@ export const FALSEVAL: BooleanVal = {
         return "false"
     },
     toPrint() {
-        return Color.red(this.toString())
+        return Color.orange(this.toString())
     },
     and(rhs) {
         if (isValueTypes(rhs, ValueType.Boolean)) return MKBOOL(this.value && rhs.value)
