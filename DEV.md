@@ -32,7 +32,7 @@ Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 [X] More native helper like type checking
 [X] Boolean operator
 [ ] Code formatting
-[ ] Syntax highlight when in repl
+[|] Syntax highlight when in repl
 [X] Repl improvement (Don't crash when error)
 [X] More type for object key (most primary litetral)
 [X] Pre Unary Expr
