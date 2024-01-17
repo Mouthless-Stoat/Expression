@@ -6,7 +6,7 @@ import Enviroment from "./runtime/enviroment"
 import fs from "fs"
 import { checkString } from "./runtime/value"
 import { XperError, input } from "./utils"
-import c, { rainColor, rainCurrColor } from "./color"
+import c, { rainCurrColor } from "./color"
 
 function evalXper(code: string, debug: boolean, stack: boolean, time: boolean, parser?: Parser, env?: Enviroment) {
     parser = parser ?? new Parser()

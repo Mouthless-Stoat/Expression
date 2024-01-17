@@ -57,7 +57,7 @@ function genNamespace(name: string, namespace: Record<string, RuntimeVal>): Func
                 valueName[args[0].type]
             )
 
-        //@ts-expect-error It should never be undefined cus the list length is at least 1
+        //@ts-expect-error It should never be undefined cus the value must be type character list
         const propName = args.shift().toString() as keyof typeof namespace
         if (!(propName in namespace)) return error(`RuntimeError: ${name} does not have function "${propName}"`)
         if (args.length < 1) {

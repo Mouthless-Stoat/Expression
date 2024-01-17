@@ -295,7 +295,7 @@ function evalShiftExpr(expr: ShiftExpr, env: Enviroment): RuntimeVal {
     try {
         oldVal = evaluate(expr.rightHand, env.clone())
     } catch (err) {
-        //@ts-expect-error
+        if (!(err instanceof Error)) throw err
         if (err.name !== "XperError") throw err
         oldVal = NULLVAL
     }
