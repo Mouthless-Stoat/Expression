@@ -1,8 +1,9 @@
 // poor man chalk
 function formatter(open: string, close: string = Code.default) {
-    return (string: string) => open + string + close
+    return (str: string) => open + str + close
 }
 
+/** Collection of all the color code */
 export const Code = {
     // fg color
     black: "\x1b[30m",
@@ -52,6 +53,8 @@ export const Code = {
     resetHidden: "\x1b[28m",
     resetStrike: "\x1b[29m",
 }
+
+/** Main Color object that have all the function */
 const Color = {
     bla: formatter(Code.black),
     red: formatter(Code.red),
@@ -67,6 +70,25 @@ const Color = {
     bol: formatter(Code.bold, Code.resetBold),
     ita: formatter(Code.italic, Code.resetItalic),
     und: formatter(Code.underline, Code.resetUnderline),
+}
+
+export const Rainbow: (keyof typeof Color)[] = ["red", "ora", "yel", "gre", "cya", "blu", "pur"]
+let raincount = 0
+export function rainColor(str: string) {
+    const out = Color[Rainbow[raincount]](str)
+    raincount = ++raincount % Rainbow.length
+    return out
+}
+
+export function getRainColor(index: number) {
+    index %= Rainbow.length
+    return Color[Rainbow[index]]
+}
+
+export function rainCurrColor() {
+    const out = Color[Rainbow[raincount]]
+    raincount = ++raincount % Rainbow.length
+    return out
 }
 
 export default Color
