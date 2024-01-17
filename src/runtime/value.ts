@@ -4,7 +4,7 @@ import { BlockLiteral } from "../frontend/ast"
 import Enviroment from "./enviroment"
 import { error, expectArgs } from "../utils"
 import deepClone from "lodash.clonedeep"
-import Color from "../color"
+import Color, { getRainColor } from "../color"
 
 // type of value at run time
 export enum ValueType {
@@ -426,7 +426,13 @@ export class ListVal implements RuntimeVal {
     }
 
     toPrint(): string {
-        return `[${this.value.map((v) => checkString(v)).join("; ")}]`
+        return this.rainbowPair(0)
+    }
+    rainbowPair(nest: number): string {
+        const color = getRainColor(nest)
+        return `${color("[")}${this.value
+            .map((v) => (isValueTypes(v, ValueType.List) ? (v as ListVal).rainbowPair(nest + 1) : checkString(v)))
+            .join("; ")}${color("]")}`
     }
     length(): number {
         return this.value.length
