@@ -41,7 +41,7 @@ function evalXper(
     const result = evalBlock(program, env, stack)
     if (stack) console.log("Eval Stack:", env.evalStack)
     const timeTaken = c.yel((performance.now() - start).toFixed(2).toString())
-    if (log) console.log("Program Return:", checkString(result))
+    if (!log) console.log("Program Return:", checkString(result))
     if (time) console.log("Time Taken:", timeTaken, "ms")
 }
 
