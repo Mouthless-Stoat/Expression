@@ -1,6 +1,6 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { ListVal, MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
+import { ListVal, MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
 import { Expr, Identifier, IndexExpr, NodeType, isNodeType } from "../frontend/ast"
 import { evaluate } from "./evaluator"
 import { error } from "../utils"
