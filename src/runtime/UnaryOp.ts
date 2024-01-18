@@ -8,8 +8,8 @@ import { error } from "../utils"
 export const PreUnaryTokens = [
     TokenType.Minus,
     TokenType.Exclamation,
-    TokenType.Increment,
-    TokenType.Decrement,
+    TokenType.DoublePlus,
+    TokenType.DoubleMinus,
     TokenType.Star,
     TokenType.Ampersand,
 ]
@@ -76,7 +76,7 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
     },
 }
 
-export const PostUnaryToken = [TokenType.Increment, TokenType.Decrement]
+export const PostUnaryToken = [TokenType.DoublePlus, TokenType.DoubleMinus]
 
 export type PostUnaryType = "--" | "++"
 

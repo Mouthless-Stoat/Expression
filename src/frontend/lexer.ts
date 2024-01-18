@@ -47,11 +47,11 @@ export enum TokenType {
     Octothorp,
     LeftDoubleAngle,
     RightDoubleAngle,
+    Ampersand,
 
     /// not use
     Quote,
     Dollar,
-    Ampersand,
     Tilde,
     Pipe,
     Caret,
@@ -60,8 +60,8 @@ export enum TokenType {
 
     // long symbol
     /// in use
-    Increment, // ++
-    Decrement, // --
+    DoublePlus, // ++
+    DoubleMinus, // --
     Bunny, // =:
     DoubleColon, // ::
     Walrus, // :=
@@ -76,6 +76,9 @@ export enum TokenType {
 
     // not use
     Spaceship, // <=>
+    DoubleSlash, // //
+    DoubleStar, // **
+    DoublePercent, // %%
 
     // special for handling
     EOF,
@@ -149,8 +152,8 @@ const multiToken: Map<string, TokenType> = (() => {
             ...Object.entries({
                 "<<": TokenType.LeftDoubleAngle,
                 ">>": TokenType.RightDoubleAngle,
-                "++": TokenType.Increment,
-                "--": TokenType.Decrement,
+                "++": TokenType.DoublePlus,
+                "--": TokenType.DoubleMinus,
                 "::": TokenType.DoubleColon,
                 "=>": TokenType.DoubleArrow,
                 "->": TokenType.Arrow,

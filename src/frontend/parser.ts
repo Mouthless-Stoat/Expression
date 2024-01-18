@@ -33,7 +33,7 @@ import {
     ONE,
     NEG,
 } from "./ast"
-import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MultiOpToken } from "../runtime/binaryOp"
+import { AddOpToken, BinaryOpToken, BinaryOpType, LogicOpToken, MulOpToken } from "../runtime/binaryOp"
 import { PostUnaryToken, PostUnaryType, PreUnaryTokens, PreUnaryType } from "../runtime/UnaryOp"
 import { Token, TokenType, tokenize } from "./lexer"
 import { error } from "../utils"
@@ -329,7 +329,7 @@ export default class Parser {
     private parseMultiplicativeExpr(): Expr {
         let leftHand = this.parseRangeExpr()
 
-        while (this.isTypes(...MultiOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
+        while (this.isTypes(...MulOpToken) && !this.token[1].isTypes(TokenType.Equal, TokenType.DoubleColon)) {
             const operator = this.next().value
             const rightHand = this.parseRangeExpr()
             leftHand = new BinaryExpr(leftHand, rightHand, operator as BinaryOpType)
