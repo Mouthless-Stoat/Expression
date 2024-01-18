@@ -253,9 +253,9 @@ export default class Parser {
                 this.token[2].isTypes(TokenType.CloseBrace) &&
                 this.token[3].isTypes(TokenType.Equal, TokenType.Walrus)) ||
             // a{1} *= 10
-            (this.isTypes(TokenType.Lesser) &&
+            (this.isTypes(TokenType.OpenBrace) &&
                 this.token[1].isTypes(TokenType.Number) &&
-                this.token[2].isTypes(TokenType.Greater) &&
+                this.token[2].isTypes(TokenType.CloseBrace) &&
                 this.token[3].isTypes(...BinaryOpToken, TokenType.Ampersand) &&
                 this.token[4].isTypes(TokenType.Equal, TokenType.Walrus)) ||
             // a *= 10
