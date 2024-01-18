@@ -14,8 +14,8 @@ export const LogicOpToken = [
     TokenType.Or,
 ]
 export const AddOpToken = [TokenType.Plus, TokenType.Minus]
-export const MultiOpToken = [TokenType.Star, TokenType.Slash, TokenType.Percent]
-export const BinaryOpToken = LogicOpToken.concat(AddOpToken, MultiOpToken)
+export const MulOpToken = [TokenType.Star, TokenType.Slash, TokenType.Percent]
+export const BinaryOpToken = LogicOpToken.concat(AddOpToken, MulOpToken)
 
 // binary operation type
 export type BinaryOpType = "+" | "-" | "*" | "/" | "%" | ">" | "<" | ">=" | "<=" | "==" | "&&" | "||"
@@ -25,105 +25,27 @@ export function isSameType(val1: RuntimeVal, val2: RuntimeVal, type: ValueType) 
     return isValueTypes(val1, type) && isValueTypes(val2, type)
 }
 
+function genImpl(name: string, func: keyof RuntimeVal): BinaryFunction {
+    return (lhs, rhs) => {
+        let out: RuntimeVal | undefined
+        if (lhs[func]) out = lhs[func](rhs)
+        return (
+            out ??
+            error("TypeError:", name, "is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
+        )
+    }
+}
 // implementation for all binary operator between every run time value
 export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
-    "+": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.add) out = lhs.add(rhs)
-        return (
-            out ??
-            error("TypeError: Addition is not define between type", valueName[lhs.type], "and", ValueType[rhs.type])
-        )
-    },
-    "-": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.sub) out = lhs.sub(rhs)
-        return (
-            out ??
-            error("TypeError: Subtraction is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
-        )
-    },
-    "*": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.mul) out = lhs.mul(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Multiplication is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
-    "/": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.div) out = lhs.div(rhs)
-        return (
-            out ??
-            error("TypeError: Division is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
-        )
-    },
-    "%": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.mod) out = lhs.mod(rhs)
-        return (
-            out ??
-            error("TypeError: Modulus is not define between type", valueName[lhs.type], "and", valueName[rhs.type])
-        )
-    },
-    ">": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.greater) out = lhs.greater(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Greater than comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
-    "<": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.lesser) out = lhs.lesser(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Lesser than comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
-    ">=": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.greaterEq) out = lhs.greaterEq(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Greater than or Equal to comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
-    "<=": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.lesserEq) out = lhs.lesserEq(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Lesser than or Equal to than comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
+    "+": genImpl("Addition", "add"),
+    "-": genImpl("Subtraction", "sub"),
+    "*": genImpl("Multiplication", "mul"),
+    "/": genImpl("Division", "div"),
+    "%": genImpl("Modulus", "mod"),
+    ">": genImpl("Greater", "greater"),
+    "<": genImpl("Lesser", "lesser"),
+    ">=": genImpl("Greater", "greaterEq"),
+    "<=": genImpl("Lesser", "lesserEq"),
     "==": (lhs, rhs) => {
         let out: RuntimeVal | undefined
         if (lhs.equal) out = lhs.equal(rhs)
@@ -140,30 +62,6 @@ export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
             )
         )
     },
-    "&&": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.and) out = lhs.and(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Logical And comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
-    "||": (lhs, rhs) => {
-        let out: RuntimeVal | undefined
-        if (lhs.or) out = lhs.or(rhs)
-        return (
-            out ??
-            error(
-                "TypeError: Logical Or comparasion is not define between type",
-                valueName[lhs.type],
-                "and",
-                valueName[rhs.type]
-            )
-        )
-    },
+    "&&": genImpl("Logical", "and"),
+    "||": genImpl("Logical", "or"),
 }
