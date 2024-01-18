@@ -400,7 +400,7 @@ function evalIndexExpr(expr: IndexExpr, env: Enviroment): RuntimeVal {
 
         //checking if index is valid
         if (indexNum < 0) indexNum = indexNum + value.length()
-        if (indexNum > value.length()) return error("RangeError: Index out of bound")
+        if (indexNum >= value.length()) return error("RangeError: Index out of bound")
 
         out.push(value.value[indexNum])
     }
