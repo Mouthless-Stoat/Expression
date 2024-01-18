@@ -14,13 +14,24 @@ print("Hello World")
 
 `FizzBuzz` is old and cliché introducing `FizzBuzzBazz`, loop from `1` to `20` and print out `Fizz`, `Buzz` and `Bazz` if the number is divisible by `3`, `5` and `7`
 
+Here a normal implemetation:
+
 ```
 for (num of 1..=20) {
-    out = ""
-    num % 3 == 0 ? out += "Fizz"
-    num % 5 == 0 ? out += "Buzz"
-    num % 7 == 0 ? out += "Bazz"
-    print( out == "" ? num : out)
+    str = ""
+    num % 3 == 0 ? str += "Fizz"
+    num % 5 == 0 ? str += "Buzz"
+    num % 7 == 0 ? str += "Bazz"
+    print( str == "" ? num : str)
+}
+```
+
+But this is also valid
+
+```
+for (num of 1..=20) {
+    str = "" + {num % 3 == 0 ? "Fizz" : ""} + {num % 5 == 0 ? "Buzz" : ""} + {num % 7 == 0 ? "Bazz" : ""}
+    print(str == "" ? num : str)
 }
 ```
 
