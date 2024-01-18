@@ -1,7 +1,7 @@
 // all binary op definition for ease of use
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
+import { MKBOOL, RuntimeVal, ValueType, isValueTypes, valueName } from "./value"
 import { error } from "../utils"
 
 export const LogicOpToken = [
@@ -128,7 +128,7 @@ export const BinaryOp: Record<BinaryOpType, BinaryFunction> = {
         let out: RuntimeVal | undefined
         if (lhs.equal) out = lhs.equal(rhs)
         else if (isValueTypes(lhs, rhs.type)) {
-            return lhs.value === rhs.value // default equal implementation
+            return MKBOOL(lhs.value === rhs.value) // default equal implementation
         }
         return (
             out ??
