@@ -1,6 +1,6 @@
 import Enviroment from "./enviroment"
 import { TokenType } from "../frontend/lexer"
-import { ListVal, MKBOOL, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
+import { ListVal, MKBOOL, NONE, NULLVAL, NumberVal, RuntimeVal, ValueType, isValueTypes } from "./value"
 import { Expr, Identifier, IndexExpr, NodeType, isNodeType } from "../frontend/ast"
 import { evaluate } from "./evaluator"
 import { error } from "../utils"
@@ -12,10 +12,11 @@ export const PreUnaryTokens = [
     TokenType.DoubleMinus,
     TokenType.Star,
     TokenType.Ampersand,
+    TokenType.Tilde,
 ]
 
 // binary operation type
-export type PreUnaryType = "-" | "!" | "++" | "--" | "*" | "&"
+export type PreUnaryType = "-" | "!" | "++" | "--" | "*" | "&" | "~"
 
 // implementation for all binary operator between every run time value
 export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => RuntimeVal> = {
@@ -73,6 +74,9 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
     "&": (expr, env) => {
         if (!isNodeType(expr, NodeType.Identifier)) return error("TypeError: Cannot access lifetime of non-Identifier")
         return env.trueGetVar((expr as Identifier).symbol).accessLimit
+    },
+    "~": (_, __) => {
+        return NONE
     },
 }
 
