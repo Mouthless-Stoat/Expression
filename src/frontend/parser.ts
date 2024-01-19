@@ -276,7 +276,7 @@ export default class Parser {
                 this.next()
                 isRef = true
             }
-            const isConst = this.next().isTypes(TokenType.DoubleColon)
+            const isConst = this.next().isTypes(TokenType.Walrus)
             const rightHand = this.parseExpr()
             return new AssignmentExpr(leftHand, rightHand, operator, isRef, isConst, limit ?? NEG(ONE))
         }
