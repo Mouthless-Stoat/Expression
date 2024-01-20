@@ -1,6 +1,6 @@
 # Xper Example
 
-Here are example using Xper to do a few simple programming problem
+Here are example using Xper to do a few simple programming problem and explain xper concept
 
 ## Hello World
 
@@ -65,4 +65,27 @@ print(
     isPalindrome(121)
     isPalindrome(121)
 )
+```
+
+## Control Carry
+
+Consider the following code
+
+```
+a = 10
+for (,,) {
+    a <= 0 ? break : a--
+    print(a)
+}
+```
+
+This would never break because the break signal is not carry out to the main loop
+
+```
+a = 10
+for (,,) {
+    a <= 0 ? break# : a--
+    print(a)
+}
+
 ```
