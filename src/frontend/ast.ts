@@ -270,7 +270,7 @@ export class BlockLiteral implements Expr {
 }
 
 /** A empty block. Mostly use for if expression*/
-export const EMPTYBLOCK = new BlockLiteral([NULLLITERAL])
+export const EMPTYBLOCK = new BlockLiteral([FALSELITERAL])
 
 /**
  * A Character Literal Expression
