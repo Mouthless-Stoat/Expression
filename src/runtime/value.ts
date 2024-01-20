@@ -115,7 +115,7 @@ export class NumberVal implements RuntimeVal {
         this.value = value
     }
     toString(): string {
-        return this.value.toString()
+        return this.value.toString().replace(".", ",")
     }
     toPrint(): string {
         return Color.yel(this.toString())
