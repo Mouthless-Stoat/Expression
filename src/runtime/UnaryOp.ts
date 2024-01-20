@@ -73,7 +73,7 @@ export const PreUnaryOp: Record<PreUnaryType, (expr: Expr, env: Enviroment) => R
     },
     "&": (expr, env) => {
         if (!isNodeType(expr, NodeType.Identifier)) return error("TypeError: Cannot access lifetime of non-Identifier")
-        return env.trueGetVar((expr as Identifier).symbol).accessLimit
+        return env.trueGetVar((expr as Identifier).symbol)[0].accessLimit
     },
     "~": (_, __) => {
         return NONE

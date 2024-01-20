@@ -3,7 +3,7 @@ import { error } from "../utils"
 import { NATIVEFUNC, NATIVEGLOBAL } from "./native"
 import deepClone from "lodash.clonedeep"
 
-interface Variable {
+interface VariableData {
     value: RuntimeVal
     accessLimit: NumberVal
 }
@@ -12,7 +12,7 @@ interface Variable {
  * A enviroment to store variable and other identifier
  * */
 export default class Enviroment {
-    private variables: Map<string, Variable> = new Map()
+    private variables: Map<string, VariableData[]> = new Map()
     private constances: Set<string> = new Set()
     private startVar: number
     private varLimt: number = 10
@@ -53,7 +53,11 @@ export default class Enviroment {
 
         if (this.constances.has(name)) return error(`TypeError: Cannot assign value to Constant "${name}"`)
         if (isConst) this.constances.add(name)
-        this.variables.set(name, { accessLimit: limit, value: ref ? value : deepClone(value) })
+        const data = { accessLimit: limit, value: ref ? value : deepClone(value) }
+        if (this.variables.has(name)) this.variables.get(name)?.unshift(data)
+        else {
+            this.variables.set(name, [data])
+        }
         return value
     }
 
@@ -73,14 +77,20 @@ export default class Enviroment {
         if (!this.hasVar(name)) {
             return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
-        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
-        if (isValueTypes(variable.value, ValueType.None) && !force) return error("XperBug: Variable does not exist")
+        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as VariableData[])
+        const currVar = variable[0]
+        if (isValueTypes(currVar.value, ValueType.None) && !force) return error("XperBug: Variable does not exist")
 
-        if (--variable.accessLimit.value === 0) {
-            this.variables.delete(name)
-            if (this.isConstant(name)) this.constances.delete(name)
+        if (--currVar.accessLimit.value === 0) {
+            variable.shift()
         }
-        return variable.value as RuntimeVal
+
+        // if it truly gone remove it
+        if (variable.length <= 0) {
+            this.variables.delete(name)
+            this.constances.delete(name)
+        }
+        return currVar.value as RuntimeVal
     }
 
     /**
@@ -90,11 +100,11 @@ export default class Enviroment {
      *
      * @returns The variable
      * */
-    public trueGetVar(name: string): Variable {
+    public trueGetVar(name: string): VariableData[] {
         if (!this.hasVar(name)) {
             return error(`ReferenceError: Cannot access "${name}" because it does not exist`)
         }
-        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as Variable)
+        let variable = this.variables.get(name) ?? (error("XperBug: Variable does not exist") as VariableData[])
 
         return variable
     }

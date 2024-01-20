@@ -628,6 +628,9 @@ export class ControlVal implements RuntimeVal {
         this.value = type
         this.carryCount = carryCount
     }
+    toPrint(): string {
+        return Color.blu(this.value)
+    }
 }
 
 interface NoneVal extends RuntimeVal {
