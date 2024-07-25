@@ -12,9 +12,9 @@ you found it you foudn my dev file welcome to my madness this is where all the n
 `[X]` are Completed feature (done and can be use) <br/>
 `[V]` are Almost Completed feature (mostly for in between commit) <br/>
 `[|]` are WIP feature (Working on it but not done yet) <br/>
-`[I]` are Considering feature (not added but considering)
-`[-]` are Maybe feature (added but remove and is now considering)
-`[ ]` are Not Completed feature
+`[I]` are Considering feature (not added but considering) <br/>
+`[-]` are Maybe feature (added but remove and is now considering) <br/>
+`[ ]` are Not Completed feature <br/>
 
 Tag like `[|]`, `[I]`, `[-]` and `[V]` are only note for later use
 
